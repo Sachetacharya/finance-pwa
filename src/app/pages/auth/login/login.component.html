@@ -1,0 +1,69 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card__header">
+      <div class="auth-card__logo">💰</div>
+      <h1 class="auth-card__title">Welcome Back</h1>
+      <p class="auth-card__subtitle">Sign in to your FinanceApp account</p>
+    </div>
+
+    <div class="auth-hint">
+      <span>🔑</span>
+      <span><strong>Credentials:</strong> admin&#64;financeapp.com / admin123</span>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="auth-alert auth-alert--error">⚠️ {{ errorMessage() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="auth-form">
+      <div class="form-group" [class.form-group--error]="isInvalid('email')">
+        <label class="form-label" for="login-email">Email Address</label>
+        <input
+          id="login-email"
+          formControlName="email"
+          class="form-control"
+          type="email"
+          placeholder="you@example.com"
+          autocomplete="email"
+        />
+        @if (isInvalid('email')) {
+          <span class="form-error">Please enter a valid email address</span>
+        }
+      </div>
+
+      <div class="form-group" [class.form-group--error]="isInvalid('password')">
+        <label class="form-label" for="login-password">Password</label>
+        <div class="input-wrapper">
+          <input
+            id="login-password"
+            formControlName="password"
+            class="form-control"
+            [type]="showPassword() ? 'text' : 'password'"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="input-toggle"
+            (click)="showPassword.set(!showPassword())"
+            [title]="showPassword() ? 'Hide password' : 'Show password'"
+          >
+            {{ showPassword() ? '🙈' : '👁️' }}
+          </button>
+        </div>
+        @if (isInvalid('password')) {
+          <span class="form-error">Password is required</span>
+        }
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--full" [disabled]="isLoading()">
+        @if (isLoading()) {
+          <span class="spinner"></span> Signing in...
+        } @else {
+          Sign In →
+        }
+      </button>
+    </form>
+
+  </div>
+</div>

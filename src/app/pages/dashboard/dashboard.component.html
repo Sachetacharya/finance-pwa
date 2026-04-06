@@ -1,0 +1,126 @@
+<div class="dashboard">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Welcome back, {{ auth.currentUser()?.name }}! Here's your financial overview.</p>
+    </div>
+    <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Add Expense</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <app-stat-card
+      title="This Month Spent"
+      [value]="expenseService.currentMonthTotal() | currencyFormat"
+      subtitle="Expenses this month"
+      icon="💳"
+      [trend]="monthChangePct()"
+      trendLabel="vs last month"
+      color="primary"
+    />
+    <app-stat-card
+      title="This Month Income"
+      [value]="expenseService.currentMonthIncome() | currencyFormat"
+      subtitle="Income this month"
+      icon="💰"
+      color="success"
+    />
+    <app-stat-card
+      title="Net Balance"
+      [value]="expenseService.netBalance() | currencyFormat"
+      subtitle="Income minus expenses"
+      icon="⚖️"
+      color="info"
+    />
+    <app-stat-card
+      title="Transactions"
+      [value]="expenseService.currentMonthExpenses().length.toString()"
+      subtitle="Expenses this month"
+      icon="🧾"
+      color="warning"
+    />
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Monthly Spending</h3>
+        <span class="card__badge">Last 6 months</span>
+      </div>
+      <div class="chart-container chart-container--bar">
+        <app-chart type="bar" [data]="barChartData()" [options]="barOptions" />
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">By Category</h3>
+        <span class="card__badge">All time</span>
+      </div>
+      <div class="chart-container chart-container--pie">
+        <app-chart type="doughnut" [data]="pieChartData()" [options]="pieOptions" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom row -->
+  <div class="bottom-grid">
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Top Categories</h3>
+      </div>
+      <div class="category-list">
+        @for (cat of expenseService.categoryTotals().slice(0, 5); track cat.category) {
+          <div class="category-item">
+            <div class="category-item__left">
+              <span class="category-item__icon">{{ categoryIcons[cat.category] }}</span>
+              <div>
+                <div class="category-item__name">{{ categoryLabels[cat.category] }}</div>
+                <div class="category-item__count">{{ cat.count }} transactions</div>
+              </div>
+            </div>
+            <div class="category-item__right">
+              <div class="category-item__amount">{{ cat.total | currencyFormat }}</div>
+              <div class="category-item__pct">{{ cat.percentage }}%</div>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar__fill" [style.width.%]="cat.percentage"></div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Recent Transactions</h3>
+        <a routerLink="/expenses" class="card__link">View all →</a>
+      </div>
+      <div class="recent-list">
+        @for (expense of recentExpenses(); track expense.id) {
+          <div class="recent-item">
+            <div class="recent-item__icon">{{ allCategoryIcons[expense.category] }}</div>
+            <div class="recent-item__info">
+              <div class="recent-item__title">{{ expense.title }}</div>
+              <div class="recent-item__meta">{{ expense.date }} · {{ allCategoryLabels[expense.category] }}</div>
+            </div>
+            <div class="recent-item__amount" [class.recent-item__amount--income]="expense.type === 'income'">
+              {{ expense.type === 'income' ? '+' : '-' }}{{ expense.amount | currencyFormat }}
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">No transactions yet. Add your first one!</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (showAddForm()) {
+  <app-expense-form
+    [expense]="null"
+    (saved)="onAddExpense($event)"
+    (cancelled)="showAddForm.set(false)"
+  />
+}

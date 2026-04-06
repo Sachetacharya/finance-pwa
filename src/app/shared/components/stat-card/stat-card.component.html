@@ -1,0 +1,20 @@
+<div class="stat-card stat-card--{{ color() }}">
+  <div class="stat-card__header">
+    <div class="stat-card__info">
+      <span class="stat-card__title">{{ title() }}</span>
+      @if (subtitle()) {
+        <span class="stat-card__subtitle">{{ subtitle() }}</span>
+      }
+    </div>
+    @if (icon()) {
+      <div class="stat-card__icon">{{ icon() }}</div>
+    }
+  </div>
+  <div class="stat-card__value">{{ value() }}</div>
+  @if (trend() !== null) {
+    <div class="stat-card__trend" [class.positive]="trend()! >= 0" [class.negative]="trend()! < 0">
+      <span class="trend-arrow">{{ trend()! >= 0 ? '↑' : '↓' }}</span>
+      <span>{{ trend()! | number:'1.1-1' }}% {{ trendLabel() }}</span>
+    </div>
+  }
+</div>

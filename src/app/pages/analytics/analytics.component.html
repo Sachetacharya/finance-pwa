@@ -1,0 +1,163 @@
+<div class="analytics-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Analytics</h1>
+      <p class="page-subtitle">Insights into your income and spending patterns</p>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="stats-grid">
+    <app-stat-card
+      title="Avg Monthly Expenses"
+      [value]="avgMonthlyExpense() | currencyFormat"
+      subtitle="Per month spending"
+      icon="💸"
+      color="danger"
+    />
+    <app-stat-card
+      title="Avg Monthly Income"
+      [value]="avgMonthlyIncome() | currencyFormat"
+      subtitle="Per month income"
+      icon="💰"
+      color="success"
+    />
+    <app-stat-card
+      title="Net Balance"
+      [value]="expenseService.netBalance() | currencyFormat"
+      subtitle="Total income minus expenses"
+      icon="⚖️"
+      color="info"
+    />
+    @if (highestExpenseMonth()) {
+      <app-stat-card
+        title="Highest Expense Month"
+        [value]="highestExpenseMonth()!.total | currencyFormat"
+        [subtitle]="highestExpenseMonth()!.month + ' ' + highestExpenseMonth()!.year"
+        icon="📊"
+        color="warning"
+      />
+    }
+  </div>
+
+  <!-- Monthly Income vs Expenses -->
+  <div class="card">
+    <div class="card__header">
+      <h3 class="card__title">Income vs Expenses</h3>
+      <span class="card__badge">Monthly comparison</span>
+    </div>
+    <div class="chart-container" style="height: 300px; padding: 16px 20px;">
+      <app-chart type="bar" [data]="monthlyCompareData()" [options]="groupedBarOptions" />
+    </div>
+  </div>
+
+  <!-- Daily Trend -->
+  <div class="card">
+    <div class="card__header">
+      <h3 class="card__title">Daily Trend</h3>
+      <span class="card__badge">Last 30 days</span>
+    </div>
+    <div class="chart-container" style="height: 260px; padding: 16px 20px;">
+      <app-chart type="line" [data]="dailyLineData()" [options]="lineOptions" />
+    </div>
+  </div>
+
+  <!-- Expense breakdown row -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Expense Categories</h3>
+        <span class="card__badge">All time</span>
+      </div>
+      <div class="chart-container" style="height: 280px;">
+        <app-chart type="doughnut" [data]="categoryPieData()" [options]="pieOptions" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Category Breakdown</h3>
+        <span class="card__badge">{{ expenseService.categoryTotals().length }} categories</span>
+      </div>
+      <div class="category-table-wrapper">
+        <table class="category-table">
+          <thead>
+            <tr><th>Category</th><th class="center">Count</th><th>Total</th><th>Share</th></tr>
+          </thead>
+          <tbody>
+            @for (cat of expenseService.categoryTotals(); track cat.category) {
+              <tr>
+                <td><span class="cat-label">{{ categoryIcons[cat.category] }} {{ categoryLabels[cat.category] }}</span></td>
+                <td class="center">{{ cat.count }}</td>
+                <td class="amount">{{ cat.total | currencyFormat }}</td>
+                <td>
+                  <div class="mini-bar">
+                    <div class="mini-bar__fill" [style.width.%]="cat.percentage"></div>
+                    <span class="mini-bar__label">{{ cat.percentage }}%</span>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="empty-cell">No expense data</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Income breakdown row -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Income Sources</h3>
+        <span class="card__badge">All time</span>
+      </div>
+      <div class="chart-container" style="height: 280px;">
+        <app-chart type="doughnut" [data]="incomeSourcePieData()" [options]="pieOptions" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Income Breakdown</h3>
+        <span class="card__badge">{{ expenseService.incomeSourceTotals().length }} sources</span>
+      </div>
+      <div class="category-table-wrapper">
+        <table class="category-table">
+          <thead>
+            <tr><th>Source</th><th class="center">Count</th><th>Total</th><th>Share</th></tr>
+          </thead>
+          <tbody>
+            @for (src of expenseService.incomeSourceTotals(); track src.source) {
+              <tr>
+                <td><span class="cat-label cat-label--income">{{ incomeSourceIcons[src.source] }} {{ incomeSourceLabels[src.source] }}</span></td>
+                <td class="center">{{ src.count }}</td>
+                <td class="amount amount--income">{{ src.total | currencyFormat }}</td>
+                <td>
+                  <div class="mini-bar mini-bar--income">
+                    <div class="mini-bar__fill" [style.width.%]="src.percentage"></div>
+                    <span class="mini-bar__label">{{ src.percentage }}%</span>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="empty-cell">No income data</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Methods -->
+  <div class="card">
+    <div class="card__header">
+      <h3 class="card__title">Payment Methods</h3>
+      <span class="card__badge">Expenses only</span>
+    </div>
+    <div class="chart-container" style="height: 260px; padding: 16px 20px;">
+      <app-chart type="bar" [data]="paymentMethodData()" [options]="barOptions" />
+    </div>
+  </div>
+</div>

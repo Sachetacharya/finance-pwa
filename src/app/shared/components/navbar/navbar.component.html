@@ -1,0 +1,38 @@
+<nav class="navbar">
+  <div class="navbar__left">
+    <button class="navbar__menu-btn" (click)="toggleSidebar.emit()" aria-label="Toggle sidebar">
+      <span class="hamburger" [class.open]="sidebarOpen()">
+        <span></span><span></span><span></span>
+      </span>
+    </button>
+  </div>
+
+  <div class="navbar__right">
+    @if (!pwa.isOnline()) {
+      <div class="navbar__badge navbar__badge--offline" title="You are offline">
+        <span>📵</span>
+        <span class="badge-text">Offline</span>
+      </div>
+    }
+
+    @if (pwa.canInstall()) {
+      <button class="btn btn--ghost btn--sm navbar__install" (click)="pwa.installApp()">
+        ⬇ Install App
+      </button>
+    }
+
+    <div class="navbar__user">
+      <div class="navbar__avatar" [title]="auth.currentUser()?.name ?? 'User'">
+        {{ auth.currentUser()?.name?.charAt(0)?.toUpperCase() ?? 'U' }}
+      </div>
+      <div class="navbar__user-info">
+        <span class="navbar__user-name">{{ auth.currentUser()?.name }}</span>
+        <span class="navbar__user-role">{{ auth.currentUser()?.role }}</span>
+      </div>
+    </div>
+
+    <button class="navbar__icon-btn" (click)="auth.logout()" title="Sign out" aria-label="Sign out">
+      🚪
+    </button>
+  </div>
+</nav>

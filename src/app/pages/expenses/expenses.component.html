@@ -1,0 +1,211 @@
+<div class="expenses-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Transactions</h1>
+      <p class="page-subtitle">
+        {{ totalFiltered() }} records
+        @if (totalAmount() > 0) { · <span class="subtitle-expense">{{ totalAmount() | currencyFormat }} expenses</span> }
+        @if (totalIncome() > 0) { · <span class="subtitle-income">{{ totalIncome() | currencyFormat }} income</span> }
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn--ghost btn--sm" (click)="exportCSV()">📥 CSV</button>
+      <button class="btn btn--ghost btn--sm" (click)="exportPrint()">🖨️ Print</button>
+      <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Add</button>
+    </div>
+  </div>
+
+  <!-- Search + Filter toolbar -->
+  <div class="toolbar">
+    <input
+      class="form-control toolbar__search"
+      type="text"
+      placeholder="🔍 Search by title or notes..."
+      [value]="filter().search ?? ''"
+      (input)="onFilterChange('search', $any($event.target).value)"
+    />
+    <div class="filter-btn-wrap">
+      <button
+        class="btn btn--ghost btn--sm filter-toggle"
+        [class.filter-toggle--active]="showFilters() || activeFilterCount() > 0"
+        (click)="showFilters.update(v => !v)"
+      >
+        ⚙ Filters
+        @if (activeFilterCount() > 0) {
+          <span class="filter-badge">{{ activeFilterCount() }}</span>
+        }
+      </button>
+
+      @if (showFilters()) {
+        <div class="filter-backdrop" (click)="showFilters.set(false)"></div>
+        <div class="filter-panel" (click)="$event.stopPropagation()">
+          <div class="filter-panel__header">
+            <span class="filter-panel__title">Filters</span>
+            @if (activeFilterCount() > 0) {
+              <button class="filter-panel__clear" (click)="clearFilters()">✕ Clear all</button>
+            }
+          </div>
+          <div class="filter-grid">
+            <div class="filter-field">
+              <label class="filter-label">Type</label>
+              <select class="form-control" [value]="filter().type"
+                (change)="onFilterChange('type', $any($event.target).value); onFilterChange('category', '')">
+                <option value="">All Types</option>
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+              </select>
+            </div>
+            <div class="filter-field">
+              <label class="filter-label">{{ filter().type === 'income' ? 'Income Source' : 'Category' }}</label>
+              <select class="form-control" [value]="filter().category"
+                (change)="onFilterChange('category', $any($event.target).value)">
+                <option value="">{{ filter().type === 'income' ? 'All Sources' : 'All Categories' }}</option>
+                @for (cat of filteredCategories(); track cat[0]) {
+                  <option [value]="cat[0]">{{ cat[1] }}</option>
+                }
+              </select>
+            </div>
+            <div class="filter-field">
+              <label class="filter-label">Payment Method</label>
+              <select class="form-control" [value]="filter().paymentMethod"
+                (change)="onFilterChange('paymentMethod', $any($event.target).value)">
+                <option value="">All Methods</option>
+                @for (method of paymentMethods; track method[0]) {
+                  <option [value]="method[0]">{{ method[1] }}</option>
+                }
+              </select>
+            </div>
+            <div class="filter-field">
+              <label class="filter-label">From Date</label>
+              <input class="form-control" type="date"
+                [value]="filter().startDate ?? ''"
+                (change)="onFilterChange('startDate', $any($event.target).value)" />
+            </div>
+            <div class="filter-field">
+              <label class="filter-label">To Date</label>
+              <input class="form-control" type="date"
+                [value]="filter().endDate ?? ''"
+                (change)="onFilterChange('endDate', $any($event.target).value)" />
+            </div>
+            <div class="filter-field">
+              <label class="filter-label">Min Amount</label>
+              <input class="form-control" type="number" min="0" step="0.01" placeholder="0.00"
+                [value]="filter().minAmount ?? ''"
+                (input)="onAmountChange('minAmount', $any($event.target).value)" />
+            </div>
+            <div class="filter-field">
+              <label class="filter-label">Max Amount</label>
+              <input class="form-control" type="number" min="0" step="0.01" placeholder="Any"
+                [value]="filter().maxAmount ?? ''"
+                (input)="onAmountChange('maxAmount', $any($event.target).value)" />
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card table-card">
+    <div class="table-wrapper">
+      <table class="expense-table">
+        <thead>
+          <tr>
+            <th class="sortable" (click)="sort('date')">Date {{ getSortIcon('date') }}</th>
+            <th class="sortable" (click)="sort('title')">Title {{ getSortIcon('title') }}</th>
+            <th class="sortable" (click)="sort('category')">Category {{ getSortIcon('category') }}</th>
+            <th class="sortable" (click)="sort('amount')">Amount {{ getSortIcon('amount') }}</th>
+            <th class="sortable" (click)="sort('paymentMethod')">Payment {{ getSortIcon('paymentMethod') }}</th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (expense of paginatedExpenses(); track expense.id) {
+            <tr [class.row--income]="expense.type === 'income'">
+              <td class="date-cell">{{ expense.date }}</td>
+              <td class="title-cell">
+                <span class="type-badge type-badge--{{ expense.type }}">
+                  {{ expense.type === 'income' ? 'IN' : 'OUT' }}
+                </span>
+                <span class="expense-title" [title]="expense.title">{{ expense.title }}</span>
+              </td>
+              <td>
+                <span class="category-badge">
+                  {{ allCategoryIcons[expense.category] }} {{ allCategoryLabels[expense.category] }}
+                </span>
+              </td>
+              <td class="amount-cell" [class.amount-cell--income]="expense.type === 'income'">
+                {{ expense.type === 'income' ? '+' : '-' }}{{ expense.amount | currencyFormat }}
+              </td>
+              <td>
+                <span class="payment-badge payment-badge--{{ expense.paymentMethod }}">
+                  {{ paymentMethodLabels[expense.paymentMethod] }}
+                </span>
+              </td>
+              <td class="notes-cell" [title]="expense.notes ?? ''">{{ expense.notes || '—' }}</td>
+              <td class="actions-cell">
+                <button class="action-btn" (click)="editingExpense.set(expense)" title="Edit">✏️</button>
+                <button class="action-btn action-btn--delete" (click)="deletingExpenseId.set(expense.id)" title="Delete">🗑️</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty-row">
+                <div class="empty-state">
+                  <span class="empty-icon">📭</span>
+                  <p>No expenses found matching your filters.</p>
+                  <button class="btn btn--ghost btn--sm" (click)="clearFilters()">Clear Filters</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <span class="pagination__info">
+          Showing {{ (currentPage() - 1) * pageSize + 1 }}–{{ getPaginationEnd() }} of {{ totalFiltered() }}
+        </span>
+        <div class="pagination__controls">
+          <button class="page-btn" [disabled]="currentPage() === 1" (click)="currentPage.set(1)" title="First page">«</button>
+          <button class="page-btn" [disabled]="currentPage() === 1" (click)="currentPage.update(p => p - 1)" title="Previous page">‹</button>
+          @for (page of visiblePages(); track page) {
+            <button
+              class="page-btn"
+              [class.active]="page === currentPage()"
+              (click)="currentPage.set(page)"
+            >{{ page }}</button>
+          }
+          <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="currentPage.update(p => p + 1)" title="Next page">›</button>
+          <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="currentPage.set(totalPages())" title="Last page">»</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Add/Edit Form Modal -->
+@if (showAddForm() || editingExpense()) {
+  <app-expense-form
+    [expense]="editingExpense()"
+    (saved)="onSave($event)"
+    (cancelled)="showAddForm.set(false); editingExpense.set(null)"
+  />
+}
+
+<!-- Delete Confirmation -->
+@if (deletingExpenseId()) {
+  <app-confirm-dialog
+    [title]="expenseService.getExpenseById(deletingExpenseId()!)?.type === 'income' ? 'Delete Income' : 'Delete Expense'"
+    message="Are you sure you want to delete this transaction? This action cannot be undone."
+    confirmText="Delete"
+    [danger]="true"
+    (confirmed)="onDelete()"
+    (cancelled)="deletingExpenseId.set(null)"
+  />
+}

@@ -1,0 +1,165 @@
+<div class="modal-overlay" (click)="cancelled.emit()" role="presentation">
+  <div class="modal" (click)="$event.stopPropagation()" role="dialog">
+    <div class="modal__header">
+      <h2 class="modal__title">
+        @if (expense()) {
+          {{ expense()!.type === 'income' ? 'Edit Income' : 'Edit Expense' }}
+        } @else {
+          {{ entryType() === 'income' ? 'Add Income' : 'Add Expense' }}
+        }
+      </h2>
+      <button class="modal__close" (click)="cancelled.emit()" aria-label="Close">✕</button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal__body" novalidate>
+
+      <!-- Type toggle (only for new entries) -->
+      @if (!expense()) {
+        <div class="type-toggle">
+          <button
+            type="button"
+            class="type-btn"
+            [class.type-btn--expense]="entryType() === 'expense'"
+            (click)="setType('expense')"
+          >
+            💸 Expense
+          </button>
+          <button
+            type="button"
+            class="type-btn"
+            [class.type-btn--income]="entryType() === 'income'"
+            (click)="setType('income')"
+          >
+            💰 Income
+          </button>
+        </div>
+      }
+
+      <div class="form-row">
+        <div class="form-group" [class.form-group--error]="isInvalid('title')">
+          <label class="form-label" for="ef-title">Title *</label>
+          <input
+            id="ef-title"
+            formControlName="title"
+            class="form-control"
+            type="text"
+            placeholder="e.g. {{ entryType() === 'income' ? 'Monthly Salary' : 'Grocery Shopping' }}"
+          />
+          @if (isInvalid('title')) {
+            <span class="form-error">{{ getError('title') }}</span>
+          }
+        </div>
+
+        <div class="form-group" [class.form-group--error]="isInvalid('amount')">
+          <label class="form-label" for="ef-amount">Amount (NPR) *</label>
+          <input
+            id="ef-amount"
+            formControlName="amount"
+            class="form-control"
+            type="number"
+            step="0.01"
+            min="0.01"
+            placeholder="0.00"
+          />
+          @if (isInvalid('amount')) {
+            <span class="form-error">{{ getError('amount') }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" [class.form-group--error]="isInvalid('category')">
+          <label class="form-label" for="ef-category">
+            {{ entryType() === 'income' ? 'Income Source' : 'Category' }} *
+          </label>
+          <select id="ef-category" formControlName="category" class="form-control">
+            @if (entryType() === 'expense') {
+              <option value="">Select category...</option>
+              @for (cat of categories; track cat[0]) {
+                <option [value]="cat[0]">{{ cat[1] }}</option>
+              }
+            } @else {
+              <option value="">Select source...</option>
+              @for (src of incomeSources; track src[0]) {
+                <option [value]="src[0]">{{ src[1] }}</option>
+              }
+            }
+          </select>
+          @if (isInvalid('category')) {
+            <span class="form-error">{{ getError('category') }}</span>
+          }
+        </div>
+
+        <div class="form-group" [class.form-group--error]="isInvalid('date')">
+          <label class="form-label" for="ef-date">Date *</label>
+          <input id="ef-date" formControlName="date" class="form-control" type="date" />
+          @if (isInvalid('date')) {
+            <span class="form-error">{{ getError('date') }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" [class.form-group--error]="isInvalid('paymentMethod') && !paymentGroup()">
+          <label class="form-label">Payment Method *</label>
+          <select class="form-control" [value]="paymentGroup()" (change)="setPaymentGroup($any($event.target).value)">
+            <option value="">Select method...</option>
+            <option value="cash">💵 Cash</option>
+            <option value="card">💳 Card</option>
+            <option value="bank">🏦 Bank</option>
+            <option value="wallet">📱 Wallet</option>
+          </select>
+          @if (isInvalid('paymentMethod') && !paymentGroup()) {
+            <span class="form-error">This field is required</span>
+          }
+        </div>
+        @if (paymentGroup() === 'bank') {
+          <div class="form-group" [class.form-group--error]="isInvalid('paymentMethod')">
+            <label class="form-label">Select Bank *</label>
+            <select formControlName="paymentMethod" class="form-control">
+              <option value="">Select bank...</option>
+              @for (b of bankOptions; track b[0]) {
+                <option [value]="b[0]">{{ b[1] }}</option>
+              }
+            </select>
+            @if (isInvalid('paymentMethod')) {
+              <span class="form-error">{{ getError('paymentMethod') }}</span>
+            }
+          </div>
+        }
+        @if (paymentGroup() === 'wallet') {
+          <div class="form-group" [class.form-group--error]="isInvalid('paymentMethod')">
+            <label class="form-label">Select Wallet *</label>
+            <select formControlName="paymentMethod" class="form-control">
+              <option value="">Select wallet...</option>
+              @for (w of walletOptions; track w[0]) {
+                <option [value]="w[0]">{{ w[1] }}</option>
+              }
+            </select>
+            @if (isInvalid('paymentMethod')) {
+              <span class="form-error">{{ getError('paymentMethod') }}</span>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ef-notes">Notes</label>
+        <textarea
+          id="ef-notes"
+          formControlName="notes"
+          class="form-control"
+          rows="3"
+          placeholder="Optional notes..."
+        ></textarea>
+      </div>
+
+      <div class="modal__footer">
+        <button type="button" class="btn btn--ghost" (click)="cancelled.emit()" [disabled]="isSubmitting()">Cancel</button>
+        <button type="submit" [class.btn--income]="entryType() === 'income'" class="btn btn--primary" [disabled]="isSubmitting()">
+          @if (isSubmitting()) { Saving... } @else { {{ expense() ? 'Update' : (entryType() === 'income' ? 'Add Income' : 'Add Expense') }} }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
