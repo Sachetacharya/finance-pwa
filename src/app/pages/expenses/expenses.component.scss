@@ -550,9 +550,7 @@
   display: none;
 }
 
-.hide-mobile {
-  @media (max-width: 768px) { display: none !important; }
-}
+// All columns visible — table scrolls horizontally on mobile
 
 .m-card {
   position: relative;

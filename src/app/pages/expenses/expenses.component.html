@@ -117,9 +117,9 @@
           <tr>
             <th class="sortable" (click)="sort('date')">Date {{ getSortIcon('date') }}</th>
             <th class="sortable" (click)="sort('title')">Title {{ getSortIcon('title') }}</th>
-            <th class="sortable hide-mobile" (click)="sort('category')">Category {{ getSortIcon('category') }}</th>
+            <th class="sortable" (click)="sort('category')">Category {{ getSortIcon('category') }}</th>
             <th class="sortable" (click)="sort('amount')">Amount {{ getSortIcon('amount') }}</th>
-            <th class="sortable hide-mobile" (click)="sort('paymentMethod')">Payment {{ getSortIcon('paymentMethod') }}</th>
+            <th class="sortable" (click)="sort('paymentMethod')">Payment {{ getSortIcon('paymentMethod') }}</th>
             <th class="hide-mobile">Notes</th>
             <th>Actions</th>
           </tr>
@@ -162,7 +162,7 @@
                   }
                 </span>
               </td>
-              <td class="notes-cell hide-mobile" [title]="expense.notes ?? ''">{{ expense.notes || '—' }}</td>
+              <td class="notes-cell" [title]="expense.notes ?? ''">{{ expense.notes || '—' }}</td>
               <td class="actions-cell">
                 <div class="action-btns">
                   <button class="action-btn" (click)="editingExpense.set(expense)" title="Edit"><ng-icon name="lucidePencil" size="16" color="currentColor" /></button>
