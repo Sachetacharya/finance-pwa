@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ExpenseService } from '../../core/services/expense.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -187,5 +187,63 @@ export class ExpensesComponent {
   hasActiveFilters(): boolean {
     const f = this.filter();
     return !!(f.search || f.type || f.category || f.paymentMethod || f.startDate || f.endDate || f.minAmount !== undefined || f.maxAmount !== undefined);
+  }
+
+  // === Swipe to delete (mobile) ===
+  readonly swipeOffset = signal<Record<string, number>>({});
+  private touchStartX = 0;
+  private touchCurrentId = '';
+  private readonly SWIPE_THRESHOLD = -80;
+
+  onTouchStart(e: TouchEvent, id: string): void {
+    this.touchStartX = e.touches[0].clientX;
+    this.touchCurrentId = id;
+  }
+
+  onTouchMove(e: TouchEvent, id: string): void {
+    if (id !== this.touchCurrentId) return;
+    const dx = e.touches[0].clientX - this.touchStartX;
+    if (dx > 0) return; // only allow left swipe
+    this.swipeOffset.update(o => ({ ...o, [id]: Math.max(dx, -100) }));
+  }
+
+  onTouchEnd(id: string): void {
+    const offset = this.swipeOffset()[id] ?? 0;
+    if (offset <= this.SWIPE_THRESHOLD) {
+      this.deletingExpenseId.set(id);
+    }
+    this.swipeOffset.update(o => ({ ...o, [id]: 0 }));
+  }
+
+  // === Keyboard shortcuts ===
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(e: KeyboardEvent): void {
+    // Ignore when typing in inputs
+    const tag = (e.target as HTMLElement).tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+    switch (e.key) {
+      case 'n':
+      case 'N':
+        e.preventDefault();
+        this.showAddForm.set(true);
+        break;
+      case 'Escape':
+        this.showAddForm.set(false);
+        this.editingExpense.set(null);
+        this.deletingExpenseId.set(null);
+        this.showFilters.set(false);
+        break;
+      case 'ArrowLeft':
+        if (this.currentPage() > 1) this.goToPage(this.currentPage() - 1);
+        break;
+      case 'ArrowRight':
+        if (this.currentPage() < this.totalPages()) this.goToPage(this.currentPage() + 1);
+        break;
+      case '/':
+        e.preventDefault();
+        document.querySelector<HTMLInputElement>('.search-input')?.focus();
+        break;
+    }
   }
 }

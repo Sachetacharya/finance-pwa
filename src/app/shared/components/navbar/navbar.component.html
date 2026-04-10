@@ -15,6 +15,11 @@
       </div>
     }
 
+    <!-- Global search -->
+    <button class="navbar__icon-btn" (click)="openSearch()" title="Search (/)">
+      🔍
+    </button>
+
     <!-- Account balances dropdown -->
     <div class="balance-dropdown">
       <button class="navbar__icon-btn" (click)="toggleBalances()" title="Account Balances">
@@ -66,6 +71,42 @@
     </button>
   </div>
 </nav>
+
+@if (showSearch()) {
+  <div class="global-search__backdrop" (click)="closeSearch()"></div>
+  <div class="global-search">
+    <div class="global-search__header">
+      <span class="global-search__icon">🔍</span>
+      <input
+        class="global-search__input"
+        type="text"
+        placeholder="Search transactions..."
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+        (keydown.escape)="closeSearch()"
+      />
+      <kbd class="global-search__kbd">esc</kbd>
+    </div>
+    @if (searchResults().length) {
+      <div class="global-search__results">
+        @for (r of searchResults(); track r.id) {
+          <button class="global-search__item" (click)="goToResult(r)">
+            <span class="global-search__item-icon">{{ r.type === 'income' ? '💰' : r.type === 'transfer' ? '🔄' : '💸' }}</span>
+            <div class="global-search__item-info">
+              <div class="global-search__item-title">{{ r.title }}</div>
+              <div class="global-search__item-meta">{{ r.date }} · {{ accountService.getLabel(r.paymentMethod) }}</div>
+            </div>
+            <span class="global-search__item-amount" [class.income]="r.type === 'income'">
+              {{ r.type === 'income' ? '+' : '-' }}{{ r.amount | currencyFormat }}
+            </span>
+          </button>
+        }
+      </div>
+    } @else if (searchQuery().length >= 2) {
+      <div class="global-search__empty">No results found</div>
+    }
+  </div>
+}
 
 @if (showLogoutConfirm()) {
   <app-confirm-dialog
