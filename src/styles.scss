@@ -117,6 +117,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
   transition: background var(--transition), color var(--transition);
   overflow-x: hidden;
+
+  &.modal-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    touch-action: none;
+  }
   min-height: 100dvh;
 }
 

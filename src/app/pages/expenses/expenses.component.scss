@@ -51,7 +51,9 @@
   max-width: 420px;
   padding: 9px 14px;
 
-  @media (max-width: 600px) { max-width: 100%; }
+  @media (max-width: 600px) {
+    max-width: 100%;
+  }
 }
 
 .card {
@@ -138,7 +140,10 @@
     font-weight: 600;
     padding: 2px 6px;
     border-radius: 4px;
-    &:hover { background: #fee2e2; }
+
+    &:hover {
+      background: #fee2e2;
+    }
   }
 }
 
@@ -154,7 +159,9 @@
   flex-direction: column;
   gap: 5px;
 
-  &--full { grid-column: 1 / -1; }
+  &--full {
+    grid-column: 1 / -1;
+  }
 }
 
 .filter-label {
@@ -166,8 +173,15 @@
 }
 
 @keyframes panelIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .form-control {
@@ -188,7 +202,9 @@
   }
 }
 
-.table-wrapper { overflow-x: auto; }
+.table-wrapper {
+  overflow-x: auto;
+}
 
 .expense-table {
   width: 100%;
@@ -215,7 +231,10 @@
       cursor: pointer;
       user-select: none;
       transition: color 0.2s;
-      &:hover { color: #6366f1; }
+
+      &:hover {
+        color: #6366f1;
+      }
     }
   }
 
@@ -228,8 +247,14 @@
 
   tbody tr {
     transition: background 0.15s;
-    &:hover { background: var(--bg-secondary, #f1f5f9); }
-    &:last-child td { border-bottom: none; }
+
+    &:hover {
+      background: var(--bg-secondary, #f1f5f9);
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
   }
 }
 
@@ -255,16 +280,30 @@
   flex-shrink: 0;
   letter-spacing: 0.04em;
 
-  &--expense { background: #fee2e2; color: #991b1b; }
-  &--income  { background: #dcfce7; color: #166534; }
+  &--expense {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  &--income {
+    background: #dcfce7;
+    color: #166534;
+  }
 }
 
 .row--income {
   background: rgba(34, 197, 94, 0.03);
 }
 
-.subtitle-expense { color: #ef4444; font-weight: 600; }
-.subtitle-income  { color: #22c55e; font-weight: 600; }
+.subtitle-expense {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.subtitle-income {
+  color: #22c55e;
+  font-weight: 600;
+}
 
 
 .expense-title {
@@ -280,8 +319,13 @@
   color: #ef4444 !important;
   white-space: nowrap;
 
-  &--income { color: #22c55e !important; }
-  &--transfer { color: #6366f1 !important; }
+  &--income {
+    color: #22c55e !important;
+  }
+
+  &--transfer {
+    color: #6366f1 !important;
+  }
 }
 
 .notes-cell {
@@ -314,14 +358,33 @@
   font-weight: 700;
   white-space: nowrap;
 
-  &--cash            { background: #fef9c3; color: #713f12; }
-  &--card            { background: #eff6ff; color: #1e40af; }
+  &--cash {
+    background: #fef9c3;
+    color: #713f12;
+  }
+
+  &--card {
+    background: #eff6ff;
+    color: #1e40af;
+  }
+
   &--bank-siddhartha,
   &--bank-nabil,
   &--bank-kumari,
-  &--bank-global     { background: #f5f3ff; color: #5b21b6; }
-  &--esewa           { background: #fff7ed; color: #9a3412; }
-  &--khalti          { background: #fdf4ff; color: #7e22ce; }
+  &--bank-global {
+    background: #f5f3ff;
+    color: #5b21b6;
+  }
+
+  &--esewa {
+    background: #fff7ed;
+    color: #9a3412;
+  }
+
+  &--khalti {
+    background: #fdf4ff;
+    color: #7e22ce;
+  }
 }
 
 .actions-cell {
@@ -334,15 +397,25 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px;
-  border-radius: 6px;
-  font-size: 0.875rem;
+  padding: 10px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.95rem;
   line-height: 1;
   transition: background 0.2s;
-  &:hover { background: var(--bg-secondary, #f1f5f9); }
+
+  &:hover {
+    background: var(--bg-secondary, #f1f5f9);
+  }
 }
 
-.empty-row { padding: 0 !important; }
+.empty-row {
+  padding: 0 !important;
+}
 
 .empty-state {
   display: flex;
@@ -351,8 +424,15 @@
   padding: 48px 24px;
   color: var(--text-muted, #94a3b8);
 
-  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
-  p { margin: 0 0 16px; font-size: 0.9rem; }
+  .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+  }
+
+  p {
+    margin: 0 0 16px;
+    font-size: 0.9rem;
+  }
 }
 
 .pagination {
@@ -360,6 +440,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
+  padding-bottom: calc(12px + var(--safe-bottom, 0px));
   border-top: 1px solid var(--border-color, #e2e8f0);
   flex-wrap: wrap;
   gap: 10px;
@@ -376,21 +457,30 @@
 }
 
 .page-btn {
-  min-width: 32px;
-  height: 32px;
+  min-width: 36px;
+  height: 36px;
   border: 1.5px solid var(--border-color, #e2e8f0);
   background: var(--bg-card, #fff);
   color: var(--text-secondary, #64748b);
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  padding: 0 6px;
+  padding: 0 8px;
 
-  &:hover:not(:disabled) { border-color: #6366f1; color: #6366f1; }
+  @media (max-width: 768px) {
+    min-width: 44px;
+    height: 44px;
+    font-size: 0.9rem;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: #6366f1;
+    color: #6366f1;
+  }
 
   &.active {
     background: #6366f1;
@@ -399,7 +489,10 @@
     font-weight: 700;
   }
 
-  &:disabled { opacity: 0.38; cursor: not-allowed; }
+  &:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+  }
 }
 
 // === Mobile card view ===
@@ -414,7 +507,9 @@
 }
 
 .table-wrapper {
-  @media (max-width: 768px) { display: none; }
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 
 .m-card {
@@ -424,15 +519,21 @@
   background: var(--bg-card, #fff);
   border: 1px solid var(--border-color, #e2e8f0);
 
-  &--income { border-left: 3px solid #22c55e; }
-  &--transfer { border-left: 3px solid #6366f1; }
+  &--income {
+    border-left: 3px solid #22c55e;
+  }
+
+  &--transfer {
+    border-left: 3px solid #6366f1;
+  }
 
   &__content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 14px;
+    padding: 14px 16px;
     gap: 10px;
+    min-height: 60px;
     background: var(--bg-card, #fff);
     position: relative;
     z-index: 1;
@@ -467,7 +568,9 @@
     flex-shrink: 0;
   }
 
-  &__info { min-width: 0; }
+  &__info {
+    min-width: 0;
+  }
 
   &__title {
     font-size: 0.88rem;
@@ -500,8 +603,13 @@
     color: #ef4444;
     white-space: nowrap;
 
-    &--income { color: #22c55e; }
-    &--transfer { color: #6366f1; }
+    &--income {
+      color: #22c55e;
+    }
+
+    &--transfer {
+      color: #6366f1;
+    }
   }
 
   &__actions {

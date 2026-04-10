@@ -1,8 +1,10 @@
 import { Component, input, output } from '@angular/core';
+import { LockScrollDirective } from '../../directives/lock-scroll.directive';
 
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
+  imports: [LockScrollDirective],
   templateUrl: './confirm-dialog.component.html',
   styleUrl: './confirm-dialog.component.scss',
 })

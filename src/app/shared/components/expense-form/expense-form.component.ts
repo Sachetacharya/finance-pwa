@@ -9,11 +9,12 @@ import {
 } from '../../../core/models/expense.model';
 import { AccountService } from '../../../core/services/account.service';
 import { CurrencyFormatPipe } from '../../pipes/currency-format.pipe';
+import { LockScrollDirective } from '../../directives/lock-scroll.directive';
 
 @Component({
   selector: 'app-expense-form',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyFormatPipe],
+  imports: [ReactiveFormsModule, CurrencyFormatPipe, LockScrollDirective],
   templateUrl: './expense-form.component.html',
   styleUrl: './expense-form.component.scss',
 })
