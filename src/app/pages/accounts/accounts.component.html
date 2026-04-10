@@ -59,7 +59,7 @@
 
 <!-- Add account modal -->
 @if (showAddForm()) {
-  <div class="modal-overlay" (click)="showAddForm.set(false)">
+  <div class="modal-overlay" lockScroll (click)="showAddForm.set(false)">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h2 class="modal__title">Add Account</h2>
@@ -94,7 +94,7 @@
 
 <!-- Transfer / Withdraw modal -->
 @if (showTransferForm()) {
-  <div class="modal-overlay" (click)="showTransferForm.set(false)">
+  <div class="modal-overlay" lockScroll (click)="showTransferForm.set(false)">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h2 class="modal__title">🔄 Transfer Money</h2>

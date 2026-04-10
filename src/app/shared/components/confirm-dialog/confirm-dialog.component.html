@@ -1,4 +1,4 @@
-<div class="dialog-overlay" (click)="cancelled.emit()" role="presentation">
+<div class="dialog-overlay" lockScroll (click)="cancelled.emit()" role="presentation">
   <div class="dialog" (click)="$event.stopPropagation()" role="dialog" [attr.aria-label]="title()">
     <div class="dialog__header">
       <h3 class="dialog__title">{{ title() }}</h3>

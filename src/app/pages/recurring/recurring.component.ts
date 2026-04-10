@@ -10,11 +10,12 @@ import {
   CATEGORY_LABELS, INCOME_SOURCE_LABELS,
   ALL_CATEGORY_LABELS, ALL_CATEGORY_ICONS,
 } from '../../core/models/expense.model';
+import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
 
 @Component({
   selector: 'app-recurring',
   standalone: true,
-  imports: [FormsModule, CurrencyFormatPipe, ConfirmDialogComponent],
+  imports: [FormsModule, CurrencyFormatPipe, ConfirmDialogComponent, LockScrollDirective],
   templateUrl: './recurring.component.html',
   styleUrl: './recurring.component.scss',
 })

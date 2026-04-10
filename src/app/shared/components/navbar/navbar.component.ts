@@ -6,12 +6,13 @@ import { AccountService } from '../../../core/services/account.service';
 import { ExpenseService } from '../../../core/services/expense.service';
 import { CurrencyFormatPipe } from '../../pipes/currency-format.pipe';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { LockScrollDirective } from '../../directives/lock-scroll.directive';
 import { Expense, ALL_CATEGORY_LABELS } from '../../../core/models/expense.model';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterModule, CurrencyFormatPipe, ConfirmDialogComponent],
+  imports: [RouterModule, CurrencyFormatPipe, ConfirmDialogComponent, LockScrollDirective],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })

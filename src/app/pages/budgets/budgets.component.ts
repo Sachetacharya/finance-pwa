@@ -4,11 +4,12 @@ import { BudgetService } from '../../core/services/budget.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { ExpenseCategory, CATEGORY_LABELS, CATEGORY_ICONS } from '../../core/models/expense.model';
+import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
 
 @Component({
   selector: 'app-budgets',
   standalone: true,
-  imports: [FormsModule, CurrencyFormatPipe],
+  imports: [FormsModule, CurrencyFormatPipe, LockScrollDirective],
   templateUrl: './budgets.component.html',
   styleUrl: './budgets.component.scss',
 })

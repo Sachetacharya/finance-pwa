@@ -73,7 +73,7 @@
 </nav>
 
 @if (showSearch()) {
-  <div class="global-search__backdrop" (click)="closeSearch()"></div>
+  <div class="global-search__backdrop" lockScroll (click)="closeSearch()"></div>
   <div class="global-search">
     <div class="global-search__header">
       <span class="global-search__icon">🔍</span>

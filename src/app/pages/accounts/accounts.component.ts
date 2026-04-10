@@ -5,11 +5,12 @@ import { BackupService } from '../../core/services/backup.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
+import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
-  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe],
+  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe, LockScrollDirective],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.scss',
 })
