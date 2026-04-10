@@ -64,6 +64,9 @@
           @if (isInvalid('amount')) {
             <span class="form-error">{{ getError('amount') }}</span>
           }
+          @if (exceedsBalance && selectedBalance !== null) {
+            <span class="form-warning">Exceeds balance ({{ selectedBalance | currencyFormat }} available)</span>
+          }
         </div>
       </div>
 
@@ -104,10 +107,13 @@
           <label class="form-label">Payment Method *</label>
           <select class="form-control" [value]="paymentGroup()" (change)="setPaymentGroup($any($event.target).value)">
             <option value="">Select method...</option>
-            <option value="cash">💵 Cash</option>
-            <option value="card">💳 Card</option>
-            <option value="bank">🏦 Bank</option>
-            <option value="wallet">📱 Wallet</option>
+            <option value="cash">💵 Cash ({{ accountService.accountBalances()['cash'] | currencyFormat }})</option>
+            @if (accountService.bankAccounts().length) {
+              <option value="bank">🏦 Bank</option>
+            }
+            @if (accountService.walletAccounts().length) {
+              <option value="wallet">📱 Wallet</option>
+            }
           </select>
           @if (isInvalid('paymentMethod') && !paymentGroup()) {
             <span class="form-error">This field is required</span>
@@ -118,8 +124,8 @@
             <label class="form-label">Select Bank *</label>
             <select formControlName="paymentMethod" class="form-control">
               <option value="">Select bank...</option>
-              @for (b of bankOptions; track b[0]) {
-                <option [value]="b[0]">{{ b[1] }}</option>
+              @for (acc of accountService.bankAccounts(); track acc.id) {
+                <option [value]="acc.id">{{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat }})</option>
               }
             </select>
             @if (isInvalid('paymentMethod')) {
@@ -132,8 +138,8 @@
             <label class="form-label">Select Wallet *</label>
             <select formControlName="paymentMethod" class="form-control">
               <option value="">Select wallet...</option>
-              @for (w of walletOptions; track w[0]) {
-                <option [value]="w[0]">{{ w[1] }}</option>
+              @for (acc of accountService.walletAccounts(); track acc.id) {
+                <option [value]="acc.id">{{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat }})</option>
               }
             </select>
             @if (isInvalid('paymentMethod')) {

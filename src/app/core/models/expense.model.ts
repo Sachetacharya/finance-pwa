@@ -6,21 +6,17 @@ export type ExpenseCategory =
 export type IncomeSource =
   | 'salary' | 'freelance' | 'investment' | 'return-pay' | 'gift' | 'other-income';
 
-export type RecordCategory = ExpenseCategory | IncomeSource;
-
-export type PaymentMethod =
-  | 'cash' | 'card'
-  | 'bank-siddhartha' | 'bank-nabil' | 'bank-kumari' | 'bank-global'
-  | 'esewa' | 'khalti';
+export type RecordCategory = ExpenseCategory | IncomeSource | 'transfer';
 
 export interface Expense {
   id: string;
-  type: 'expense' | 'income';
+  type: 'expense' | 'income' | 'transfer';
   title: string;
   amount: number;
   category: RecordCategory;
   date: string;
-  paymentMethod: PaymentMethod;
+  paymentMethod: string; // 'cash' | account id | 'deleted-account'
+  toAccount?: string;    // destination account for transfers
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -28,9 +24,9 @@ export interface Expense {
 
 export interface ExpenseFilter {
   search?: string;
-  type?: 'expense' | 'income' | '';
+  type?: 'expense' | 'income' | 'transfer' | '';
   category?: RecordCategory | '';
-  paymentMethod?: PaymentMethod | '';
+  paymentMethod?: string;
   startDate?: string;
   endDate?: string;
   minAmount?: number;
@@ -93,17 +89,6 @@ export const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
   other: '#FF6384',
 };
 
-export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
-  cash: 'Cash',
-  card: 'Card',
-  'bank-siddhartha': 'Siddhartha Bank',
-  'bank-nabil': 'Nabil Bank',
-  'bank-kumari': 'Kumari Bank',
-  'bank-global': 'Global IME Bank',
-  esewa: 'eSewa',
-  khalti: 'Khalti',
-};
-
 export const INCOME_SOURCE_LABELS: Record<IncomeSource, string> = {
   salary: 'Salary',
   freelance: 'Freelance',
@@ -125,9 +110,11 @@ export const INCOME_SOURCE_ICONS: Record<IncomeSource, string> = {
 export const ALL_CATEGORY_LABELS: Record<RecordCategory, string> = {
   ...CATEGORY_LABELS,
   ...INCOME_SOURCE_LABELS,
+  transfer: 'Transfer',
 };
 
 export const ALL_CATEGORY_ICONS: Record<RecordCategory, string> = {
   ...CATEGORY_ICONS,
   ...INCOME_SOURCE_ICONS,
+  transfer: '🔄',
 };

@@ -1,0 +1,274 @@
+.accounts-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 8px;
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary, #1e293b);
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  color: var(--text-secondary, #64748b);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.account-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 14px;
+  padding: 18px 20px;
+  transition: box-shadow 0.2s;
+
+  &:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); }
+
+  &--cash {
+    border-left: 4px solid #22c55e;
+  }
+
+  &__icon {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary, #f1f5f9);
+    border-radius: 10px;
+  }
+
+  &__info { flex: 1; min-width: 0; }
+
+  &__name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary, #1e293b);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__type {
+    font-size: 0.78rem;
+    color: var(--text-muted, #94a3b8);
+    margin-top: 2px;
+  }
+
+  &__balance {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #16a34a;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &--negative { color: #ef4444; }
+  }
+
+  &__action, &__delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 6px;
+    border-radius: 8px;
+    opacity: 0.5;
+    transition: opacity 0.2s, background 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+      opacity: 1;
+      background: var(--bg-secondary, #f1f5f9);
+    }
+  }
+
+  &__delete:hover {
+    background: rgba(239, 68, 68, 0.08);
+  }
+}
+
+.backup-section {
+  margin-top: 16px;
+  padding: 20px;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 14px;
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary, #1e293b);
+    margin: 0 0 6px;
+  }
+
+  &__desc {
+    font-size: 0.85rem;
+    color: var(--text-muted, #94a3b8);
+    margin: 0 0 14px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.9rem;
+}
+
+// Modal reuses the same patterns as expense-form modal
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 16px;
+}
+
+.modal {
+  background: var(--bg-card, #fff);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px 0;
+  }
+
+  &__title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-primary, #1e293b);
+    margin: 0;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--text-muted, #94a3b8);
+    padding: 4px;
+  }
+
+  &__body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 8px;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &--error .form-control { border-color: #ef4444; }
+}
+
+.form-error {
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-control {
+  padding: 10px 14px;
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: var(--text-primary, #1e293b);
+  background: var(--bg-primary, #f8fafc);
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+  }
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+
+  &--primary {
+    background: #6366f1;
+    color: #fff;
+    &:hover:not(:disabled) { opacity: 0.88; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+
+  &--outline {
+    background: transparent;
+    color: #6366f1;
+    border: 1.5px solid #6366f1;
+    &:hover { background: rgba(99, 102, 241, 0.06); }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: var(--text-secondary, #64748b);
+    &:hover { background: var(--bg-secondary, #f1f5f9); }
+  }
+}

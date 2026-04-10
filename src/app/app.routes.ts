@@ -40,6 +40,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/analytics/analytics.component').then(m => m.AnalyticsComponent),
       },
+      {
+        path: 'recurring',
+        loadComponent: () =>
+          import('./pages/recurring/recurring.component').then(m => m.RecurringComponent),
+      },
+      {
+        path: 'budgets',
+        loadComponent: () =>
+          import('./pages/budgets/budgets.component').then(m => m.BudgetsComponent),
+      },
+      {
+        path: 'accounts',
+        loadComponent: () =>
+          import('./pages/accounts/accounts.component').then(m => m.AccountsComponent),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

@@ -16,5 +16,9 @@
       <span class="trend-arrow">{{ trend()! >= 0 ? '↑' : '↓' }}</span>
       <span>{{ trend()! | number:'1.1-1' }}% {{ trendLabel() }}</span>
     </div>
+  } @else if (trendLabel()) {
+    <div class="stat-card__trend neutral">
+      <span>— {{ trendLabel() }}</span>
+    </div>
   }
 </div>

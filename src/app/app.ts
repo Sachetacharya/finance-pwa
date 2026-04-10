@@ -6,6 +6,7 @@ import { ToastComponent } from './shared/components/toast/toast.component';
 import { ThemeService } from './core/services/theme.service';
 import { PwaService } from './core/services/pwa.service';
 import { NotificationService } from './core/services/notification.service';
+import { RecurringService } from './core/services/recurring.service';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +20,7 @@ export class App {
   readonly pwaService = inject(PwaService);
   private readonly notification = inject(NotificationService);
   private readonly swUpdate = inject(SwUpdate);
+  private readonly recurring = inject(RecurringService); // processes due items on startup
 
   constructor() {
     // Online / offline notifications

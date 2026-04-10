@@ -11,15 +11,14 @@ import {
   ExpenseFilter,
   ExpenseCategory,
   IncomeSource,
-  PaymentMethod,
   CATEGORY_LABELS,
   CATEGORY_ICONS,
   INCOME_SOURCE_LABELS,
   INCOME_SOURCE_ICONS,
   ALL_CATEGORY_LABELS,
   ALL_CATEGORY_ICONS,
-  PAYMENT_METHOD_LABELS,
 } from '../../core/models/expense.model';
+import { AccountService } from '../../core/services/account.service';
 
 type SortField = 'date' | 'title' | 'category' | 'amount' | 'paymentMethod';
 type SortDir = 'asc' | 'desc';
@@ -47,16 +46,16 @@ export class ExpensesComponent {
   readonly editingExpense = signal<Expense | null>(null);
   readonly deletingExpenseId = signal<string | null>(null);
 
+  readonly accountService = inject(AccountService);
+
   readonly categories = Object.entries(CATEGORY_LABELS) as [ExpenseCategory, string][];
   readonly incomeSources = Object.entries(INCOME_SOURCE_LABELS) as [IncomeSource, string][];
-  readonly paymentMethods = Object.entries(PAYMENT_METHOD_LABELS) as [PaymentMethod, string][];
   readonly categoryLabels = CATEGORY_LABELS;
   readonly categoryIcons = CATEGORY_ICONS;
   readonly incomeSourceLabels = INCOME_SOURCE_LABELS;
   readonly incomeSourceIcons = INCOME_SOURCE_ICONS;
   readonly allCategoryLabels = ALL_CATEGORY_LABELS;
   readonly allCategoryIcons = ALL_CATEGORY_ICONS;
-  readonly paymentMethodLabels = PAYMENT_METHOD_LABELS;
 
   readonly filteredCategories = computed(() =>
     this.filter().type === 'income' ? this.incomeSources : this.categories
@@ -173,6 +172,11 @@ export class ExpensesComponent {
 
   exportPrint(): void {
     this.exportService.exportToPrint(this.filteredSorted());
+  }
+
+  goToPage(page: number): void {
+    this.currentPage.set(page);
+    document.querySelector('.expenses-table-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   clearFilters(): void {

@@ -54,6 +54,7 @@
                 <option value="">All Types</option>
                 <option value="expense">Expense</option>
                 <option value="income">Income</option>
+                <option value="transfer">Transfer</option>
               </select>
             </div>
             <div class="filter-field">
@@ -71,9 +72,11 @@
               <select class="form-control" [value]="filter().paymentMethod"
                 (change)="onFilterChange('paymentMethod', $any($event.target).value)">
                 <option value="">All Methods</option>
-                @for (method of paymentMethods; track method[0]) {
-                  <option [value]="method[0]">{{ method[1] }}</option>
+                <option value="cash">Cash</option>
+                @for (acc of accountService.accounts(); track acc.id) {
+                  <option [value]="acc.id">{{ acc.name }}</option>
                 }
+                <option value="deleted-account">Deleted Account</option>
               </select>
             </div>
             <div class="filter-field">
@@ -108,7 +111,7 @@
 
   <!-- Table -->
   <div class="card table-card">
-    <div class="table-wrapper">
+    <div class="table-wrapper expenses-table-wrap">
       <table class="expense-table">
         <thead>
           <tr>
@@ -136,12 +139,20 @@
                   {{ allCategoryIcons[expense.category] }} {{ allCategoryLabels[expense.category] }}
                 </span>
               </td>
-              <td class="amount-cell" [class.amount-cell--income]="expense.type === 'income'">
-                {{ expense.type === 'income' ? '+' : '-' }}{{ expense.amount | currencyFormat }}
+              <td class="amount-cell"
+                  [class.amount-cell--income]="expense.type === 'income'"
+                  [class.amount-cell--transfer]="expense.type === 'transfer'">
+                @if (expense.type === 'income') { + }
+                @else if (expense.type === 'transfer') { 🔄 }
+                @else { - }
+                {{ expense.amount | currencyFormat }}
               </td>
               <td>
-                <span class="payment-badge payment-badge--{{ expense.paymentMethod }}">
-                  {{ paymentMethodLabels[expense.paymentMethod] }}
+                <span class="payment-badge">
+                  {{ accountService.getLabel(expense.paymentMethod) }}
+                  @if (expense.toAccount) {
+                    → {{ accountService.getLabel(expense.toAccount) }}
+                  }
                 </span>
               </td>
               <td class="notes-cell" [title]="expense.notes ?? ''">{{ expense.notes || '—' }}</td>
@@ -165,6 +176,50 @@
       </table>
     </div>
 
+    <!-- Mobile card view -->
+    <div class="mobile-cards">
+      @for (expense of paginatedExpenses(); track expense.id) {
+        <div class="m-card"
+          [class.m-card--income]="expense.type === 'income'"
+          [class.m-card--transfer]="expense.type === 'transfer'"
+          (touchstart)="onTouchStart($event, expense.id)"
+          (touchmove)="onTouchMove($event, expense.id)"
+          (touchend)="onTouchEnd(expense.id)">
+          <div class="m-card__content" [style.transform]="'translateX(' + (swipeOffset()[expense.id] ?? 0) + 'px)'">
+            <div class="m-card__left">
+              <span class="m-card__icon">{{ allCategoryIcons[expense.category] }}</span>
+              <div class="m-card__info">
+                <div class="m-card__title">{{ expense.title }}</div>
+                <div class="m-card__meta">
+                  {{ expense.date }} · {{ accountService.getLabel(expense.paymentMethod) }}
+                  @if (expense.toAccount) { → {{ accountService.getLabel(expense.toAccount) }} }
+                </div>
+              </div>
+            </div>
+            <div class="m-card__right">
+              <div class="m-card__amount"
+                [class.m-card__amount--income]="expense.type === 'income'"
+                [class.m-card__amount--transfer]="expense.type === 'transfer'">
+                @if (expense.type === 'income') { + } @else if (expense.type === 'transfer') { 🔄 } @else { - }
+                {{ expense.amount | currencyFormat }}
+              </div>
+              <div class="m-card__actions">
+                <button class="action-btn" (click)="editingExpense.set(expense)">✏️</button>
+                <button class="action-btn action-btn--delete" (click)="deletingExpenseId.set(expense.id)">🗑️</button>
+              </div>
+            </div>
+          </div>
+          <div class="m-card__swipe-action">🗑️ Delete</div>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <span class="empty-icon">📭</span>
+          <p>No expenses found.</p>
+          <button class="btn btn--ghost btn--sm" (click)="clearFilters()">Clear Filters</button>
+        </div>
+      }
+    </div>
+
     <!-- Pagination -->
     @if (totalPages() > 1) {
       <div class="pagination">
@@ -172,17 +227,17 @@
           Showing {{ (currentPage() - 1) * pageSize + 1 }}–{{ getPaginationEnd() }} of {{ totalFiltered() }}
         </span>
         <div class="pagination__controls">
-          <button class="page-btn" [disabled]="currentPage() === 1" (click)="currentPage.set(1)" title="First page">«</button>
-          <button class="page-btn" [disabled]="currentPage() === 1" (click)="currentPage.update(p => p - 1)" title="Previous page">‹</button>
+          <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(1)" title="First page">«</button>
+          <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" title="Previous page">‹</button>
           @for (page of visiblePages(); track page) {
             <button
               class="page-btn"
               [class.active]="page === currentPage()"
-              (click)="currentPage.set(page)"
+              (click)="goToPage(page)"
             >{{ page }}</button>
           }
-          <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="currentPage.update(p => p + 1)" title="Next page">›</button>
-          <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="currentPage.set(totalPages())" title="Last page">»</button>
+          <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)" title="Next page">›</button>
+          <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(totalPages())" title="Last page">»</button>
         </div>
       </div>
     }

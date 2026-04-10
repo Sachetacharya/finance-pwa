@@ -1,5 +1,6 @@
 import { Component, inject, computed } from '@angular/core';
 import { ExpenseService } from '../../core/services/expense.service';
+import { AccountService } from '../../core/services/account.service';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { ChartComponent } from '../../shared/components/chart/chart.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
@@ -19,10 +20,15 @@ import { ChartConfiguration } from 'chart.js';
 })
 export class AnalyticsComponent {
   readonly expenseService = inject(ExpenseService);
+  private readonly accountService = inject(AccountService);
   readonly categoryLabels = CATEGORY_LABELS;
   readonly categoryIcons = CATEGORY_ICONS;
   readonly incomeSourceLabels = INCOME_SOURCE_LABELS;
   readonly incomeSourceIcons = INCOME_SOURCE_ICONS;
+
+  readonly hasExpenses = computed(() => this.expenseService.expenses().some(e => e.type === 'expense'));
+  readonly hasIncome = computed(() => this.expenseService.expenses().some(e => e.type === 'income'));
+  readonly hasAnyData = computed(() => this.expenseService.expenses().some(e => e.type !== 'transfer'));
 
   readonly avgMonthlyExpense = computed(() => {
     const totals = this.expenseService.monthlyTotals();
@@ -130,9 +136,9 @@ export class AnalyticsComponent {
       const d = new Date(now);
       d.setDate(now.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
-      const dayRecords = this.expenseService.expenses().filter(e => e.date === dateStr);
+      const dayRecords = this.expenseService.expenses().filter(e => e.date === dateStr && e.type !== 'transfer');
       labels.push(`${d.getDate()}/${d.getMonth() + 1}`);
-      expenseData.push(Math.round(dayRecords.filter(e => e.type !== 'income').reduce((s, e) => s + e.amount, 0) * 100) / 100);
+      expenseData.push(Math.round(dayRecords.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0) * 100) / 100);
       incomeData.push(Math.round(dayRecords.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0) * 100) / 100);
     }
 
@@ -167,18 +173,13 @@ export class AnalyticsComponent {
 
   readonly paymentMethodData = computed((): ChartConfiguration['data'] => {
     const map = new Map<string, number>();
-    this.expenseService.expenses().filter(e => e.type !== 'income').forEach(e => {
+    this.expenseService.expenses().filter(e => e.type === 'expense').forEach(e => {
       map.set(e.paymentMethod, (map.get(e.paymentMethod) ?? 0) + e.amount);
     });
     const entries = Array.from(map.entries())
       .sort((a, b) => b[1] - a[1])
       .map(([k, v]) => [k, Math.round(v * 100) / 100] as [string, number]);
-    const labels: Record<string, string> = {
-      cash: 'Cash', card: 'Card',
-      'bank-siddhartha': 'Siddhartha Bank', 'bank-nabil': 'Nabil Bank',
-      'bank-kumari': 'Kumari Bank', 'bank-global': 'Global IME Bank',
-      esewa: 'eSewa', khalti: 'Khalti',
-    };
+    const labels = this.accountService.paymentLabels();
     return {
       labels: entries.map(e => labels[e[0]] ?? e[0]),
       datasets: [{

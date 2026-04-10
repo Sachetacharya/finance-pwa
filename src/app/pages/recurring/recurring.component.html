@@ -1,0 +1,131 @@
+<div class="recurring-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Recurring</h1>
+      <p class="page-subtitle">Auto-create transactions on a schedule</p>
+    </div>
+    <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Add Recurring</button>
+  </div>
+
+  @for (item of recurringService.items(); track item.id) {
+    <div class="rec-card" [class.rec-card--disabled]="!item.enabled">
+      <div class="rec-card__left">
+        <span class="rec-card__icon">{{ allCategoryIcons[item.category] }}</span>
+        <div>
+          <div class="rec-card__title">{{ item.title }}</div>
+          <div class="rec-card__meta">
+            {{ item.frequency === 'monthly' ? 'Monthly' : 'Weekly' }} ·
+            {{ item.type === 'income' ? 'Income' : 'Expense' }} ·
+            Next: {{ item.nextDate }}
+          </div>
+        </div>
+      </div>
+      <div class="rec-card__right">
+        <span class="rec-card__amount" [class.rec-card__amount--income]="item.type === 'income'">
+          {{ item.type === 'income' ? '+' : '-' }}{{ item.amount | currencyFormat }}
+        </span>
+        <label class="rec-toggle" title="{{ item.enabled ? 'Disable' : 'Enable' }}">
+          <input type="checkbox" [checked]="item.enabled" (change)="onToggle(item.id)" />
+          <span class="rec-toggle__slider"></span>
+        </label>
+        <button class="rec-card__delete" (click)="deletingId.set(item.id)" title="Remove">🗑️</button>
+      </div>
+    </div>
+  } @empty {
+    <div class="empty-state">
+      <div class="empty-state__icon">🔄</div>
+      <h3 class="empty-state__title">No recurring transactions</h3>
+      <p class="empty-state__text">Set up automatic entries for salary, rent, subscriptions, etc.</p>
+    </div>
+  }
+</div>
+
+<!-- Add recurring modal -->
+@if (showAddForm()) {
+  <div class="modal-overlay" (click)="showAddForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">Add Recurring Transaction</h2>
+        <button class="modal__close" (click)="showAddForm.set(false)">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-control" [(ngModel)]="newType">
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Frequency</label>
+            <select class="form-control" [(ngModel)]="newFrequency">
+              <option value="monthly">Monthly</option>
+              <option value="weekly">Weekly</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Title *</label>
+          <input class="form-control" type="text" [(ngModel)]="newTitle"
+            placeholder="e.g. Monthly Salary, Netflix" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount (NPR) *</label>
+            <input class="form-control" type="number" [(ngModel)]="newAmount"
+              placeholder="0.00" min="0.01" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Start Date *</label>
+            <input class="form-control" type="date" [(ngModel)]="newStartDate" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">{{ newType === 'income' ? 'Source' : 'Category' }} *</label>
+            <select class="form-control" [(ngModel)]="newCategory">
+              <option value="">Select...</option>
+              @if (newType === 'expense') {
+                @for (cat of expenseCategories; track cat[0]) {
+                  <option [value]="cat[0]">{{ cat[1] }}</option>
+                }
+              } @else {
+                @for (src of incomeSources; track src[0]) {
+                  <option [value]="src[0]">{{ src[1] }}</option>
+                }
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account *</label>
+            <select class="form-control" [(ngModel)]="newPayment">
+              <option value="">Select...</option>
+              @for (acc of allAccounts; track acc.id) {
+                <option [value]="acc.id">{{ acc.icon }} {{ acc.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input class="form-control" type="text" [(ngModel)]="newNotes" placeholder="Optional" />
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="showAddForm.set(false)">Cancel</button>
+          <button class="btn btn--primary" (click)="onAdd()" [disabled]="!canAdd">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (deletingId()) {
+  <app-confirm-dialog
+    title="Remove Recurring"
+    message="Remove this recurring transaction? Future entries won't be created. Past entries stay."
+    confirmText="Remove"
+    (confirmed)="onDelete()"
+    (cancelled)="deletingId.set(null)"
+  />
+}

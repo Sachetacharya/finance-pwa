@@ -29,6 +29,9 @@ export class SidebarComponent {
     { path: '/dashboard', label: 'Dashboard', icon: '🏠' },
     { path: '/expenses', label: 'Expenses', icon: '💳' },
     { path: '/analytics', label: 'Analytics', icon: '📊' },
+    { path: '/recurring', label: 'Recurring', icon: '🔄' },
+    { path: '/budgets', label: 'Budgets', icon: '📋' },
+    { path: '/accounts', label: 'Accounts', icon: '🏦' },
   ];
 
   onNavClick(): void {

@@ -4,15 +4,16 @@ import {
   Expense,
   ExpenseCategory,
   IncomeSource,
-  PaymentMethod,
   CATEGORY_LABELS,
   INCOME_SOURCE_LABELS,
 } from '../../../core/models/expense.model';
+import { AccountService } from '../../../core/services/account.service';
+import { CurrencyFormatPipe } from '../../pipes/currency-format.pipe';
 
 @Component({
   selector: 'app-expense-form',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CurrencyFormatPipe],
   templateUrl: './expense-form.component.html',
   styleUrl: './expense-form.component.scss',
 })
@@ -22,47 +23,44 @@ export class ExpenseFormComponent implements OnInit {
   cancelled = output<void>();
 
   private readonly fb = inject(FormBuilder);
+  readonly accountService = inject(AccountService);
+  readonly currencyPipe = inject(CurrencyFormatPipe);
 
   readonly isSubmitting = signal(false);
   readonly entryType = signal<'expense' | 'income'>('expense');
-  readonly paymentGroup = signal<'cash' | 'card' | 'bank' | 'wallet' | ''>('');
+  readonly paymentGroup = signal<'cash' | 'bank' | 'wallet' | ''>('');
 
   readonly categories = Object.entries(CATEGORY_LABELS) as [ExpenseCategory, string][];
   readonly incomeSources = Object.entries(INCOME_SOURCE_LABELS) as [IncomeSource, string][];
 
-  readonly bankOptions: [PaymentMethod, string][] = [
-    ['bank-siddhartha', 'Siddhartha Bank'],
-    ['bank-nabil', 'Nabil Bank'],
-    ['bank-kumari', 'Kumari Bank'],
-    ['bank-global', 'Global IME Bank'],
-  ];
+  get selectedBalance(): number | null {
+    const pm = this.form.get('paymentMethod')?.value;
+    if (!pm) return null;
+    return this.accountService.accountBalances()[pm] ?? null;
+  }
 
-  readonly walletOptions: [PaymentMethod, string][] = [
-    ['esewa', 'eSewa'],
-    ['khalti', 'Khalti'],
-  ];
+  get exceedsBalance(): boolean {
+    if (this.entryType() !== 'expense') return false;
+    const bal = this.selectedBalance;
+    const amt = this.form.get('amount')?.value;
+    if (bal === null || !amt) return false;
+    return amt > bal;
+  }
 
   readonly form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     amount: [null as number | null, [Validators.required, Validators.min(0.01)]],
     category: ['', Validators.required],
     date: ['', Validators.required],
-    paymentMethod: ['' as PaymentMethod | '', Validators.required],
+    paymentMethod: ['', Validators.required],
     notes: [''],
   });
 
   ngOnInit(): void {
     const exp = this.expense();
     if (exp) {
-      this.entryType.set(exp.type ?? 'expense');
-      const pm = exp.paymentMethod as string;
-      if (pm === 'cash' || pm === 'card') {
-        this.paymentGroup.set(pm);
-      } else if (pm.startsWith('bank-')) {
-        this.paymentGroup.set('bank');
-      } else if (pm === 'esewa' || pm === 'khalti') {
-        this.paymentGroup.set('wallet');
-      }
+      this.entryType.set(exp.type === 'income' ? 'income' : 'expense');
+      this.resolvePaymentGroup(exp.paymentMethod);
       this.form.patchValue({
         title: exp.title,
         amount: exp.amount,
@@ -76,15 +74,26 @@ export class ExpenseFormComponent implements OnInit {
     }
   }
 
+  private resolvePaymentGroup(pm: string): void {
+    if (pm === 'cash') {
+      this.paymentGroup.set('cash');
+    } else {
+      const acc = this.accountService.accounts().find(a => a.id === pm);
+      if (acc) {
+        this.paymentGroup.set(acc.type === 'bank' ? 'bank' : 'wallet');
+      }
+    }
+  }
+
   setType(type: 'expense' | 'income'): void {
     this.entryType.set(type);
     this.form.get('category')?.setValue('');
   }
 
-  setPaymentGroup(group: 'cash' | 'card' | 'bank' | 'wallet' | ''): void {
+  setPaymentGroup(group: 'cash' | 'bank' | 'wallet' | ''): void {
     this.paymentGroup.set(group);
-    if (group === 'cash' || group === 'card') {
-      this.form.get('paymentMethod')?.setValue(group as PaymentMethod);
+    if (group === 'cash') {
+      this.form.get('paymentMethod')?.setValue('cash');
     } else {
       this.form.get('paymentMethod')?.setValue('');
     }
@@ -103,7 +112,7 @@ export class ExpenseFormComponent implements OnInit {
       amount: val.amount!,
       category: val.category as ExpenseCategory | IncomeSource,
       date: val.date!,
-      paymentMethod: val.paymentMethod as PaymentMethod,
+      paymentMethod: val.paymentMethod!,
       notes: val.notes || undefined,
     });
   }

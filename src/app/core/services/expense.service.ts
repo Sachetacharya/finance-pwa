@@ -22,7 +22,7 @@ export class ExpenseService {
   readonly expenses = this._expenses.asReadonly();
 
   readonly totalAmount = computed(() =>
-    this._expenses().filter(e => e.type !== 'income').reduce((sum, e) => sum + e.amount, 0)
+    this._expenses().filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0)
   );
 
   readonly totalIncome = computed(() =>
@@ -34,7 +34,7 @@ export class ExpenseService {
   readonly currentMonthExpenses = computed(() => {
     const now = new Date();
     return this._expenses().filter(e => {
-      if (e.type === 'income') return false;
+      if (e.type !== 'expense') return false;
       const d = new Date(e.date);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     });
@@ -61,7 +61,7 @@ export class ExpenseService {
     const py = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
     return this._expenses()
       .filter(e => {
-        if (e.type === 'income') return false;
+        if (e.type !== 'expense') return false;
         const d = new Date(e.date);
         return d.getMonth() === pm && d.getFullYear() === py;
       })
@@ -71,7 +71,7 @@ export class ExpenseService {
   readonly monthlyTotals = computed((): MonthlyTotal[] => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const map = new Map<string, MonthlyTotal>();
-    this._expenses().filter(e => e.type !== 'income').forEach(expense => {
+    this._expenses().filter(e => e.type === 'expense').forEach(expense => {
       const d = new Date(expense.date);
       const key = `${d.getFullYear()}-${d.getMonth()}`;
       if (!map.has(key)) {
@@ -89,7 +89,7 @@ export class ExpenseService {
 
   readonly categoryTotals = computed((): CategoryTotal[] => {
     const map = new Map<ExpenseCategory, { total: number; count: number }>();
-    const expenseEntries = this._expenses().filter(e => e.type !== 'income');
+    const expenseEntries = this._expenses().filter(e => e.type === 'expense');
     const grandTotal = expenseEntries.reduce((sum, e) => sum + e.amount, 0);
     expenseEntries.forEach(e => {
       const cat = e.category as ExpenseCategory;
@@ -155,13 +155,22 @@ export class ExpenseService {
         const parsed = JSON.parse(stored);
         // Migrate old records that pre-date the type field
         const pmMigrate: Record<string, string> = {
-          'credit-card': 'card', 'debit-card': 'card',
-          'bank-transfer': 'bank-nabil', 'digital-wallet': 'esewa',
+          'card': 'deleted-account',
+          'credit-card': 'deleted-account',
+          'debit-card': 'deleted-account',
+          'bank-siddhartha': 'deleted-account',
+          'bank-nabil': 'deleted-account',
+          'bank-kumari': 'deleted-account',
+          'bank-global': 'deleted-account',
+          'bank-transfer': 'deleted-account',
+          'esewa': 'deleted-account',
+          'khalti': 'deleted-account',
+          'digital-wallet': 'deleted-account',
         };
         const catMigrate: Record<string, string> = { rental: 'return-pay', business: 'other-income' };
         return parsed.map((e: Expense) => ({
           ...e,
-          type: e.type === 'income' ? 'income' : 'expense',
+          type: e.type === 'income' ? 'income' : e.type === 'transfer' ? 'transfer' : 'expense',
           paymentMethod: pmMigrate[e.paymentMethod] ?? e.paymentMethod,
           category: catMigrate[e.category] ?? e.category,
         }));
@@ -229,6 +238,15 @@ export class ExpenseService {
 
   getExpenseById(id: string): Expense | undefined {
     return this._expenses().find(e => e.id === id);
+  }
+
+  migratePaymentMethod(from: string, to: string): void {
+    const list = this._expenses();
+    const updated = list.map(e =>
+      e.paymentMethod === from ? { ...e, paymentMethod: to, updatedAt: new Date().toISOString() } : e
+    );
+    this._expenses.set(updated);
+    this.persist(updated);
   }
 
   resetData(): void {

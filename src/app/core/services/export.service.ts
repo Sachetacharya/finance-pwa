@@ -1,17 +1,21 @@
-import { Injectable } from '@angular/core';
-import { Expense, ALL_CATEGORY_LABELS, PAYMENT_METHOD_LABELS } from '../models/expense.model';
+import { Injectable, inject } from '@angular/core';
+import { Expense, ALL_CATEGORY_LABELS } from '../models/expense.model';
+import { AccountService } from './account.service';
 import { formatCurrency } from '../../shared/utils/currency.utils';
 
 @Injectable({ providedIn: 'root' })
 export class ExportService {
+  private readonly accountService = inject(AccountService);
+
   exportToCSV(expenses: Expense[], filename = 'expenses'): void {
+    const labels = this.accountService.paymentLabels();
     const headers = ['Date', 'Title', 'Category', 'Amount', 'Payment Method', 'Notes'];
     const rows = expenses.map(e => [
       e.date,
       `"${e.title.replace(/"/g, '""')}"`,
       ALL_CATEGORY_LABELS[e.category],
       e.amount.toFixed(2),
-      PAYMENT_METHOD_LABELS[e.paymentMethod],
+      labels[e.paymentMethod] ?? e.paymentMethod,
       `"${(e.notes ?? '').replace(/"/g, '""')}"`,
     ]);
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -25,6 +29,7 @@ export class ExportService {
   }
 
   exportToPrint(expenses: Expense[]): void {
+    const labels = this.accountService.paymentLabels();
     const total = expenses.reduce((s, e) => s + e.amount, 0);
     const rows = expenses
       .map(
@@ -33,7 +38,7 @@ export class ExportService {
         <td>${e.title}</td>
         <td>${ALL_CATEGORY_LABELS[e.category]}</td>
         <td>${formatCurrency(e.amount)}</td>
-        <td>${PAYMENT_METHOD_LABELS[e.paymentMethod]}</td>
+        <td>${labels[e.paymentMethod] ?? e.paymentMethod}</td>
         <td>${e.notes ?? '—'}</td>
       </tr>`
       )

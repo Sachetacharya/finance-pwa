@@ -6,6 +6,14 @@
     </div>
   </div>
 
+  @if (!hasAnyData()) {
+    <div class="empty-banner">
+      <div class="empty-banner__icon">📊</div>
+      <h3 class="empty-banner__title">No data yet</h3>
+      <p class="empty-banner__text">Add some expenses or income to see your analytics here.</p>
+    </div>
+  } @else {
+
   <!-- Summary Cards -->
   <div class="stats-grid">
     <app-stat-card
@@ -63,6 +71,7 @@
   </div>
 
   <!-- Expense breakdown row -->
+  @if (hasExpenses()) {
   <div class="charts-grid">
     <div class="card">
       <div class="card__header">
@@ -105,8 +114,10 @@
       </div>
     </div>
   </div>
+  }
 
   <!-- Income breakdown row -->
+  @if (hasIncome()) {
   <div class="charts-grid">
     <div class="card">
       <div class="card__header">
@@ -149,8 +160,10 @@
       </div>
     </div>
   </div>
+  }
 
   <!-- Payment Methods -->
+  @if (hasExpenses()) {
   <div class="card">
     <div class="card__header">
       <h3 class="card__title">Payment Methods</h3>
@@ -160,4 +173,7 @@
       <app-chart type="bar" [data]="paymentMethodData()" [options]="barOptions" />
     </div>
   </div>
+  }
+
+  }
 </div>

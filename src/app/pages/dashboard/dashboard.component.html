@@ -64,6 +64,45 @@
     </div>
   </div>
 
+  <!-- Budget Alerts -->
+  @if (budgetService.budgetStatuses().length) {
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Budget Tracker</h3>
+        <a routerLink="/budgets" class="card__link">Manage →</a>
+      </div>
+      <div class="budget-list">
+        @for (s of budgetService.budgetStatuses(); track s.budget.id) {
+          <div class="budget-item">
+            <div class="budget-item__header">
+              <span class="budget-item__name">{{ categoryIcons[s.budget.category] }} {{ categoryLabels[s.budget.category] }}</span>
+              <span class="budget-item__values">{{ s.spent | currencyFormat }} / {{ s.budget.monthlyLimit | currencyFormat }}</span>
+            </div>
+            <div class="budget-bar">
+              <div class="budget-bar__fill"
+                [class.budget-bar__fill--warning]="s.percentage >= 80 && s.percentage < 100"
+                [class.budget-bar__fill--danger]="s.percentage >= 100"
+                [style.width.%]="s.percentage > 100 ? 100 : s.percentage">
+              </div>
+            </div>
+            <div class="budget-item__footer">
+              <span class="budget-item__pct" [class.text-warning]="s.percentage >= 80 && s.percentage < 100" [class.text-danger]="s.percentage >= 100">
+                {{ s.percentage }}%
+              </span>
+              <span class="budget-item__remaining">
+                @if (s.remaining >= 0) {
+                  {{ s.remaining | currencyFormat }} left
+                } @else {
+                  {{ (s.remaining * -1) | currencyFormat }} over
+                }
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   <!-- Bottom row -->
   <div class="bottom-grid">
     <div class="card">

@@ -15,6 +15,36 @@
       </div>
     }
 
+    <!-- Account balances dropdown -->
+    <div class="balance-dropdown">
+      <button class="navbar__icon-btn" (click)="toggleBalances()" title="Account Balances">
+        💰
+      </button>
+      @if (showBalances()) {
+        <div class="balance-dropdown__panel">
+          <div class="balance-dropdown__title">Account Balances</div>
+          <div class="balance-dropdown__item">
+            <span class="balance-dropdown__name">💵 Cash</span>
+            <span class="balance-dropdown__amount" [class.balance-dropdown__amount--negative]="accountService.accountBalances()['cash'] < 0">
+              {{ accountService.accountBalances()['cash'] | currencyFormat }}
+            </span>
+          </div>
+          @for (acc of accountService.accounts(); track acc.id) {
+            <div class="balance-dropdown__item">
+              <span class="balance-dropdown__name">{{ acc.type === 'bank' ? '🏦' : '📱' }} {{ acc.name }}</span>
+              <span class="balance-dropdown__amount" [class.balance-dropdown__amount--negative]="accountService.accountBalances()[acc.id] < 0">
+                {{ accountService.accountBalances()[acc.id] | currencyFormat }}
+              </span>
+            </div>
+          }
+          @if (!accountService.accounts().length) {
+            <div class="balance-dropdown__empty">No accounts yet</div>
+          }
+        </div>
+        <div class="balance-dropdown__backdrop" (click)="showBalances.set(false)"></div>
+      }
+    </div>
+
     @if (pwa.canInstall()) {
       <button class="btn btn--ghost btn--sm navbar__install" (click)="pwa.installApp()">
         ⬇ Install App
@@ -31,8 +61,18 @@
       </div>
     </div>
 
-    <button class="navbar__icon-btn" (click)="auth.logout()" title="Sign out" aria-label="Sign out">
+    <button class="navbar__icon-btn" (click)="confirmLogout()" title="Sign out" aria-label="Sign out">
       🚪
     </button>
   </div>
 </nav>
+
+@if (showLogoutConfirm()) {
+  <app-confirm-dialog
+    title="Sign Out"
+    message="Are you sure you want to sign out?"
+    confirmText="Sign Out"
+    (confirmed)="onLogout()"
+    (cancelled)="showLogoutConfirm.set(false)"
+  />
+}

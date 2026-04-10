@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { ExpenseService } from '../../core/services/expense.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { BudgetService } from '../../core/services/budget.service';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { ChartComponent } from '../../shared/components/chart/chart.component';
 import { ExpenseFormComponent } from '../../shared/components/expense-form/expense-form.component';
@@ -21,6 +22,7 @@ import { ChartConfiguration } from 'chart.js';
 export class DashboardComponent {
   readonly expenseService = inject(ExpenseService);
   readonly auth = inject(AuthService);
+  readonly budgetService = inject(BudgetService);
   private readonly notification = inject(NotificationService);
   private readonly fmt = inject(CurrencyFormatPipe);
 

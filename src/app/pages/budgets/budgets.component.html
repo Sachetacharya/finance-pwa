@@ -1,0 +1,91 @@
+<div class="budgets-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Budgets</h1>
+      <p class="page-subtitle">Set monthly spending limits by category</p>
+    </div>
+    @if (availableCategories.length) {
+      <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Set Budget</button>
+    }
+  </div>
+
+  @for (s of budgetService.budgetStatuses(); track s.budget.id) {
+    <div class="budget-card" [class.budget-card--warning]="s.percentage >= 80 && s.percentage < 100" [class.budget-card--danger]="s.percentage >= 100">
+      <div class="budget-card__top">
+        <div class="budget-card__info">
+          <span class="budget-card__icon">{{ categoryIcons[s.budget.category] }}</span>
+          <div>
+            <div class="budget-card__name">{{ categoryLabels[s.budget.category] }}</div>
+            <div class="budget-card__meta">{{ s.spent | currencyFormat }} of {{ s.budget.monthlyLimit | currencyFormat }}</div>
+          </div>
+        </div>
+        <div class="budget-card__actions">
+          <div class="budget-card__pct"
+            [class.text-ok]="s.percentage < 80"
+            [class.text-warn]="s.percentage >= 80 && s.percentage < 100"
+            [class.text-over]="s.percentage >= 100">
+            {{ s.percentage }}%
+          </div>
+          <button class="budget-card__remove" (click)="onRemove(s.budget.category)" title="Remove budget">✕</button>
+        </div>
+      </div>
+      <div class="budget-card__bar">
+        <div class="budget-card__bar-fill"
+          [class.budget-card__bar-fill--warning]="s.percentage >= 80 && s.percentage < 100"
+          [class.budget-card__bar-fill--danger]="s.percentage >= 100"
+          [style.width.%]="s.percentage > 100 ? 100 : s.percentage">
+        </div>
+      </div>
+      <div class="budget-card__bottom">
+        @if (s.remaining >= 0) {
+          <span class="budget-card__remaining">{{ s.remaining | currencyFormat }} remaining</span>
+        } @else {
+          <span class="budget-card__remaining text-over">{{ (s.remaining * -1) | currencyFormat }} over budget</span>
+        }
+        <div class="budget-card__edit">
+          <label class="budget-card__edit-label">Limit:</label>
+          <input class="budget-card__edit-input" type="number" [ngModel]="s.budget.monthlyLimit"
+            (change)="onUpdate(s.budget.category, $any($event.target).valueAsNumber)"
+            min="1" step="100" />
+        </div>
+      </div>
+    </div>
+  } @empty {
+    <div class="empty-state">
+      <div class="empty-state__icon">📋</div>
+      <h3 class="empty-state__title">No budgets set</h3>
+      <p class="empty-state__text">Set a monthly spending limit for any category to track your spending.</p>
+    </div>
+  }
+</div>
+
+@if (showAddForm()) {
+  <div class="modal-overlay" (click)="showAddForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">Set Budget</h2>
+        <button class="modal__close" (click)="showAddForm.set(false)">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select class="form-control" [(ngModel)]="newCategory">
+            <option value="">Select category...</option>
+            @for (cat of availableCategories; track cat[0]) {
+              <option [value]="cat[0]">{{ categoryIcons[cat[0]] }} {{ cat[1] }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monthly Limit (NPR) *</label>
+          <input class="form-control" type="number" [(ngModel)]="newLimit"
+            placeholder="e.g. 5000" min="1" step="100" />
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="showAddForm.set(false)">Cancel</button>
+          <button class="btn btn--primary" (click)="onAdd()" [disabled]="!newCategory || !newLimit">Set Budget</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

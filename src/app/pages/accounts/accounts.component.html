@@ -1,0 +1,157 @@
+<div class="accounts-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Accounts</h1>
+      <p class="page-subtitle">Manage your bank accounts and wallets</p>
+    </div>
+    <div class="page-header__actions">
+      <button class="btn btn--outline" (click)="openTransfer()">🔄 Transfer</button>
+      <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Add Account</button>
+    </div>
+  </div>
+
+  <!-- Cash card (always present, not deletable) -->
+  <div class="account-card account-card--cash">
+    <div class="account-card__icon">💵</div>
+    <div class="account-card__info">
+      <div class="account-card__name">Cash</div>
+      <div class="account-card__type">Always available</div>
+    </div>
+    <div class="account-card__balance" [class.account-card__balance--negative]="accountService.accountBalances()['cash'] < 0">
+      {{ accountService.accountBalances()['cash'] | currencyFormat }}
+    </div>
+    <button class="account-card__action" (click)="openTransfer('cash')" title="Transfer from Cash">🔄</button>
+  </div>
+
+  <!-- User accounts -->
+  @for (acc of accountService.accounts(); track acc.id) {
+    <div class="account-card">
+      <div class="account-card__icon">{{ acc.type === 'bank' ? '🏦' : '📱' }}</div>
+      <div class="account-card__info">
+        <div class="account-card__name">{{ acc.name }}</div>
+        <div class="account-card__type">{{ acc.type === 'bank' ? 'Bank Account' : 'Digital Wallet' }}</div>
+      </div>
+      <div class="account-card__balance" [class.account-card__balance--negative]="accountService.accountBalances()[acc.id] < 0">
+        {{ accountService.accountBalances()[acc.id] | currencyFormat }}
+      </div>
+      <button class="account-card__action" (click)="openTransfer(acc.id)" title="Transfer from {{ acc.name }}">🔄</button>
+      <button class="account-card__delete" (click)="deletingAccountId.set(acc.id)" title="Delete account">🗑️</button>
+    </div>
+  } @empty {
+    <div class="empty-state">
+      <p>No accounts yet. Add a bank account or wallet to get started.</p>
+    </div>
+  }
+</div>
+
+<!-- Data Backup -->
+<div class="backup-section">
+  <h2 class="backup-section__title">Data Backup</h2>
+  <p class="backup-section__desc">Export your data as a JSON file or restore from a previous backup.</p>
+  <div class="backup-section__actions">
+    <button class="btn btn--outline" (click)="onExportBackup()">📥 Export Backup</button>
+    <label class="btn btn--outline">
+      📤 Import Backup
+      <input type="file" accept=".json" hidden (change)="onImportBackup($event)" />
+    </label>
+  </div>
+</div>
+
+<!-- Add account modal -->
+@if (showAddForm()) {
+  <div class="modal-overlay" (click)="showAddForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">Add Account</h2>
+        <button class="modal__close" (click)="showAddForm.set(false)">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label class="form-label">Account Type *</label>
+          <select class="form-control" [(ngModel)]="newType">
+            <option value="bank">🏦 Bank Account</option>
+            <option value="wallet">📱 Digital Wallet</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account Name *</label>
+          <input class="form-control" type="text" [(ngModel)]="newName"
+            placeholder="e.g. Siddhartha Bank" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Initial Balance (NPR)</label>
+          <input class="form-control" type="number" [(ngModel)]="newBalance"
+            placeholder="0.00" min="0" step="0.01" />
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="showAddForm.set(false)">Cancel</button>
+          <button class="btn btn--primary" (click)="onAdd()" [disabled]="!newName.trim()">Add Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Transfer / Withdraw modal -->
+@if (showTransferForm()) {
+  <div class="modal-overlay" (click)="showTransferForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">🔄 Transfer Money</h2>
+        <button class="modal__close" (click)="showTransferForm.set(false)">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label class="form-label">From Account *</label>
+          <select class="form-control" [(ngModel)]="transferFrom">
+            <option value="">Select source...</option>
+            @for (acc of allAccounts; track acc.id) {
+              <option [value]="acc.id">{{ acc.icon }} {{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat }})</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">To Account *</label>
+          <select class="form-control" [(ngModel)]="transferTo">
+            <option value="">Select destination...</option>
+            @for (acc of transferToOptions; track acc.id) {
+              <option [value]="acc.id">{{ acc.icon }} {{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat }})</option>
+            }
+          </select>
+        </div>
+        <div class="form-group" [class.form-group--error]="exceedsBalance">
+          <label class="form-label">Amount (NPR) *</label>
+          <input class="form-control" type="number" [(ngModel)]="transferAmount"
+            placeholder="0.00" min="0.01" step="0.01" />
+          @if (exceedsBalance) {
+            <span class="form-error">Insufficient balance. Available: {{ sourceBalance | currencyFormat }}</span>
+          }
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input class="form-control" type="date" [(ngModel)]="transferDate" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input class="form-control" type="text" [(ngModel)]="transferNotes"
+            placeholder="e.g. Cash withdrawal, Fund transfer..." />
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="showTransferForm.set(false)">Cancel</button>
+          <button class="btn btn--primary" (click)="onTransfer()" [disabled]="!canTransfer">Transfer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete confirmation -->
+@if (deletingAccountId()) {
+  <app-confirm-dialog
+    title="Delete Account"
+    message="This will move all transactions linked to this account to 'Deleted Account'. Are you sure?"
+    confirmText="Delete"
+    (confirmed)="onDelete()"
+    (cancelled)="deletingAccountId.set(null)"
+  />
+}
