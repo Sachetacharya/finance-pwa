@@ -18,7 +18,7 @@
       <div class="account-card__type">Always available</div>
     </div>
     <div class="account-card__balance" [class.account-card__balance--negative]="accountService.accountBalances()['cash'] < 0">
-      {{ accountService.accountBalances()['cash'] | currencyFormat }}
+      {{ accountService.accountBalances()['cash'] | currencyFormat | privacyMask }}
     </div>
     <button class="account-card__action" (click)="openTransfer('cash')" title="Transfer from Cash"><ng-icon name="lucideArrowRightLeft" size="16" /></button>
   </div>
@@ -32,7 +32,7 @@
         <div class="account-card__type">{{ acc.type === 'bank' ? 'Bank Account' : 'Digital Wallet' }}</div>
       </div>
       <div class="account-card__balance" [class.account-card__balance--negative]="accountService.accountBalances()[acc.id] < 0">
-        {{ accountService.accountBalances()[acc.id] | currencyFormat }}
+        {{ accountService.accountBalances()[acc.id] | currencyFormat | privacyMask }}
       </div>
       <button class="account-card__action" (click)="openTransfer(acc.id)" title="Transfer from {{ acc.name }}"><ng-icon name="lucideArrowRightLeft" size="16" /></button>
       <button class="account-card__delete" (click)="deletingAccountId.set(acc.id)" title="Delete account"><ng-icon name="lucideTrash2" size="16" /></button>
@@ -93,7 +93,7 @@
           <select class="form-control" [(ngModel)]="transferFrom">
             <option value="">Select source...</option>
             @for (acc of allAccounts; track acc.id) {
-              <option [value]="acc.id">{{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat }})</option>
+              <option [value]="acc.id">{{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat | privacyMask }})</option>
             }
           </select>
         </div>
@@ -102,7 +102,7 @@
           <select class="form-control" [(ngModel)]="transferTo">
             <option value="">Select destination...</option>
             @for (acc of transferToOptions; track acc.id) {
-              <option [value]="acc.id">{{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat }})</option>
+              <option [value]="acc.id">{{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat | privacyMask }})</option>
             }
           </select>
         </div>
@@ -111,7 +111,7 @@
           <input class="form-control" type="number" [(ngModel)]="transferAmount"
             placeholder="0.00" min="0.01" step="0.01" />
           @if (exceedsBalance) {
-            <span class="form-error">Insufficient balance. Available: {{ sourceBalance | currencyFormat }}</span>
+            <span class="form-error">Insufficient balance. Available: {{ sourceBalance | currencyFormat | privacyMask }}</span>
           }
         </div>
         <div class="form-group">

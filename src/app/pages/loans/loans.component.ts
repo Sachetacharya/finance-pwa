@@ -6,6 +6,7 @@ import { ExpenseService } from '../../core/services/expense.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
+import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
 import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
 import { LoanStatus } from '../../core/models/loan.model';
 import { NgIcon } from '@ng-icons/core';
@@ -13,7 +14,7 @@ import { NgIcon } from '@ng-icons/core';
 @Component({
   selector: 'app-loans',
   standalone: true,
-  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe, LockScrollDirective, NgIcon],
+  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe, PrivacyMaskPipe, LockScrollDirective, NgIcon],
   templateUrl: './loans.component.html',
   styleUrl: './loans.component.scss',
 })

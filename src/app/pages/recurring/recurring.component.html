@@ -22,7 +22,7 @@
       </div>
       <div class="rec-card__right">
         <span class="rec-card__amount" [class.rec-card__amount--income]="item.type === 'income'">
-          {{ item.type === 'income' ? '+' : '-' }}{{ item.amount | currencyFormat }}
+          {{ item.type === 'income' ? '+' : '-' }}{{ item.amount | currencyFormat | privacyMask }}
         </span>
         <label class="rec-toggle" title="{{ item.enabled ? 'Disable' : 'Enable' }}">
           <input type="checkbox" [checked]="item.enabled" (change)="onToggle(item.id)" />

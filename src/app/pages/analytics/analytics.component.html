@@ -89,12 +89,12 @@
     <div class="loan-summary-row">
       <div class="loan-stat loan-stat--owe">
         <div class="loan-stat__label">You Owe</div>
-        <div class="loan-stat__value">{{ loanService.totalBorrowedOutstanding() | currencyFormat }}</div>
+        <div class="loan-stat__value">{{ loanService.totalBorrowedOutstanding() | currencyFormat | privacyMask }}</div>
         <div class="loan-stat__count">{{ loanService.borrowedLoans().length }} loan{{ loanService.borrowedLoans().length !== 1 ? 's' : '' }}</div>
       </div>
       <div class="loan-stat loan-stat--owed">
         <div class="loan-stat__label">Owed to You</div>
-        <div class="loan-stat__value">{{ loanService.totalLentOutstanding() | currencyFormat }}</div>
+        <div class="loan-stat__value">{{ loanService.totalLentOutstanding() | currencyFormat | privacyMask }}</div>
         <div class="loan-stat__count">{{ loanService.lentLoans().length }} record{{ loanService.lentLoans().length !== 1 ? 's' : '' }}</div>
       </div>
     </div>
@@ -160,7 +160,7 @@
               </span>
             </div>
             <div class="bva-row__values">
-              {{ s.spent | currencyFormat }} / {{ s.budget.monthlyLimit | currencyFormat }}
+              {{ s.spent | currencyFormat | privacyMask }} / {{ s.budget.monthlyLimit | currencyFormat | privacyMask }}
             </div>
           </div>
         }
@@ -196,7 +196,7 @@
               <tr>
                 <td><span class="cat-label"><ng-icon [name]="categoryIcons[cat.category]" size="14" /> {{ categoryLabels[cat.category] }}</span></td>
                 <td class="center">{{ cat.count }}</td>
-                <td class="amount">{{ cat.total | currencyFormat }}</td>
+                <td class="amount">{{ cat.total | currencyFormat | privacyMask }}</td>
                 <td>
                   <div class="mini-bar">
                     <div class="mini-bar__fill" [style.width.%]="cat.percentage"></div>
@@ -242,7 +242,7 @@
               <tr>
                 <td><span class="cat-label cat-label--income"><ng-icon [name]="incomeSourceIcons[src.source]" size="14" /> {{ incomeSourceLabels[src.source] }}</span></td>
                 <td class="center">{{ src.count }}</td>
-                <td class="amount amount--income">{{ src.total | currencyFormat }}</td>
+                <td class="amount amount--income">{{ src.total | currencyFormat | privacyMask }}</td>
                 <td>
                   <div class="mini-bar mini-bar--income">
                     <div class="mini-bar__fill" [style.width.%]="src.percentage"></div>
@@ -322,7 +322,7 @@
             <div class="top-expense-item__title">{{ e.title }}</div>
             <div class="top-expense-item__meta">{{ e.date }}</div>
           </div>
-          <span class="top-expense-item__amount">{{ e.amount | currencyFormat }}</span>
+          <span class="top-expense-item__amount">{{ e.amount | currencyFormat | privacyMask }}</span>
         </div>
       }
     </div>

@@ -20,8 +20,8 @@
             <button class="quick-add__main" (click)="quickUseTemplate(tpl.id)" [title]="tpl.title">
               <ng-icon [name]="allCategoryIcons[tpl.category]" size="16" />
               <span class="quick-add__name">{{ tpl.name }}</span>
-              @if (showAmounts()) {
-                <span class="quick-add__amount">{{ tpl.amount | currencyFormat }}</span>
+              @if (!privacy.isHidden()) {
+                <span class="quick-add__amount">{{ tpl.amount | currencyFormat | privacyMask }}</span>
               }
             </button>
             <button class="quick-add__edit" (click)="openUseTemplate(tpl.id)" title="Edit & add" aria-label="Edit template values">
@@ -105,7 +105,7 @@
           <div class="budget-item">
             <div class="budget-item__header">
               <span class="budget-item__name"><ng-icon [name]="categoryIcons[s.budget.category]" size="16" /> {{ categoryLabels[s.budget.category] }}</span>
-              <span class="budget-item__values">{{ s.spent | currencyFormat }} / {{ s.budget.monthlyLimit | currencyFormat }}</span>
+              <span class="budget-item__values">{{ s.spent | currencyFormat | privacyMask }} / {{ s.budget.monthlyLimit | currencyFormat | privacyMask }}</span>
             </div>
             <div class="budget-bar">
               <div class="budget-bar__fill"
@@ -120,9 +120,9 @@
               </span>
               <span class="budget-item__remaining">
                 @if (s.remaining >= 0) {
-                  {{ s.remaining | currencyFormat }} left
+                  {{ s.remaining | currencyFormat | privacyMask }} left
                 } @else {
-                  {{ (s.remaining * -1) | currencyFormat }} over
+                  {{ (s.remaining * -1) | currencyFormat | privacyMask }} over
                 }
               </span>
             </div>
@@ -149,7 +149,7 @@
               </div>
             </div>
             <div class="category-item__right">
-              <div class="category-item__amount">{{ cat.total | currencyFormat }}</div>
+              <div class="category-item__amount">{{ cat.total | currencyFormat | privacyMask }}</div>
               <div class="category-item__pct">{{ cat.percentage }}%</div>
             </div>
           </div>
@@ -174,7 +174,7 @@
               <div class="recent-item__meta">{{ expense.date }} · {{ allCategoryLabels[expense.category] }}</div>
             </div>
             <div class="recent-item__amount" [class.recent-item__amount--income]="expense.type === 'income'">
-              {{ expense.type === 'income' ? '+' : '-' }}{{ expense.amount | currencyFormat }}
+              {{ expense.type === 'income' ? '+' : '-' }}{{ expense.amount | currencyFormat | privacyMask }}
             </div>
           </div>
         } @empty {

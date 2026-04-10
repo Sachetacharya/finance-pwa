@@ -16,7 +16,7 @@
           <span class="budget-card__icon"><ng-icon [name]="categoryIcons[s.budget.category]" size="20" /></span>
           <div>
             <div class="budget-card__name">{{ categoryLabels[s.budget.category] }}</div>
-            <div class="budget-card__meta">{{ s.spent | currencyFormat }} of {{ s.budget.monthlyLimit | currencyFormat }}</div>
+            <div class="budget-card__meta">{{ s.spent | currencyFormat | privacyMask }} of {{ s.budget.monthlyLimit | currencyFormat | privacyMask }}</div>
           </div>
         </div>
         <div class="budget-card__actions">
@@ -38,9 +38,9 @@
       </div>
       <div class="budget-card__bottom">
         @if (s.remaining >= 0) {
-          <span class="budget-card__remaining">{{ s.remaining | currencyFormat }} remaining</span>
+          <span class="budget-card__remaining">{{ s.remaining | currencyFormat | privacyMask }} remaining</span>
         } @else {
-          <span class="budget-card__remaining text-over">{{ (s.remaining * -1) | currencyFormat }} over budget</span>
+          <span class="budget-card__remaining text-over">{{ (s.remaining * -1) | currencyFormat | privacyMask }} over budget</span>
         }
         <div class="budget-card__edit">
           <label class="budget-card__edit-label">Limit:</label>
@@ -72,7 +72,7 @@
           <select class="form-control" [(ngModel)]="newCategory">
             <option value="">Select category...</option>
             @for (cat of availableCategories; track cat[0]) {
-              <option [value]="cat[0]">{{ categoryIcons[cat[0]] }} {{ cat[1] }}</option>
+              <option [value]="cat[0]">{{ cat[1] }}</option>
             }
           </select>
         </div>

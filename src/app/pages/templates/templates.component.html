@@ -22,7 +22,7 @@
       </div>
       <div class="tpl-card__right">
         <span class="tpl-card__amount" [class.tpl-card__amount--income]="tpl.type === 'income'">
-          {{ tpl.type === 'income' ? '+' : '-' }}{{ tpl.amount | currencyFormat }}
+          {{ tpl.type === 'income' ? '+' : '-' }}{{ tpl.amount | currencyFormat | privacyMask }}
         </span>
         <button class="tpl-card__use" (click)="onUse(tpl.id)" aria-label="Use template">
           <ng-icon name="lucidePlus" size="16" /> Use

@@ -5,12 +5,13 @@ import { NotificationService } from '../../core/services/notification.service';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { ExpenseCategory, CATEGORY_LABELS, CATEGORY_ICONS } from '../../core/models/expense.model';
 import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
+import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
 import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-budgets',
   standalone: true,
-  imports: [FormsModule, CurrencyFormatPipe, LockScrollDirective, NgIcon],
+  imports: [FormsModule, CurrencyFormatPipe, PrivacyMaskPipe, LockScrollDirective, NgIcon],
   templateUrl: './budgets.component.html',
   styleUrl: './budgets.component.scss',
 })

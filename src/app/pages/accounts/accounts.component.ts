@@ -6,11 +6,12 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
 import { NgIcon } from '@ng-icons/core';
+import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
-  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe, LockScrollDirective, NgIcon],
+  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe, PrivacyMaskPipe, LockScrollDirective, NgIcon],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.scss',
 })

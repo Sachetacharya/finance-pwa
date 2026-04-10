@@ -7,6 +7,7 @@ import { LoanService } from '../../core/services/loan.service';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { ChartComponent } from '../../shared/components/chart/chart.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
+import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
 import { NgIcon } from '@ng-icons/core';
 import {
   CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS,
@@ -18,7 +19,7 @@ import { ChartConfiguration } from 'chart.js';
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [StatCardComponent, ChartComponent, CurrencyFormatPipe, NgIcon, FormsModule],
+  imports: [StatCardComponent, ChartComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon, FormsModule],
   templateUrl: './analytics.component.html',
   styleUrl: './analytics.component.scss',
 })

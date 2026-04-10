@@ -103,7 +103,7 @@
               <div class="global-search__item-meta">{{ r.date }} · {{ accountService.getLabel(r.paymentMethod) }}</div>
             </div>
             <span class="global-search__item-amount" [class.income]="r.type === 'income'">
-              {{ r.type === 'income' ? '+' : '-' }}{{ r.amount | currencyFormat }}
+              {{ r.type === 'income' ? '+' : '-' }}{{ r.amount | currencyFormat | privacyMask }}
             </span>
           </button>
         }

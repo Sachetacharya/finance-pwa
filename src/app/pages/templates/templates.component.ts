@@ -4,6 +4,7 @@ import { TemplateService } from '../../core/services/template.service';
 import { AccountService } from '../../core/services/account.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
+import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
 import { ExpenseService } from '../../core/services/expense.service';
 import { TransactionTemplate } from '../../core/models/template.model';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -18,7 +19,7 @@ import {
 @Component({
   selector: 'app-templates',
   standalone: true,
-  imports: [FormsModule, CurrencyFormatPipe, ConfirmDialogComponent, LockScrollDirective, NgIcon],
+  imports: [FormsModule, CurrencyFormatPipe, PrivacyMaskPipe, ConfirmDialogComponent, LockScrollDirective, NgIcon],
   templateUrl: './templates.component.html',
   styleUrl: './templates.component.scss',
 })

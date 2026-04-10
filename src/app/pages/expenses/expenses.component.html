@@ -5,8 +5,8 @@
       <h1 class="page-title">Transactions</h1>
       <p class="page-subtitle">
         {{ totalFiltered() }} records
-        @if (totalAmount() > 0) { · <span class="subtitle-expense">{{ totalAmount() | currencyFormat }} expenses</span> }
-        @if (totalIncome() > 0) { · <span class="subtitle-income">{{ totalIncome() | currencyFormat }} income</span> }
+        @if (totalAmount() > 0) { · <span class="subtitle-expense">{{ totalAmount() | currencyFormat | privacyMask }} expenses</span> }
+        @if (totalIncome() > 0) { · <span class="subtitle-income">{{ totalIncome() | currencyFormat | privacyMask }} income</span> }
       </p>
     </div>
     <div class="header-actions">
@@ -140,17 +140,17 @@
                   [class.amount-cell--income]="expense.type === 'income'"
                   [class.amount-cell--transfer]="expense.type === 'transfer'">
                 @if (isStatementMode()) {
-                  <span class="stmt-before">{{ statementBalances().get(expense.id)?.before | currencyFormat }}</span>
+                  <span class="stmt-before">{{ statementBalances().get(expense.id)?.before | currencyFormat | privacyMask }}</span>
                 }
                 <span class="stmt-amount">
                   @if (expense.type === 'income') { + }
                   @else if (expense.type === 'transfer') { <ng-icon name="lucideArrowRightLeft" size="12" /> }
                   @else { - }
-                  {{ expense.amount | currencyFormat }}
+                  {{ expense.amount | currencyFormat | privacyMask }}
                 </span>
                 @if (isStatementMode()) {
                   <span class="stmt-after" [class.stmt-after--negative]="(statementBalances().get(expense.id)?.after ?? 0) < 0">
-                    {{ statementBalances().get(expense.id)?.after | currencyFormat }}
+                    {{ statementBalances().get(expense.id)?.after | currencyFormat | privacyMask }}
                   </span>
                 }
               </td>
@@ -207,17 +207,17 @@
             </div>
             <div class="m-card__right">
               @if (isStatementMode()) {
-                <div class="m-card__stmt-before">{{ statementBalances().get(expense.id)?.before | currencyFormat }}</div>
+                <div class="m-card__stmt-before">{{ statementBalances().get(expense.id)?.before | currencyFormat | privacyMask }}</div>
               }
               <div class="m-card__amount"
                 [class.m-card__amount--income]="expense.type === 'income'"
                 [class.m-card__amount--transfer]="expense.type === 'transfer'">
                 @if (expense.type === 'income') { + } @else if (expense.type === 'transfer') { <ng-icon name="lucideArrowRightLeft" size="12" /> } @else { - }
-                {{ expense.amount | currencyFormat }}
+                {{ expense.amount | currencyFormat | privacyMask }}
               </div>
               @if (isStatementMode()) {
                 <div class="m-card__stmt-after" [class.m-card__stmt-after--negative]="(statementBalances().get(expense.id)?.after ?? 0) < 0">
-                  {{ statementBalances().get(expense.id)?.after | currencyFormat }}
+                  {{ statementBalances().get(expense.id)?.after | currencyFormat | privacyMask }}
                 </div>
               }
               <div class="m-card__actions">

@@ -13,11 +13,11 @@
   <div class="loan-summary">
     <div class="loan-summary__card loan-summary__card--borrowed">
       <div class="loan-summary__label">You owe</div>
-      <div class="loan-summary__amount">{{ loanService.totalBorrowedOutstanding() | currencyFormat }}</div>
+      <div class="loan-summary__amount">{{ loanService.totalBorrowedOutstanding() | currencyFormat | privacyMask }}</div>
     </div>
     <div class="loan-summary__card loan-summary__card--lent">
       <div class="loan-summary__label">Others owe you</div>
-      <div class="loan-summary__amount">{{ loanService.totalLentOutstanding() | currencyFormat }}</div>
+      <div class="loan-summary__amount">{{ loanService.totalLentOutstanding() | currencyFormat | privacyMask }}</div>
     </div>
   </div>
 
@@ -69,12 +69,12 @@
 
       <div class="loan-card__bottom">
         <div class="loan-card__amounts">
-          <span class="loan-card__paid">{{ s.totalPaid | currencyFormat }} paid</span>
+          <span class="loan-card__paid">{{ s.totalPaid | currencyFormat | privacyMask }} paid</span>
           <span class="loan-card__separator">of</span>
-          <span class="loan-card__total">{{ s.loan.amount | currencyFormat }}</span>
+          <span class="loan-card__total">{{ s.loan.amount | currencyFormat | privacyMask }}</span>
         </div>
         @if (s.outstanding > 0) {
-          <span class="loan-card__outstanding">{{ s.outstanding | currencyFormat }} remaining</span>
+          <span class="loan-card__outstanding">{{ s.outstanding | currencyFormat | privacyMask }} remaining</span>
         }
       </div>
 
@@ -86,7 +86,7 @@
             @for (p of s.loan.payments; track p.id) {
               <div class="loan-card__payment">
                 <span>{{ p.date }}</span>
-                <span>{{ p.amount | currencyFormat }}</span>
+                <span>{{ p.amount | currencyFormat | privacyMask }}</span>
                 @if (p.notes) { <span class="loan-card__payment-note">{{ p.notes }}</span> }
               </div>
             }
@@ -169,12 +169,12 @@
       <div class="modal__body">
         <div class="pay-info">
           <span class="pay-info__label">{{ paying.loan.title }}</span>
-          <span class="pay-info__outstanding">Outstanding: {{ paying.outstanding | currencyFormat }}</span>
+          <span class="pay-info__outstanding">Outstanding: {{ paying.outstanding | currencyFormat | privacyMask }}</span>
         </div>
 
         <label class="pay-full-check">
           <input type="checkbox" [checked]="payFullAmount" (change)="togglePayFull()" />
-          <span>Pay full amount ({{ paying.outstanding | currencyFormat }})</span>
+          <span>Pay full amount ({{ paying.outstanding | currencyFormat | privacyMask }})</span>
         </label>
 
         @if (!payFullAmount) {
@@ -183,7 +183,7 @@
             <input class="form-control" type="number" [(ngModel)]="payAmount"
               placeholder="0.00" min="0.01" [max]="paying.outstanding" step="0.01" />
             @if (payAmount && payAmount > paying.outstanding) {
-              <span class="form-error">Cannot exceed outstanding ({{ paying.outstanding | currencyFormat }})</span>
+              <span class="form-error">Cannot exceed outstanding ({{ paying.outstanding | currencyFormat | privacyMask }})</span>
             }
           </div>
         }
@@ -300,7 +300,7 @@
           <div class="split-preview">
             <div class="split-preview__row">
               <span>{{ splitMode === 'split' ? 'Your share' : 'Expense' }}</span>
-              <strong>{{ splitMyShare | currencyFormat }}</strong>
+              <strong>{{ splitMyShare | currencyFormat | privacyMask }}</strong>
             </div>
             <div class="split-preview__row">
               @if (splitPaidBy === 'other') {
@@ -308,7 +308,7 @@
               } @else {
                 <span>{{ splitOtherName || '...' }} owes you</span>
               }
-              <strong>{{ splitLoanAmount | currencyFormat }}</strong>
+              <strong>{{ splitLoanAmount | currencyFormat | privacyMask }}</strong>
             </div>
           </div>
         }
