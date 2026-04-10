@@ -26,7 +26,7 @@
             [class.text-over]="s.percentage >= 100">
             {{ s.percentage }}%
           </div>
-          <button class="budget-card__remove" (click)="onRemove(s.budget.category)" title="Remove budget"><ng-icon name="lucideX" size="14" /></button>
+          <button class="budget-card__remove" (click)="onRemove(s.budget.category)" title="Remove budget" aria-label="Remove budget"><ng-icon name="lucideX" size="14" /></button>
         </div>
       </div>
       <div class="budget-card__bar">
@@ -52,7 +52,7 @@
     </div>
   } @empty {
     <div class="empty-state">
-      <div class="empty-state__icon">📋</div>
+      <div class="empty-state__icon"><ng-icon name="lucideClipboardList" size="36" /></div>
       <h3 class="empty-state__title">No budgets set</h3>
       <p class="empty-state__text">Set a monthly spending limit for any category to track your spending.</p>
     </div>
@@ -64,7 +64,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h2 class="modal__title">Set Budget</h2>
-        <button class="modal__close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
+        <button class="modal__close" aria-label="Close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
       </div>
       <div class="modal__body">
         <div class="form-group">

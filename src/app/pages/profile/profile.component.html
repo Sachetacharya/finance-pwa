@@ -20,13 +20,13 @@
   <!-- Theme -->
   <div class="setting-card">
     <div class="setting-card__header">
-      <span class="setting-card__icon">🎨</span>
+      <span class="setting-card__icon"><ng-icon name="lucidePalette" size="20" /></span>
       <div>
         <div class="setting-card__title">Appearance</div>
         <div class="setting-card__desc">{{ theme.isDarkMode() ? 'Dark mode enabled' : 'Light mode enabled' }}</div>
       </div>
     </div>
-    <button class="setting-card__action" (click)="theme.toggle()">
+    <button class="setting-card__action" (click)="theme.toggle()" aria-label="Toggle theme">
       <ng-icon [name]="theme.isDarkMode() ? 'lucideSun' : 'lucideMoon'" size="16" />
       {{ theme.isDarkMode() ? 'Light' : 'Dark' }}
     </button>
@@ -35,7 +35,7 @@
   <!-- App Updates -->
   <div class="setting-card">
     <div class="setting-card__header">
-      <span class="setting-card__icon">🔄</span>
+      <span class="setting-card__icon"><ng-icon name="lucideRefreshCw" size="20" /></span>
       <div>
         <div class="setting-card__title">App Updates</div>
         <div class="setting-card__desc">
@@ -62,7 +62,7 @@
   <!-- Force Reload -->
   <div class="setting-card setting-card--highlight">
     <div class="setting-card__header">
-      <span class="setting-card__icon">🚀</span>
+      <span class="setting-card__icon"><ng-icon name="lucideRocket" size="20" /></span>
       <div>
         <div class="setting-card__title">Force Reload</div>
         <div class="setting-card__desc">Clear cache, unregister service worker, and hard reload. Use this if the app feels stuck on an old version.</div>
@@ -96,7 +96,7 @@
   <!-- PWA Status -->
   <div class="setting-card">
     <div class="setting-card__header">
-      <span class="setting-card__icon">📱</span>
+      <span class="setting-card__icon"><ng-icon name="lucideSmartphone" size="20" /></span>
       <div>
         <div class="setting-card__title">PWA Status</div>
         <div class="setting-card__desc">

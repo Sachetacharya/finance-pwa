@@ -37,11 +37,11 @@ export class AccountsComponent {
   /** All selectable account options (cash + user accounts) */
   get allAccounts(): { id: string; name: string; icon: string }[] {
     return [
-      { id: 'cash', name: 'Cash', icon: '💵' },
+      { id: 'cash', name: 'Cash', icon: 'lucideBanknote' },
       ...this.accountService.accounts().map(a => ({
         id: a.id,
         name: a.name,
-        icon: a.type === 'bank' ? '🏦' : '📱',
+        icon: a.type === 'bank' ? 'lucideLandmark' : 'lucideSmartphone',
       })),
     ];
   }

@@ -221,8 +221,8 @@
                 </div>
               }
               <div class="m-card__actions">
-                <button class="action-btn" (click)="editingExpense.set(expense)"><ng-icon name="lucidePencil" size="16" /></button>
-                <button class="action-btn action-btn--delete" (click)="deletingExpenseId.set(expense.id)"><ng-icon name="lucideTrash2" size="16" /></button>
+                <button class="action-btn" (click)="editingExpense.set(expense)" aria-label="Edit"><ng-icon name="lucidePencil" size="16" /></button>
+                <button class="action-btn action-btn--delete" (click)="deletingExpenseId.set(expense.id)" aria-label="Delete"><ng-icon name="lucideTrash2" size="16" /></button>
               </div>
             </div>
           </div>

@@ -12,7 +12,7 @@
 
   <!-- Cash card (always present, not deletable) -->
   <div class="account-card account-card--cash">
-    <div class="account-card__icon">💵</div>
+    <div class="account-card__icon"><ng-icon name="lucideBanknote" size="22" /></div>
     <div class="account-card__info">
       <div class="account-card__name">Cash</div>
       <div class="account-card__type">Always available</div>
@@ -26,7 +26,7 @@
   <!-- User accounts -->
   @for (acc of accountService.accounts(); track acc.id) {
     <div class="account-card">
-      <div class="account-card__icon">{{ acc.type === 'bank' ? '🏦' : '📱' }}</div>
+      <div class="account-card__icon"><ng-icon [name]="acc.type === 'bank' ? 'lucideLandmark' : 'lucideSmartphone'" size="22" /></div>
       <div class="account-card__info">
         <div class="account-card__name">{{ acc.name }}</div>
         <div class="account-card__type">{{ acc.type === 'bank' ? 'Bank Account' : 'Digital Wallet' }}</div>
@@ -50,14 +50,14 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h2 class="modal__title">Add Account</h2>
-        <button class="modal__close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
+        <button class="modal__close" aria-label="Close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
       </div>
       <div class="modal__body">
         <div class="form-group">
           <label class="form-label">Account Type *</label>
           <select class="form-control" [(ngModel)]="newType">
-            <option value="bank">🏦 Bank Account</option>
-            <option value="wallet">📱 Digital Wallet</option>
+            <option value="bank">Bank Account</option>
+            <option value="wallet">Digital Wallet</option>
           </select>
         </div>
         <div class="form-group">
@@ -85,7 +85,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h2 class="modal__title"><ng-icon name="lucideArrowRightLeft" size="16" /> Transfer Money</h2>
-        <button class="modal__close" (click)="showTransferForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
+        <button class="modal__close" aria-label="Close" (click)="showTransferForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
       </div>
       <div class="modal__body">
         <div class="form-group">
@@ -93,7 +93,7 @@
           <select class="form-control" [(ngModel)]="transferFrom">
             <option value="">Select source...</option>
             @for (acc of allAccounts; track acc.id) {
-              <option [value]="acc.id">{{ acc.icon }} {{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat }})</option>
+              <option [value]="acc.id">{{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat }})</option>
             }
           </select>
         </div>
@@ -102,7 +102,7 @@
           <select class="form-control" [(ngModel)]="transferTo">
             <option value="">Select destination...</option>
             @for (acc of transferToOptions; track acc.id) {
-              <option [value]="acc.id">{{ acc.icon }} {{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat }})</option>
+              <option [value]="acc.id">{{ acc.name }} ({{ accountService.accountBalances()[acc.id] | currencyFormat }})</option>
             }
           </select>
         </div>

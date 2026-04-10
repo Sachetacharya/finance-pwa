@@ -39,7 +39,7 @@
     <div class="loan-card" [class.loan-card--resolved]="s.outstanding <= 0">
       <div class="loan-card__top">
         <div class="loan-card__info">
-          <span class="loan-card__icon">{{ s.loan.type === 'borrowed' ? '🏦' : '🤝' }}</span>
+          <span class="loan-card__icon"><ng-icon [name]="s.loan.type === 'borrowed' ? 'lucideLandmark' : 'lucideHandshake'" size="20" /></span>
           <div>
             <div class="loan-card__title">{{ s.loan.title }}</div>
             <div class="loan-card__meta">
@@ -96,7 +96,7 @@
     </div>
   } @empty {
     <div class="empty-state">
-      <div class="empty-state__icon">{{ activeTab() === 'borrowed' ? '🏦' : '🤝' }}</div>
+      <div class="empty-state__icon"><ng-icon [name]="activeTab() === 'borrowed' ? 'lucideLandmark' : 'lucideHandshake'" size="36" /></div>
       <h3 class="empty-state__title">No {{ activeTab() === 'borrowed' ? 'loans' : 'lent records' }}</h3>
       <p class="empty-state__text">
         {{ activeTab() === 'borrowed' ? 'Track money you borrow from banks or people' : 'Track money you lend to others' }}
@@ -111,7 +111,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h2 class="modal__title">{{ newType === 'borrowed' ? 'Add Loan (Borrowed)' : 'Record Lent Money' }}</h2>
-        <button class="modal__close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
+        <button class="modal__close" aria-label="Close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
       </div>
       <div class="modal__body">
         <div class="form-group">
@@ -135,7 +135,7 @@
           <select class="form-control" [(ngModel)]="newAccount">
             <option value="">{{ newType === 'borrowed' ? 'Money goes to...' : 'Money comes from...' }}</option>
             @for (acc of allAccounts; track acc.id) {
-              <option [value]="acc.id">{{ acc.icon }} {{ acc.name }}</option>
+              <option [value]="acc.id">{{ acc.name }}</option>
             }
           </select>
         </div>
@@ -164,7 +164,7 @@
         <h2 class="modal__title">
           {{ paying.loan.type === 'borrowed' ? 'Make Payment' : 'Record Repayment' }}
         </h2>
-        <button class="modal__close" (click)="payingLoan.set(null)"><ng-icon name="lucideX" size="18" /></button>
+        <button class="modal__close" aria-label="Close" (click)="payingLoan.set(null)"><ng-icon name="lucideX" size="18" /></button>
       </div>
       <div class="modal__body">
         <div class="pay-info">
@@ -215,7 +215,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h2 class="modal__title">{{ splitMode === 'split' ? 'Quick Split' : 'Quick Expense + Loan' }}</h2>
-        <button class="modal__close" (click)="showSplitForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
+        <button class="modal__close" aria-label="Close" (click)="showSplitForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
       </div>
       <div class="modal__body">
 

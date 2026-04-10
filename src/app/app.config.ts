@@ -24,6 +24,8 @@ import {
   lucideZap, lucideBookOpen, lucidePlane, lucideUser, lucidePackage,
   // Income source icons
   lucideBriefcase, lucideLaptop, lucideGift,
+  // Extra icons for remaining pages
+  lucideKeyRound, lucidePalette, lucideRocket, lucideClipboardList,
 } from '@ng-icons/lucide';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
@@ -52,6 +54,7 @@ export const appConfig: ApplicationConfig = {
       lucideUtensilsCrossed, lucideCar, lucideFilm, lucideShoppingBag, lucideHeart,
       lucideZap, lucideBookOpen, lucidePlane, lucideUser, lucidePackage,
       lucideBriefcase, lucideLaptop, lucideGift,
+      lucideKeyRound, lucidePalette, lucideRocket, lucideClipboardList,
       lucideReceipt, lucideCalendar, lucideCreditCard, lucideArrowRightLeft,
       lucideEye, lucideEyeOff, lucideCheck, lucideAlertTriangle, lucideInfo,
       lucideChevronDown, lucideChevronUp, lucidePieChart, lucideLayoutDashboard,

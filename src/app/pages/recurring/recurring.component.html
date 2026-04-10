@@ -46,7 +46,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h2 class="modal__title">Add Recurring Transaction</h2>
-        <button class="modal__close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
+        <button class="modal__close" aria-label="Close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
       </div>
       <div class="modal__body">
         <div class="form-row">
@@ -102,7 +102,7 @@
             <select class="form-control" [(ngModel)]="newPayment">
               <option value="">Select...</option>
               @for (acc of allAccounts; track acc.id) {
-                <option [value]="acc.id">{{ acc.icon }} {{ acc.name }}</option>
+                <option [value]="acc.id">{{ acc.name }}</option>
               }
             </select>
           </div>

@@ -45,9 +45,9 @@ export class RecurringComponent {
 
   get allAccounts() {
     return [
-      { id: 'cash', name: 'Cash', icon: '💵' },
+      { id: 'cash', name: 'Cash', icon: 'lucideBanknote' },
       ...this.accountService.accounts().map(a => ({
-        id: a.id, name: a.name, icon: a.type === 'bank' ? '🏦' : '📱',
+        id: a.id, name: a.name, icon: a.type === 'bank' ? 'lucideLandmark' : 'lucideSmartphone',
       })),
     ];
   }

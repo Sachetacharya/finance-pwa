@@ -315,12 +315,12 @@
 }
 
 .subtitle-expense {
-  color: #ef4444;
+  color: var(--color-expense);
   font-weight: 600;
 }
 
 .subtitle-income {
-  color: #22c55e;
+  color: var(--color-income);
   font-weight: 600;
 }
 
