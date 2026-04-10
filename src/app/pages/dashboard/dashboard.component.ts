@@ -4,11 +4,18 @@ import { ExpenseService } from '../../core/services/expense.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { BudgetService } from '../../core/services/budget.service';
+import { TemplateService } from '../../core/services/template.service';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { ChartComponent } from '../../shared/components/chart/chart.component';
 import { ExpenseFormComponent } from '../../shared/components/expense-form/expense-form.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { NgIcon } from '@ng-icons/core';
+import { FormsModule } from '@angular/forms';
+import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
+import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
+import { PrivacyService } from '../../core/services/privacy.service';
+import { AccountService } from '../../core/services/account.service';
+import { TransactionTemplate } from '../../core/models/template.model';
 import { Expense, CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS, ALL_CATEGORY_LABELS, ALL_CATEGORY_ICONS } from '../../core/models/expense.model';
 import { formatCurrency } from '../../shared/utils/currency.utils';
 import { ChartConfiguration } from 'chart.js';
@@ -16,7 +23,7 @@ import { ChartConfiguration } from 'chart.js';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterModule, StatCardComponent, ChartComponent, ExpenseFormComponent, CurrencyFormatPipe, NgIcon],
+  imports: [RouterModule, StatCardComponent, ChartComponent, ExpenseFormComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon, FormsModule, LockScrollDirective],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -24,10 +31,23 @@ export class DashboardComponent {
   readonly expenseService = inject(ExpenseService);
   readonly auth = inject(AuthService);
   readonly budgetService = inject(BudgetService);
+  readonly templateService = inject(TemplateService);
+  readonly accountService = inject(AccountService);
   private readonly notification = inject(NotificationService);
   private readonly fmt = inject(CurrencyFormatPipe);
 
+  readonly privacy = inject(PrivacyService);
   readonly showAddForm = signal(false);
+  readonly usingTemplate = signal<TransactionTemplate | null>(null);
+  useAmount: number | null = null;
+  useAccount = '';
+
+  get allAccounts() {
+    return [
+      { id: 'cash', name: 'Cash' },
+      ...this.accountService.accounts().map(a => ({ id: a.id, name: a.name })),
+    ];
+  }
 
   readonly monthChangePct = computed(() => {
     const prev = this.expenseService.previousMonthTotal();
@@ -112,6 +132,35 @@ export class DashboardComponent {
   readonly categoryIcons = CATEGORY_ICONS;
   readonly allCategoryLabels = ALL_CATEGORY_LABELS;
   readonly allCategoryIcons = ALL_CATEGORY_ICONS;
+
+  quickUseTemplate(id: string): void {
+    this.templateService.useTemplate(id);
+    this.notification.success('Added');
+  }
+
+  openUseTemplate(id: string): void {
+    const tpl = this.templateService.templates().find(t => t.id === id);
+    if (!tpl) return;
+    this.usingTemplate.set(tpl);
+    this.useAmount = tpl.amount;
+    this.useAccount = tpl.paymentMethod;
+  }
+
+  confirmUseTemplate(): void {
+    const tpl = this.usingTemplate();
+    if (!tpl || !this.useAmount || !this.useAccount) return;
+    this.expenseService.addExpense({
+      type: tpl.type,
+      title: tpl.title,
+      amount: this.useAmount,
+      category: tpl.category,
+      date: new Date().toISOString().split('T')[0],
+      paymentMethod: this.useAccount,
+      notes: tpl.notes,
+    });
+    this.notification.success('Added from template');
+    this.usingTemplate.set(null);
+  }
 
   onAddExpense(data: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>): void {
     this.expenseService.addExpense(data);

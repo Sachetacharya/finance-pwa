@@ -30,6 +30,7 @@ export class SidebarComponent {
     { path: '/dashboard', label: 'Dashboard', icon: 'lucideLayoutDashboard' },
     { path: '/expenses', label: 'Expenses', icon: 'lucideReceipt' },
     { path: '/analytics', label: 'Analytics', icon: 'lucideBarChart3' },
+    { path: '/templates', label: 'Templates', icon: 'lucideZap' },
     { path: '/recurring', label: 'Recurring', icon: 'lucideRepeat' },
     { path: '/budgets', label: 'Budgets', icon: 'lucideTarget' },
     { path: '/loans', label: 'Loans', icon: 'lucideHandshake' },

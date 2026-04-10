@@ -18,6 +18,11 @@
       <ng-icon name="lucideSearch" size="20" />
     </button>
 
+    <!-- Privacy toggle -->
+    <button class="navbar__icon-btn" (click)="privacy.toggle()" [title]="privacy.isHidden() ? 'Show amounts' : 'Hide amounts'" aria-label="Toggle amount visibility">
+      <ng-icon [name]="privacy.isHidden() ? 'lucideEyeOff' : 'lucideEye'" size="20" />
+    </button>
+
     <!-- Account balances dropdown -->
     <div class="balance-dropdown">
       <button class="navbar__icon-btn" (click)="toggleBalances()" title="Account Balances">
@@ -29,7 +34,7 @@
           <div class="balance-dropdown__item">
             <span class="balance-dropdown__name"><ng-icon name="lucideBanknote" size="16" /> Cash</span>
             <span class="balance-dropdown__amount" [class.balance-dropdown__amount--negative]="accountService.accountBalances()['cash'] < 0">
-              {{ accountService.accountBalances()['cash'] | currencyFormat }}
+              {{ accountService.accountBalances()['cash'] | currencyFormat | privacyMask }}
             </span>
           </div>
           @for (acc of accountService.accounts(); track acc.id) {
@@ -39,7 +44,7 @@
                 {{ acc.name }}
               </span>
               <span class="balance-dropdown__amount" [class.balance-dropdown__amount--negative]="accountService.accountBalances()[acc.id] < 0">
-                {{ accountService.accountBalances()[acc.id] | currencyFormat }}
+                {{ accountService.accountBalances()[acc.id] | currencyFormat | privacyMask }}
               </span>
             </div>
           }

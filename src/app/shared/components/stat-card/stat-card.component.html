@@ -12,7 +12,7 @@
       </div>
     }
   </div>
-  <div class="stat-card__value">{{ value() }}</div>
+  <div class="stat-card__value">{{ value() | privacyMask }}</div>
   @if (trend() !== null) {
     <div class="stat-card__trend" [class.positive]="trend()! >= 0" [class.negative]="trend()! < 0">
       <ng-icon [name]="trend()! >= 0 ? 'lucideTrendingUp' : 'lucideTrendingDown'" size="14" />

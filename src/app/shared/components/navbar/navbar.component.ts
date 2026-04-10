@@ -7,13 +7,15 @@ import { ExpenseService } from '../../../core/services/expense.service';
 import { CurrencyFormatPipe } from '../../pipes/currency-format.pipe';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { LockScrollDirective } from '../../directives/lock-scroll.directive';
+import { PrivacyService } from '../../../core/services/privacy.service';
+import { PrivacyMaskPipe } from '../../pipes/privacy-mask.pipe';
 import { Expense, ALL_CATEGORY_LABELS } from '../../../core/models/expense.model';
 import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterModule, CurrencyFormatPipe, ConfirmDialogComponent, LockScrollDirective, NgIcon],
+  imports: [RouterModule, CurrencyFormatPipe, ConfirmDialogComponent, LockScrollDirective, NgIcon, PrivacyMaskPipe],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })
@@ -24,6 +26,7 @@ export class NavbarComponent {
   readonly auth = inject(AuthService);
   readonly pwa = inject(PwaService);
   readonly accountService = inject(AccountService);
+  readonly privacy = inject(PrivacyService);
   private readonly expenseService = inject(ExpenseService);
   private readonly router = inject(Router);
   readonly showBalances = signal(false);

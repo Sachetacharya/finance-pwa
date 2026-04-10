@@ -1,0 +1,157 @@
+<div class="templates-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Templates</h1>
+      <p class="page-subtitle">Quick-add frequent transactions with one tap</p>
+    </div>
+    <button class="btn btn--primary" (click)="openAdd()">
+      <ng-icon name="lucidePlus" size="16" /> New Template
+    </button>
+  </div>
+
+  @for (tpl of templateService.templates(); track tpl.id) {
+    <div class="tpl-card">
+      <div class="tpl-card__left">
+        <span class="tpl-card__icon"><ng-icon [name]="allCategoryIcons[tpl.category]" size="20" /></span>
+        <div class="tpl-card__info">
+          <div class="tpl-card__name">{{ tpl.name }}</div>
+          <div class="tpl-card__meta">
+            {{ tpl.title }} · {{ allCategoryLabels[tpl.category] }} · {{ accountService.getLabel(tpl.paymentMethod) }}
+          </div>
+        </div>
+      </div>
+      <div class="tpl-card__right">
+        <span class="tpl-card__amount" [class.tpl-card__amount--income]="tpl.type === 'income'">
+          {{ tpl.type === 'income' ? '+' : '-' }}{{ tpl.amount | currencyFormat }}
+        </span>
+        <button class="tpl-card__use" (click)="onUse(tpl.id)" aria-label="Use template">
+          <ng-icon name="lucidePlus" size="16" /> Use
+        </button>
+        <button class="tpl-card__delete" (click)="deletingId.set(tpl.id)" aria-label="Delete template">
+          <ng-icon name="lucideTrash2" size="14" />
+        </button>
+      </div>
+    </div>
+  } @empty {
+    <div class="empty-state">
+      <div class="empty-state__icon"><ng-icon name="lucideRepeat" size="36" /></div>
+      <h3 class="empty-state__title">No templates yet</h3>
+      <p class="empty-state__text">Create templates for things you buy often — coffee, bus fare, lunch, etc.</p>
+    </div>
+  }
+</div>
+
+<!-- Add template modal -->
+@if (showAddForm()) {
+  <div class="modal-overlay" lockScroll (click)="showAddForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">New Template</h2>
+        <button class="modal__close" aria-label="Close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label class="form-label">Template Name *</label>
+          <input class="form-control" type="text" [(ngModel)]="newName"
+            placeholder="e.g. Morning Coffee, Bus Fare" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-control" [(ngModel)]="newType">
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (NPR) *</label>
+            <input class="form-control" type="number" [(ngModel)]="newAmount"
+              placeholder="0.00" min="0.01" step="0.01" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Transaction Title *</label>
+          <input class="form-control" type="text" [(ngModel)]="newTitle"
+            placeholder="e.g. Coffee at Himalayan Java" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">{{ newType === 'income' ? 'Source' : 'Category' }} *</label>
+            <select class="form-control" [(ngModel)]="newCategory">
+              <option value="">Select...</option>
+              @if (newType === 'expense') {
+                @for (cat of expenseCategories; track cat[0]) {
+                  <option [value]="cat[0]">{{ cat[1] }}</option>
+                }
+              } @else {
+                @for (src of incomeSources; track src[0]) {
+                  <option [value]="src[0]">{{ src[1] }}</option>
+                }
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account *</label>
+            <select class="form-control" [(ngModel)]="newPayment">
+              <option value="">Select...</option>
+              @for (acc of allAccounts; track acc.id) {
+                <option [value]="acc.id">{{ acc.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input class="form-control" type="text" [(ngModel)]="newNotes" placeholder="Optional" />
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="showAddForm.set(false)">Cancel</button>
+          <button class="btn btn--primary" (click)="onAdd()" [disabled]="!canAdd">Create Template</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (usingTemplate(); as tpl) {
+  <div class="modal-overlay" lockScroll (click)="usingTemplate.set(null)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title"><ng-icon [name]="allCategoryIcons[tpl.category]" size="18" /> {{ tpl.name }}</h2>
+        <button class="modal__close" aria-label="Close" (click)="usingTemplate.set(null)"><ng-icon name="lucideX" size="18" /></button>
+      </div>
+      <div class="modal__body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount</label>
+            <input class="form-control" type="number" [(ngModel)]="useAmount" min="0.01" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account</label>
+            <select class="form-control" [(ngModel)]="useAccount">
+              @for (acc of allAccounts; track acc.id) {
+                <option [value]="acc.id">{{ acc.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="usingTemplate.set(null)">Cancel</button>
+          <button class="btn btn--primary" (click)="confirmUse()" [disabled]="!useAmount || !useAccount">
+            <ng-icon name="lucidePlus" size="14" /> Add
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (deletingId()) {
+  <app-confirm-dialog
+    title="Delete Template"
+    message="Remove this template? Your past transactions won't be affected."
+    confirmText="Delete"
+    (confirmed)="onDelete()"
+    (cancelled)="deletingId.set(null)"
+  />
+}

@@ -41,6 +41,11 @@ export const routes: Routes = [
           import('./pages/analytics/analytics.component').then(m => m.AnalyticsComponent),
       },
       {
+        path: 'templates',
+        loadComponent: () =>
+          import('./pages/templates/templates.component').then(m => m.TemplatesComponent),
+      },
+      {
         path: 'recurring',
         loadComponent: () =>
           import('./pages/recurring/recurring.component').then(m => m.RecurringComponent),

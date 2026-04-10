@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, input } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
+import { PrivacyMaskPipe } from '../../pipes/privacy-mask.pipe';
 
 @Component({
   selector: 'app-stat-card',
   standalone: true,
-  imports: [NgIcon,CommonModule],
+  imports: [NgIcon, CommonModule, PrivacyMaskPipe],
   templateUrl: './stat-card.component.html',
   styleUrl: './stat-card.component.scss',
 })

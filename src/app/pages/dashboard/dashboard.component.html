@@ -8,6 +8,35 @@
     <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Add</button>
   </div>
 
+  <!-- Quick Add Templates -->
+  @if (templateService.templates().length) {
+    <div class="quick-add">
+      <div class="quick-add__label">Quick Add</div>
+      <div class="quick-add__list">
+        @for (tpl of templateService.templates(); track tpl.id) {
+          <div class="quick-add__btn"
+            [class.quick-add__btn--expense]="tpl.type === 'expense'"
+            [class.quick-add__btn--income]="tpl.type === 'income'">
+            <button class="quick-add__main" (click)="quickUseTemplate(tpl.id)" [title]="tpl.title">
+              <ng-icon [name]="allCategoryIcons[tpl.category]" size="16" />
+              <span class="quick-add__name">{{ tpl.name }}</span>
+              @if (showAmounts()) {
+                <span class="quick-add__amount">{{ tpl.amount | currencyFormat }}</span>
+              }
+            </button>
+            <button class="quick-add__edit" (click)="openUseTemplate(tpl.id)" title="Edit & add" aria-label="Edit template values">
+              <ng-icon name="lucidePencil" size="12" />
+            </button>
+          </div>
+        }
+        <a class="quick-add__btn quick-add__btn--manage" routerLink="/templates">
+          <ng-icon name="lucideSettings" size="14" />
+          <span>Manage</span>
+        </a>
+      </div>
+    </div>
+  }
+
   <!-- Stats -->
   <div class="stats-grid">
     <app-stat-card
@@ -155,6 +184,35 @@
     </div>
   </div>
 </div>
+
+@if (usingTemplate(); as tpl) {
+  <div class="modal-overlay" lockScroll (click)="usingTemplate.set(null)">
+    <div class="use-tpl-modal" (click)="$event.stopPropagation()">
+      <div class="use-tpl-modal__header">
+        <ng-icon [name]="allCategoryIcons[tpl.category]" size="20" />
+        <span>{{ tpl.name }}</span>
+        <button class="use-tpl-modal__close" aria-label="Close" (click)="usingTemplate.set(null)"><ng-icon name="lucideX" size="16" /></button>
+      </div>
+      <div class="use-tpl-modal__body">
+        <div class="use-tpl-modal__row">
+          <label class="use-tpl-modal__label">Amount</label>
+          <input class="use-tpl-modal__input" type="number" [(ngModel)]="useAmount" min="0.01" step="0.01" />
+        </div>
+        <div class="use-tpl-modal__row">
+          <label class="use-tpl-modal__label">Account</label>
+          <select class="use-tpl-modal__input" [(ngModel)]="useAccount">
+            @for (acc of allAccounts; track acc.id) {
+              <option [value]="acc.id">{{ acc.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <button class="use-tpl-modal__confirm" (click)="confirmUseTemplate()" [disabled]="!useAmount || !useAccount">
+        <ng-icon name="lucidePlus" size="16" /> Add {{ tpl.type === 'income' ? 'Income' : 'Expense' }}
+      </button>
+    </div>
+  </div>
+}
 
 @if (showAddForm()) {
   <app-expense-form
