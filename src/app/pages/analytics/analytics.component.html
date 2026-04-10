@@ -14,7 +14,7 @@
     </div>
   } @else {
 
-  <!-- Summary Cards -->
+  <!-- Summary Cards Row 1 -->
   <div class="stats-grid">
     <app-stat-card
       title="Avg Monthly Expenses"
@@ -31,15 +31,51 @@
       color="success"
     />
     <app-stat-card
-      title="Net Balance"
-      [value]="expenseService.netBalance() | currencyFormat"
-      subtitle="Total income minus expenses"
-      icon="lucideArrowLeftRight"
+      title="Savings Rate"
+      [value]="savingsRate() + '%'"
+      subtitle="Of income saved"
+      icon="lucideTarget"
+      [color]="savingsRate() >= 20 ? 'success' : savingsRate() >= 0 ? 'warning' : 'danger'"
+    />
+    <app-stat-card
+      title="Avg Expense Size"
+      [value]="avgTransactionSize() | currencyFormat"
+      subtitle="Per transaction"
+      icon="lucideReceipt"
       color="info"
     />
+  </div>
+
+  <!-- Summary Cards Row 2 -->
+  <div class="stats-grid">
+    <app-stat-card
+      title="This Week"
+      [value]="weeklyComparison().thisWeek | currencyFormat"
+      subtitle="Spent this week"
+      icon="lucideCalendar"
+      [trend]="weeklyComparison().change"
+      trendLabel="vs last week"
+      color="primary"
+    />
+    <app-stat-card
+      title="Total Transactions"
+      [value]="totalTransactions().toString()"
+      subtitle="All time"
+      icon="lucideBarChart3"
+      color="info"
+    />
+    @if (biggestExpense()) {
+      <app-stat-card
+        title="Biggest Expense"
+        [value]="biggestExpense()!.amount | currencyFormat"
+        [subtitle]="biggestExpense()!.title"
+        icon="lucideAlertTriangle"
+        color="danger"
+      />
+    }
     @if (highestExpenseMonth()) {
       <app-stat-card
-        title="Highest Expense Month"
+        title="Highest Month"
         [value]="highestExpenseMonth()!.total | currencyFormat"
         [subtitle]="highestExpenseMonth()!.month + ' ' + highestExpenseMonth()!.year"
         icon="lucidePieChart"
@@ -47,6 +83,22 @@
       />
     }
   </div>
+
+  <!-- Loan Summary -->
+  @if (loanService.loans().length) {
+    <div class="loan-summary-row">
+      <div class="loan-stat loan-stat--owe">
+        <div class="loan-stat__label">You Owe</div>
+        <div class="loan-stat__value">{{ loanService.totalBorrowedOutstanding() | currencyFormat }}</div>
+        <div class="loan-stat__count">{{ loanService.borrowedLoans().length }} loan{{ loanService.borrowedLoans().length !== 1 ? 's' : '' }}</div>
+      </div>
+      <div class="loan-stat loan-stat--owed">
+        <div class="loan-stat__label">Owed to You</div>
+        <div class="loan-stat__value">{{ loanService.totalLentOutstanding() | currencyFormat }}</div>
+        <div class="loan-stat__count">{{ loanService.lentLoans().length }} record{{ loanService.lentLoans().length !== 1 ? 's' : '' }}</div>
+      </div>
+    </div>
+  }
 
   <!-- Monthly Income vs Expenses -->
   <div class="card">
@@ -69,6 +121,52 @@
       <app-chart type="line" [data]="dailyLineData()" [options]="lineOptions" />
     </div>
   </div>
+
+  <!-- Monthly Savings Trend -->
+  <div class="card">
+    <div class="card__header">
+      <h3 class="card__title">Monthly Savings</h3>
+      <span class="card__badge">Income - Expenses</span>
+    </div>
+    <div class="chart-container" style="height: 260px; padding: 16px 20px;">
+      <app-chart type="bar" [data]="monthlySavingsData()" [options]="barOptions" />
+    </div>
+  </div>
+
+  <!-- Budget vs Actual -->
+  @if (budgetService.budgetStatuses().length) {
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Budget vs Actual</h3>
+        <span class="card__badge">This month</span>
+      </div>
+      <div class="budget-vs-actual">
+        @for (s of budgetService.budgetStatuses(); track s.budget.id) {
+          <div class="bva-row">
+            <div class="bva-row__label">
+              <ng-icon [name]="categoryIcons[s.budget.category]" size="16" />
+              {{ categoryLabels[s.budget.category] }}
+            </div>
+            <div class="bva-row__bar-wrap">
+              <div class="bva-row__bar">
+                <div class="bva-row__bar-fill"
+                  [class.bva-row__bar-fill--over]="s.percentage >= 100"
+                  [class.bva-row__bar-fill--warn]="s.percentage >= 80 && s.percentage < 100"
+                  [style.width.%]="s.percentage > 100 ? 100 : s.percentage">
+                </div>
+              </div>
+              <span class="bva-row__pct" [class.text-danger]="s.percentage >= 100" [class.text-warning]="s.percentage >= 80 && s.percentage < 100">
+                {{ s.percentage }}%
+              </span>
+            </div>
+            <div class="bva-row__values">
+              {{ s.spent | currencyFormat }} / {{ s.budget.monthlyLimit | currencyFormat }}
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
 
   <!-- Expense breakdown row -->
   @if (hasExpenses()) {
@@ -171,6 +269,62 @@
     </div>
     <div class="chart-container" style="height: 260px; padding: 16px 20px;">
       <app-chart type="bar" [data]="paymentMethodData()" [options]="barOptions" />
+    </div>
+  </div>
+  }
+
+  <!-- Spending Patterns -->
+  @if (hasExpenses()) {
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Spending by Day</h3>
+        <span class="card__badge">Peak: {{ peakDay().day }}</span>
+      </div>
+      <div class="chart-container" style="height: 260px; padding: 16px 20px;">
+        <app-chart type="bar" [data]="spendingByDayData()" [options]="barOptions" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Spending by Time</h3>
+        <span class="card__badge">Peak: {{ peakTime().time }}</span>
+      </div>
+      <div class="chart-container" style="height: 260px; padding: 16px 20px;">
+        <app-chart type="bar" [data]="spendingByTimeData()" [options]="barOptions" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Spending Over Time -->
+  <div class="card">
+    <div class="card__header">
+      <h3 class="card__title">Category Spending Over Time</h3>
+      <span class="card__badge">Last 6 months</span>
+    </div>
+    <div class="chart-container" style="height: 300px; padding: 16px 20px;">
+      <app-chart type="bar" [data]="categoryOverTimeData()" [options]="stackedBarOptions" />
+    </div>
+  </div>
+
+  <!-- Top Expenses List -->
+  <div class="card">
+    <div class="card__header">
+      <h3 class="card__title">Top 10 Expenses</h3>
+      <span class="card__badge">All time</span>
+    </div>
+    <div class="top-expenses">
+      @for (e of expenseService.expenses().slice().filter(ex => ex.type === 'expense').sort(sortByAmount).slice(0, 10); track e.id; let i = $index) {
+        <div class="top-expense-item">
+          <span class="top-expense-item__rank">{{ i + 1 }}</span>
+          <div class="top-expense-item__info">
+            <div class="top-expense-item__title">{{ e.title }}</div>
+            <div class="top-expense-item__meta">{{ e.date }}</div>
+          </div>
+          <span class="top-expense-item__amount">{{ e.amount | currencyFormat }}</span>
+        </div>
+      }
     </div>
   </div>
   }

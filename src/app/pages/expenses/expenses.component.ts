@@ -97,6 +97,47 @@ export class ExpensesComponent {
   });
 
   readonly totalFiltered = computed(() => this.filteredSorted().length);
+
+  /** Statement mode: shows running balance when a specific account is selected */
+  readonly isStatementMode = computed(() => !!this.filter().paymentMethod && this.filter().paymentMethod !== '');
+
+  readonly statementBalances = computed((): Map<string, { before: number; after: number }> => {
+    const pm = this.filter().paymentMethod;
+    if (!pm) return new Map();
+
+    // Get initial balance for this account
+    const accounts = this.accountService.accounts();
+    const acc = accounts.find(a => a.id === pm);
+    const initialBalance = acc ? acc.initialBalance : 0; // cash = 0
+
+    // Get ALL transactions affecting this account, sorted date ASC (chronological)
+    const allExpenses = this.expenseService.expenses();
+    const relevant = allExpenses
+      .filter(e => e.paymentMethod === pm || e.toAccount === pm)
+      .sort((a, b) => {
+        const dateDiff = a.date.localeCompare(b.date);
+        return dateDiff !== 0 ? dateDiff : a.createdAt.localeCompare(b.createdAt);
+      });
+
+    // Compute running balance
+    let balance = initialBalance;
+    const balanceMap = new Map<string, { before: number; after: number }>();
+
+    for (const e of relevant) {
+      const before = Math.round(balance * 100) / 100;
+      if (e.type === 'transfer') {
+        if (e.paymentMethod === pm) balance -= e.amount; // money left
+        if (e.toAccount === pm) balance += e.amount;     // money came
+      } else if (e.type === 'income') {
+        balance += e.amount;
+      } else {
+        balance -= e.amount;
+      }
+      balanceMap.set(e.id, { before, after: Math.round(balance * 100) / 100 });
+    }
+
+    return balanceMap;
+  });
   readonly totalAmount = computed(() =>
     this.filteredSorted().filter(e => e.type !== 'income').reduce((s, e) => s + e.amount, 0)
   );
