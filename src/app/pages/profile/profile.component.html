@@ -1,0 +1,93 @@
+<div class="profile-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-subtitle">App preferences and updates</p>
+    </div>
+  </div>
+
+  <!-- User info -->
+  <div class="profile-card">
+    <div class="profile-card__avatar">
+      {{ auth.currentUser()?.name?.charAt(0)?.toUpperCase() ?? 'U' }}
+    </div>
+    <div class="profile-card__info">
+      <div class="profile-card__name">{{ auth.currentUser()?.name }}</div>
+      <div class="profile-card__email">{{ auth.currentUser()?.email }}</div>
+    </div>
+  </div>
+
+  <!-- Theme -->
+  <div class="setting-card">
+    <div class="setting-card__header">
+      <span class="setting-card__icon">🎨</span>
+      <div>
+        <div class="setting-card__title">Appearance</div>
+        <div class="setting-card__desc">{{ theme.isDarkMode() ? 'Dark mode enabled' : 'Light mode enabled' }}</div>
+      </div>
+    </div>
+    <button class="setting-card__action" (click)="theme.toggle()">
+      {{ theme.isDarkMode() ? '☀️ Light' : '🌙 Dark' }}
+    </button>
+  </div>
+
+  <!-- App Updates -->
+  <div class="setting-card">
+    <div class="setting-card__header">
+      <span class="setting-card__icon">🔄</span>
+      <div>
+        <div class="setting-card__title">App Updates</div>
+        <div class="setting-card__desc">
+          Version {{ appVersion }}
+          @if (lastChecked()) {
+            · Last checked: {{ lastChecked() }}
+          }
+        </div>
+      </div>
+    </div>
+    <div class="setting-card__buttons">
+      @if (updateAvailable()) {
+        <button class="btn btn--primary btn--sm" (click)="applyUpdate()" [disabled]="isReloading()">
+          @if (isReloading()) { Updating... } @else { Apply Update }
+        </button>
+      } @else {
+        <button class="btn btn--ghost btn--sm" (click)="checkForUpdates()" [disabled]="isChecking()">
+          @if (isChecking()) { Checking... } @else { Check for Updates }
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Force Reload -->
+  <div class="setting-card setting-card--highlight">
+    <div class="setting-card__header">
+      <span class="setting-card__icon">🚀</span>
+      <div>
+        <div class="setting-card__title">Force Reload</div>
+        <div class="setting-card__desc">Clear cache, unregister service worker, and hard reload. Use this if the app feels stuck on an old version.</div>
+      </div>
+    </div>
+    <button class="btn btn--danger-outline btn--sm" (click)="forceReload()" [disabled]="isReloading()">
+      @if (isReloading()) { Reloading... } @else { Clear & Reload }
+    </button>
+  </div>
+
+  <!-- PWA Status -->
+  <div class="setting-card">
+    <div class="setting-card__header">
+      <span class="setting-card__icon">📱</span>
+      <div>
+        <div class="setting-card__title">PWA Status</div>
+        <div class="setting-card__desc">
+          @if (pwa.isInstalled()) { App is installed }
+          @else if (pwa.canInstall()) { App can be installed }
+          @else { Running in browser }
+          · {{ pwa.isOnline() ? 'Online' : 'Offline' }}
+        </div>
+      </div>
+    </div>
+    @if (pwa.canInstall()) {
+      <button class="btn btn--primary btn--sm" (click)="pwa.installApp()">Install App</button>
+    }
+  </div>
+</div>

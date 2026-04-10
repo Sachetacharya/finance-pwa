@@ -60,6 +60,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/accounts/accounts.component').then(m => m.AccountsComponent),
       },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./pages/profile/profile.component').then(m => m.ProfileComponent),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

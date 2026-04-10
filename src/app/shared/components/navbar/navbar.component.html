@@ -56,15 +56,15 @@
       </button>
     }
 
-    <div class="navbar__user">
-      <div class="navbar__avatar" [title]="auth.currentUser()?.name ?? 'User'">
+    <a class="navbar__user" routerLink="/settings" title="Settings">
+      <div class="navbar__avatar">
         {{ auth.currentUser()?.name?.charAt(0)?.toUpperCase() ?? 'U' }}
       </div>
       <div class="navbar__user-info">
         <span class="navbar__user-name">{{ auth.currentUser()?.name }}</span>
-        <span class="navbar__user-role">{{ auth.currentUser()?.role }}</span>
+        <span class="navbar__user-role">Settings</span>
       </div>
-    </div>
+    </a>
 
     <button class="navbar__icon-btn" (click)="confirmLogout()" title="Sign out" aria-label="Sign out">
       🚪
