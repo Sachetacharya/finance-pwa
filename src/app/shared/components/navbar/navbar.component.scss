@@ -5,6 +5,7 @@
   backdrop-filter: blur(16px) saturate(1.8);
   -webkit-backdrop-filter: blur(16px) saturate(1.8);
   border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -30,8 +31,9 @@
     min-width: 44px;
     min-height: 44px;
     border-radius: 8px;
-    transition: background 0.2s;
-    &:hover { background: var(--bg-secondary, #f1f5f9); }
+    color: var(--text-secondary);
+    transition: background 0.2s, color 0.2s;
+    &:hover { background: var(--bg-secondary, #f1f5f9); color: var(--text-primary); }
 
     @media (min-width: 768px) { display: none; }
   }
@@ -90,8 +92,9 @@
     justify-content: center;
     border-radius: 8px;
     line-height: 1;
-    transition: background 0.2s;
-    &:hover { background: var(--bg-secondary, #f1f5f9); }
+    color: var(--text-secondary);
+    transition: background 0.2s, color 0.2s;
+    &:hover { background: var(--bg-secondary, #f1f5f9); color: var(--text-primary); }
   }
 
   &__user {
