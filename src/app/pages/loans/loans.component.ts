@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LoanService } from '../../core/services/loan.service';
 import { AccountService } from '../../core/services/account.service';
+import { ExpenseService } from '../../core/services/expense.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
@@ -19,9 +20,11 @@ import { NgIcon } from '@ng-icons/core';
 export class LoansComponent {
   readonly loanService = inject(LoanService);
   readonly accountService = inject(AccountService);
+  private readonly expenseService = inject(ExpenseService);
   private readonly notification = inject(NotificationService);
 
   readonly showAddForm = signal(false);
+  readonly showSplitForm = signal(false);
   readonly payingLoan = signal<LoanStatus | null>(null);
   readonly deletingLoanId = signal<string | null>(null);
   readonly activeTab = signal<'borrowed' | 'lent'>('borrowed');
@@ -35,6 +38,7 @@ export class LoansComponent {
   newNotes = '';
 
   // Payment form
+  payFullAmount = true;
   payAmount: number | null = null;
   payDate = new Date().toISOString().split('T')[0];
   payNotes = '';
@@ -58,7 +62,9 @@ export class LoansComponent {
 
   get canPay(): boolean {
     const paying = this.payingLoan();
-    return !!this.payAmount && this.payAmount > 0 && !!paying && this.payAmount <= paying.outstanding;
+    if (!paying) return false;
+    if (this.payFullAmount) return true;
+    return !!this.payAmount && this.payAmount > 0 && this.payAmount <= paying.outstanding;
   }
 
   openAdd(type: 'borrowed' | 'lent'): void {
@@ -88,32 +94,122 @@ export class LoansComponent {
 
   openPayment(status: LoanStatus): void {
     this.payingLoan.set(status);
+    this.payFullAmount = true;
     this.payAmount = null;
     this.payDate = new Date().toISOString().split('T')[0];
     this.payNotes = '';
   }
 
-  payFull(): void {
-    const outstanding = this.payingLoan()?.outstanding;
-    if (outstanding) this.payAmount = outstanding;
+  togglePayFull(): void {
+    this.payFullAmount = !this.payFullAmount;
+    if (!this.payFullAmount) this.payAmount = null;
   }
 
   onPay(): void {
     const paying = this.payingLoan();
     if (!paying || !this.canPay) return;
+    const amount = this.payFullAmount ? paying.outstanding : this.payAmount!;
     this.loanService.addPayment(
       paying.loan.id,
-      this.payAmount!,
+      amount,
       this.payDate,
       this.payNotes || undefined,
     );
-    const remaining = paying.outstanding - this.payAmount!;
-    if (remaining <= 0) {
+    if (this.payFullAmount || paying.outstanding - amount <= 0) {
       this.notification.success('Loan fully resolved!');
     } else {
       this.notification.success('Payment recorded');
     }
     this.payingLoan.set(null);
+  }
+
+  // === Quick Split / Quick Expense+Loan ===
+  splitMode: 'split' | 'fixed' = 'split';
+  splitTitle = '';
+  splitTotal: number | null = null;
+  splitPeople = 2;
+  splitPaidBy: 'me' | 'other' = 'other';
+  splitOtherName = '';
+  splitAccount = '';
+  splitCategory = 'food';
+  splitDate = new Date().toISOString().split('T')[0];
+
+  get splitMyShare(): number {
+    if (!this.splitTotal) return 0;
+    if (this.splitMode === 'fixed') return this.splitTotal;
+    return Math.round((this.splitTotal / this.splitPeople) * 100) / 100;
+  }
+
+  get splitLoanAmount(): number {
+    if (!this.splitTotal) return 0;
+    if (this.splitMode === 'fixed') return this.splitTotal;
+    if (this.splitPaidBy === 'other') return this.splitMyShare;
+    return Math.round((this.splitTotal - this.splitMyShare) * 100) / 100;
+  }
+
+  get canSplit(): boolean {
+    return !!this.splitTitle.trim() && !!this.splitTotal && this.splitTotal > 0
+      && !!this.splitOtherName.trim() && !!this.splitAccount
+      && (this.splitMode === 'fixed' || this.splitPeople >= 2);
+  }
+
+  openSplit(): void {
+    this.splitMode = 'split';
+    this.splitTitle = '';
+    this.splitTotal = null;
+    this.splitPeople = 2;
+    this.splitPaidBy = 'other';
+    this.splitOtherName = '';
+    this.splitAccount = '';
+    this.splitCategory = 'food';
+    this.splitDate = new Date().toISOString().split('T')[0];
+    this.showSplitForm.set(true);
+  }
+
+  onSplit(): void {
+    if (!this.canSplit) return;
+    const myShare = this.splitMyShare;
+    const otherName = this.splitOtherName.trim();
+    const title = this.splitTitle.trim();
+    const isFixed = this.splitMode === 'fixed';
+
+    // 1. Create the expense (my share)
+    this.expenseService.addExpense({
+      type: 'expense',
+      title,
+      amount: myShare,
+      category: this.splitCategory as any,
+      date: this.splitDate,
+      paymentMethod: this.splitAccount,
+      notes: isFixed
+        ? `${otherName} ${this.splitPaidBy === 'other' ? 'paid for me' : 'owes me'}`
+        : `Split with ${otherName} (${this.splitPeople} people, total ${this.splitTotal})`,
+    });
+
+    // 2. Create the loan (skipExpense=true — no extra income/expense for splits)
+    if (this.splitPaidBy === 'other') {
+      this.loanService.addLoan({
+        title: `${isFixed ? '' : 'Split - '}${title} (${otherName})`,
+        type: 'borrowed',
+        amount: this.splitLoanAmount,
+        accountId: this.splitAccount,
+        date: this.splitDate,
+        notes: `${otherName} paid`,
+      }, true);
+      this.notification.success(`Added. You owe ${otherName}.`);
+    } else {
+      this.loanService.addLoan({
+        title: `${isFixed ? '' : 'Split - '}${title} (${otherName})`,
+        type: 'lent',
+        amount: this.splitLoanAmount,
+        accountId: this.splitAccount,
+        date: this.splitDate,
+        notes: `I paid, ${otherName} owes`,
+      }, true);
+      this.notification.success(`Added. ${otherName} owes you.`);
+    }
+
+    this.showSplitForm.set(false);
   }
 
   onDelete(): void {

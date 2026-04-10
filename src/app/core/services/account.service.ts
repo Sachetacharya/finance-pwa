@@ -1,12 +1,10 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { Account } from '../models/account.model';
 import { ExpenseService } from './expense.service';
-import { LoanService } from './loan.service';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
   private readonly expenseService = inject(ExpenseService);
-  private readonly loanService = inject(LoanService);
   private readonly _accounts = signal<Account[]>(this.loadFromStorage());
 
   readonly accounts = this._accounts.asReadonly();
@@ -48,12 +46,6 @@ export class AccountService {
       } else {
         adjust(e.paymentMethod, -e.amount);
       }
-    }
-
-    // Add loan impact (borrowed adds money, lent removes money)
-    const loanImpact = this.loanService.getBalanceImpact();
-    for (const [id, amount] of Object.entries(loanImpact)) {
-      balances[id] = (balances[id] ?? 0) + amount;
     }
 
     // Round all

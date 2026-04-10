@@ -4,6 +4,9 @@
       <h1 class="page-title">Loans</h1>
       <p class="page-subtitle">Track money borrowed and lent</p>
     </div>
+    <button class="btn btn--primary btn--sm" (click)="openSplit()">
+      <ng-icon name="lucideArrowRightLeft" size="14" /> Quick Split
+    </button>
   </div>
 
   <!-- Summary cards -->
@@ -164,7 +167,13 @@
           <span class="pay-info__label">{{ paying.loan.title }}</span>
           <span class="pay-info__outstanding">Outstanding: {{ paying.outstanding | currencyFormat }}</span>
         </div>
-        <div class="form-row">
+
+        <label class="pay-full-check">
+          <input type="checkbox" [checked]="payFullAmount" (change)="togglePayFull()" />
+          <span>Pay full amount ({{ paying.outstanding | currencyFormat }})</span>
+        </label>
+
+        @if (!payFullAmount) {
           <div class="form-group">
             <label class="form-label">Amount (NPR) *</label>
             <input class="form-control" type="number" [(ngModel)]="payAmount"
@@ -173,20 +182,131 @@
               <span class="form-error">Cannot exceed outstanding ({{ paying.outstanding | currencyFormat }})</span>
             }
           </div>
+        }
+
+        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Date</label>
             <input class="form-control" type="date" [(ngModel)]="payDate" />
           </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Notes</label>
-          <input class="form-control" type="text" [(ngModel)]="payNotes" placeholder="e.g. EMI #3" />
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <input class="form-control" type="text" [(ngModel)]="payNotes" placeholder="e.g. EMI #3" />
+          </div>
         </div>
         <div class="modal__footer">
-          <button class="btn btn--ghost" (click)="payFull()">Pay Full</button>
+          <button class="btn btn--ghost" (click)="payingLoan.set(null)">Cancel</button>
           <button class="btn btn--primary" (click)="onPay()" [disabled]="!canPay">
-            {{ paying.loan.type === 'borrowed' ? 'Pay' : 'Mark Received' }}
+            {{ payFullAmount ? 'Resolve Fully' : (paying.loan.type === 'borrowed' ? 'Pay' : 'Mark Received') }}
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Quick Split / Fixed Amount modal -->
+@if (showSplitForm()) {
+  <div class="modal-overlay" lockScroll (click)="showSplitForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">{{ splitMode === 'split' ? 'Quick Split' : 'Quick Expense + Loan' }}</h2>
+        <button class="modal__close" (click)="showSplitForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
+      </div>
+      <div class="modal__body">
+
+        <!-- Mode toggle -->
+        <div class="mode-toggle">
+          <button class="mode-toggle__btn" [class.mode-toggle__btn--active]="splitMode === 'split'" (click)="splitMode = 'split'">
+            <ng-icon name="lucideArrowRightLeft" size="14" /> Split Bill
+          </button>
+          <button class="mode-toggle__btn" [class.mode-toggle__btn--active]="splitMode === 'fixed'" (click)="splitMode = 'fixed'">
+            <ng-icon name="lucideBanknote" size="14" /> Fixed Amount
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">What was it for? *</label>
+          <input class="form-control" type="text" [(ngModel)]="splitTitle"
+            placeholder="e.g. Dinner, Taxi fare, Movie tickets" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">{{ splitMode === 'split' ? 'Total Bill' : 'Amount' }} (NPR) *</label>
+            <input class="form-control" type="number" [(ngModel)]="splitTotal"
+              placeholder="0.00" min="0.01" step="0.01" />
+          </div>
+          @if (splitMode === 'split') {
+            <div class="form-group">
+              <label class="form-label">Split between</label>
+              <select class="form-control" [(ngModel)]="splitPeople">
+                @for (n of [2,3,4,5,6,7,8]; track n) {
+                  <option [value]="n">{{ n }} people</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Who paid? *</label>
+            <select class="form-control" [(ngModel)]="splitPaidBy">
+              <option value="other">Other person paid</option>
+              <option value="me">I paid</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ splitPaidBy === 'other' ? 'Who paid?' : 'Who owes you?' }} *</label>
+            <input class="form-control" type="text" [(ngModel)]="splitOtherName"
+              placeholder="e.g. Ram" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-control" [(ngModel)]="splitCategory">
+              <option value="food">Food & Dining</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="travel">Travel</option>
+              <option value="shopping">Shopping</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account *</label>
+            <select class="form-control" [(ngModel)]="splitAccount">
+              <option value="">Select...</option>
+              @for (acc of allAccounts; track acc.id) {
+                <option [value]="acc.id">{{ acc.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input class="form-control" type="date" [(ngModel)]="splitDate" />
+        </div>
+
+        @if (splitTotal && splitTotal > 0) {
+          <div class="split-preview">
+            <div class="split-preview__row">
+              <span>{{ splitMode === 'split' ? 'Your share' : 'Expense' }}</span>
+              <strong>{{ splitMyShare | currencyFormat }}</strong>
+            </div>
+            <div class="split-preview__row">
+              @if (splitPaidBy === 'other') {
+                <span>You owe {{ splitOtherName || '...' }}</span>
+              } @else {
+                <span>{{ splitOtherName || '...' }} owes you</span>
+              }
+              <strong>{{ splitLoanAmount | currencyFormat }}</strong>
+            </div>
+          </div>
+        }
+
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="showSplitForm.set(false)">Cancel</button>
+          <button class="btn btn--primary" (click)="onSplit()" [disabled]="!canSplit">Save</button>
         </div>
       </div>
     </div>

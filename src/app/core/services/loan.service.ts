@@ -1,15 +1,16 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { Loan, LoanPayment, LoanStatus } from '../models/loan.model';
+import { ExpenseService } from './expense.service';
 
 @Injectable({ providedIn: 'root' })
 export class LoanService {
+  private readonly expenseService = inject(ExpenseService);
   private readonly _loans = signal<Loan[]>(this.loadFromStorage());
 
   readonly loans = this._loans.asReadonly();
   readonly borrowedLoans = computed(() => this._loans().filter(l => l.type === 'borrowed'));
   readonly lentLoans = computed(() => this._loans().filter(l => l.type === 'lent'));
 
-  /** Status for every loan with outstanding calculation */
   readonly loanStatuses = computed((): LoanStatus[] =>
     this._loans().map(loan => {
       const totalPaid = loan.payments.reduce((s, p) => s + p.amount, 0);
@@ -21,12 +22,10 @@ export class LoanService {
     })
   );
 
-  /** Only active (not fully resolved) loans */
   readonly activeLoans = computed(() =>
     this.loanStatuses().filter(s => s.outstanding > 0)
   );
 
-  /** Summary totals */
   readonly totalBorrowedOutstanding = computed(() =>
     this.loanStatuses()
       .filter(s => s.loan.type === 'borrowed' && s.outstanding > 0)
@@ -40,26 +39,9 @@ export class LoanService {
   );
 
   /**
-   * Balance impact per account from loans.
-   * Borrowed: +principal, -payments (net = +outstanding)
-   * Lent: -principal, +payments (net = -outstanding)
+   * @param skipExpense true for quick split (expense already created separately)
    */
-  getBalanceImpact(): Record<string, number> {
-    const impact: Record<string, number> = {};
-    for (const loan of this._loans()) {
-      const totalPaid = loan.payments.reduce((s, p) => s + p.amount, 0);
-      if (loan.type === 'borrowed') {
-        // Got money into account, payments take money out
-        impact[loan.accountId] = (impact[loan.accountId] ?? 0) + loan.amount - totalPaid;
-      } else {
-        // Gave money from account, payments bring money back
-        impact[loan.accountId] = (impact[loan.accountId] ?? 0) - loan.amount + totalPaid;
-      }
-    }
-    return impact;
-  }
-
-  addLoan(data: Omit<Loan, 'id' | 'payments' | 'createdAt'>): Loan {
+  addLoan(data: Omit<Loan, 'id' | 'payments' | 'createdAt'>, skipExpense = false): Loan {
     const loan: Loan = {
       ...data,
       id: `loan-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -69,22 +51,78 @@ export class LoanService {
     const updated = [...this._loans(), loan];
     this._loans.set(updated);
     this.persist(updated);
+
+    // Create real expense/income record
+    if (!skipExpense) {
+      if (data.type === 'borrowed') {
+        // Money came into my account → income
+        this.expenseService.addExpense({
+          type: 'income',
+          title: `Loan received — ${data.title}`,
+          amount: data.amount,
+          category: 'other-income',
+          date: data.date,
+          paymentMethod: data.accountId,
+          notes: data.notes,
+        });
+      } else {
+        // Money left my account → expense
+        this.expenseService.addExpense({
+          type: 'expense',
+          title: `Lent — ${data.title}`,
+          amount: data.amount,
+          category: 'other',
+          date: data.date,
+          paymentMethod: data.accountId,
+          notes: data.notes,
+        });
+      }
+    }
+
     return loan;
   }
 
   addPayment(loanId: string, amount: number, date: string, notes?: string): void {
-    const updated = this._loans().map(l => {
-      if (l.id !== loanId) return l;
-      const payment: LoanPayment = {
-        id: `pay-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        amount,
-        date,
-        notes,
-      };
-      return { ...l, payments: [...l.payments, payment] };
-    });
+    const loan = this._loans().find(l => l.id === loanId);
+    if (!loan) return;
+
+    const payment: LoanPayment = {
+      id: `pay-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      amount,
+      date,
+      notes,
+    };
+
+    const updated = this._loans().map(l =>
+      l.id === loanId ? { ...l, payments: [...l.payments, payment] } : l
+    );
     this._loans.set(updated);
     this.persist(updated);
+
+    // Create real expense/income record for the payment
+    if (loan.type === 'borrowed') {
+      // Paying back → money leaves my account → expense
+      this.expenseService.addExpense({
+        type: 'expense',
+        title: `Loan payment — ${loan.title}`,
+        amount,
+        category: 'other',
+        date,
+        paymentMethod: loan.accountId,
+        notes: notes ?? `Payment on: ${loan.title}`,
+      });
+    } else {
+      // Receiving repayment → money enters my account → income
+      this.expenseService.addExpense({
+        type: 'income',
+        title: `Repayment received — ${loan.title}`,
+        amount,
+        category: 'other-income',
+        date,
+        paymentMethod: loan.accountId,
+        notes: notes ?? `Repayment from: ${loan.title}`,
+      });
+    }
   }
 
   removeLoan(id: string): void {
