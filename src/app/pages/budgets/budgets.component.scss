@@ -220,6 +220,9 @@
     max-width: 100%;
     border-radius: 20px 20px 0 0;
     padding-bottom: var(--safe-bottom, 0px);
+    max-height: 85dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   &__header {

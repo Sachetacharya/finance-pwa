@@ -40,9 +40,11 @@
 
   /* Mobile: full-width bottom sheet */
   @media (max-width: 599px) {
-    max-height: 92dvh;
+    max-height: 85dvh;
     border-radius: 20px 20px 0 0;
+    padding-bottom: var(--safe-bottom, 0px);
     animation: sheetUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    -webkit-overflow-scrolling: touch;
 
     /* Drag handle */
     &::before {
@@ -196,10 +198,11 @@
   border-radius: 8px;
   background: var(--bg-primary, #f8fafc);
   color: var(--text-primary, #1e293b);
-  font-size: 0.95rem;
+  font-size: 16px; /* prevents iOS zoom on focus */
   transition: border-color 0.2s, box-shadow 0.2s;
   width: 100%;
   box-sizing: border-box;
+  -webkit-appearance: none;
 
   &:focus {
     outline: none;
