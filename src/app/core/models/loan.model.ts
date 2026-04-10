@@ -14,6 +14,7 @@ export interface Loan {
   date: string;
   notes?: string;
   payments: LoanPayment[];
+  fromSplit?: boolean;  // true = created from quick split (no initial money flow)
   createdAt: string;
 }
 

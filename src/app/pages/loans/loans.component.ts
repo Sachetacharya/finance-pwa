@@ -36,6 +36,7 @@ export class LoansComponent {
   newAccount = '';
   newDate = new Date().toISOString().split('T')[0];
   newNotes = '';
+  newAlreadyRecorded = false; // true = expense/income already in transactions
 
   // Payment form
   payFullAmount = true;
@@ -74,6 +75,7 @@ export class LoansComponent {
     this.newAccount = '';
     this.newDate = new Date().toISOString().split('T')[0];
     this.newNotes = '';
+    this.newAlreadyRecorded = false;
     this.showAddForm.set(true);
   }
 
@@ -86,7 +88,7 @@ export class LoansComponent {
       accountId: this.newAccount,
       date: this.newDate,
       notes: this.newNotes || undefined,
-    });
+    }, this.newAlreadyRecorded);
     const label = this.newType === 'borrowed' ? 'Loan added' : 'Lent record added';
     this.notification.success(label);
     this.showAddForm.set(false);
@@ -133,6 +135,7 @@ export class LoansComponent {
   splitAccount = '';
   splitCategory = 'food';
   splitDate = new Date().toISOString().split('T')[0];
+  splitAlreadyRecorded = false;
 
   get splitMyShare(): number {
     if (!this.splitTotal) return 0;
@@ -163,6 +166,7 @@ export class LoansComponent {
     this.splitAccount = '';
     this.splitCategory = 'food';
     this.splitDate = new Date().toISOString().split('T')[0];
+    this.splitAlreadyRecorded = false;
     this.showSplitForm.set(true);
   }
 
@@ -173,20 +177,25 @@ export class LoansComponent {
     const title = this.splitTitle.trim();
     const isFixed = this.splitMode === 'fixed';
 
-    // 1. Create the expense (my share)
-    this.expenseService.addExpense({
-      type: 'expense',
-      title,
-      amount: myShare,
-      category: this.splitCategory as any,
-      date: this.splitDate,
-      paymentMethod: this.splitAccount,
-      notes: isFixed
-        ? `${otherName} ${this.splitPaidBy === 'other' ? 'paid for me' : 'owes me'}`
-        : `Split with ${otherName} (${this.splitPeople} people, total ${this.splitTotal})`,
-    });
+    if (!this.splitAlreadyRecorded) {
+      if (this.splitPaidBy === 'me') {
+        // I paid the full bill → create expense for full amount
+        this.expenseService.addExpense({
+          type: 'expense',
+          title,
+          amount: this.splitTotal!,
+          category: this.splitCategory as any,
+          date: this.splitDate,
+          paymentMethod: this.splitAccount,
+          notes: isFixed
+            ? `${otherName} owes me`
+            : `Split with ${otherName} (${this.splitPeople} people, total ${this.splitTotal})`,
+        });
+      }
+      // If other paid: no expense now — money hasn't left my account yet
+    }
 
-    // 2. Create the loan (skipExpense=true — no extra income/expense for splits)
+    // 2. Create the loan (skipExpense=true for splits — component handles expense above)
     if (this.splitPaidBy === 'other') {
       this.loanService.addLoan({
         title: `${isFixed ? '' : 'Split - '}${title} (${otherName})`,

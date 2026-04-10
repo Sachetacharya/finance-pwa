@@ -39,7 +39,7 @@ export class LoanService {
   );
 
   /**
-   * @param skipExpense true for quick split (expense already created separately)
+   * @param skipExpense true for quick split (component handles expense separately)
    */
   addLoan(data: Omit<Loan, 'id' | 'payments' | 'createdAt'>, skipExpense = false): Loan {
     const loan: Loan = {
@@ -52,10 +52,9 @@ export class LoanService {
     this._loans.set(updated);
     this.persist(updated);
 
-    // Create real expense/income record
     if (!skipExpense) {
       if (data.type === 'borrowed') {
-        // Money came into my account → income
+        // Money entered my account → income
         this.expenseService.addExpense({
           type: 'income',
           title: `Loan received — ${data.title}`,
@@ -99,7 +98,7 @@ export class LoanService {
     this._loans.set(updated);
     this.persist(updated);
 
-    // Create real expense/income record for the payment
+    // Payment = real money movement → always create expense/income
     if (loan.type === 'borrowed') {
       // Paying back → money leaves my account → expense
       this.expenseService.addExpense({
@@ -109,7 +108,7 @@ export class LoanService {
         category: 'other',
         date,
         paymentMethod: loan.accountId,
-        notes: notes ?? `Payment on: ${loan.title}`,
+        notes,
       });
     } else {
       // Receiving repayment → money enters my account → income
@@ -120,7 +119,7 @@ export class LoanService {
         category: 'other-income',
         date,
         paymentMethod: loan.accountId,
-        notes: notes ?? `Repayment from: ${loan.title}`,
+        notes,
       });
     }
   }

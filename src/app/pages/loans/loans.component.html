@@ -143,6 +143,10 @@
           <label class="form-label">Notes</label>
           <input class="form-control" type="text" [(ngModel)]="newNotes" placeholder="Optional" />
         </div>
+        <label class="already-recorded-check">
+          <input type="checkbox" [(ngModel)]="newAlreadyRecorded" />
+          <span>Already recorded as {{ newType === 'borrowed' ? 'income' : 'expense' }}</span>
+        </label>
         <div class="modal__footer">
           <button class="btn btn--ghost" (click)="showAddForm.set(false)">Cancel</button>
           <button class="btn btn--primary" (click)="onAddLoan()" [disabled]="!canAddLoan">Add</button>
@@ -286,6 +290,11 @@
           <label class="form-label">Date</label>
           <input class="form-control" type="date" [(ngModel)]="splitDate" />
         </div>
+
+        <label class="already-recorded-check">
+          <input type="checkbox" [(ngModel)]="splitAlreadyRecorded" />
+          <span>Already recorded as expense</span>
+        </label>
 
         @if (splitTotal && splitTotal > 0) {
           <div class="split-preview">
