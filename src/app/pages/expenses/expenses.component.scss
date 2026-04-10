@@ -281,13 +281,13 @@
   letter-spacing: 0.04em;
 
   &--expense {
-    background: #fee2e2;
-    color: #991b1b;
+    background: var(--danger-light);
+    color: var(--color-expense);
   }
 
   &--income {
-    background: #dcfce7;
-    color: #166534;
+    background: var(--success-light);
+    color: var(--color-income);
   }
 }
 
@@ -315,16 +315,17 @@
 }
 
 .amount-cell {
+  font-family: 'DM Sans', sans-serif;
   font-weight: 700;
-  color: #ef4444 !important;
+  color: var(--color-expense) !important;
   white-space: nowrap;
 
   &--income {
-    color: #22c55e !important;
+    color: var(--color-income) !important;
   }
 
   &--transfer {
-    color: #6366f1 !important;
+    color: var(--color-transfer) !important;
   }
 }
 
@@ -520,11 +521,11 @@
   border: 1px solid var(--border-color, #e2e8f0);
 
   &--income {
-    border-left: 3px solid #22c55e;
+    border-left: 3px solid var(--color-income);
   }
 
   &--transfer {
-    border-left: 3px solid #6366f1;
+    border-left: 3px solid var(--color-transfer);
   }
 
   &__content {
@@ -598,17 +599,18 @@
   }
 
   &__amount {
+    font-family: 'DM Sans', sans-serif;
     font-size: 0.9rem;
     font-weight: 700;
-    color: #ef4444;
+    color: var(--color-expense);
     white-space: nowrap;
 
     &--income {
-      color: #22c55e;
+      color: var(--color-income);
     }
 
     &--transfer {
-      color: #6366f1;
+      color: var(--color-transfer);
     }
   }
 

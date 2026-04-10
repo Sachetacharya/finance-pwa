@@ -13,10 +13,12 @@
 }
 
 .page-title {
+  font-family: 'DM Sans', sans-serif;
   font-size: 1.75rem;
   font-weight: 800;
-  color: var(--text-primary, #1e293b);
+  color: var(--text-primary);
   margin: 0 0 4px;
+  letter-spacing: -0.02em;
 }
 
 .page-subtitle {
@@ -45,11 +47,12 @@
 }
 
 .card {
-  background: var(--bg-card, #fff);
-  border-radius: 14px;
-  border: 1px solid var(--border-color, #e2e8f0);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+  background: var(--bg-card);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
+  transition: box-shadow 0.25s var(--transition);
 
   &__header {
     display: flex;
@@ -76,7 +79,7 @@
 
   &__link {
     font-size: 0.8rem;
-    color: #6366f1;
+    color: var(--primary);
     font-weight: 600;
     text-decoration: none;
     &:hover { text-decoration: underline; }
@@ -117,7 +120,7 @@
 
   &__fill {
     height: 100%;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    background: linear-gradient(90deg, var(--primary), var(--transfer));
     border-radius: 4px;
     min-width: 2px;
     transition: width 0.6s ease;
@@ -146,12 +149,13 @@
   }
   &__meta { font-size: 0.72rem; color: var(--text-muted, #94a3b8); }
   &__amount {
+    font-family: 'DM Sans', sans-serif;
     font-size: 0.875rem;
     font-weight: 700;
-    color: #ef4444;
+    color: var(--color-expense);
     flex-shrink: 0;
 
-    &--income { color: #22c55e; }
+    &--income { color: var(--color-income); }
   }
 }
 
@@ -181,7 +185,7 @@
     margin-top: 4px;
     font-size: 0.72rem;
   }
-  &__pct { font-weight: 700; color: #22c55e; }
+  &__pct { font-weight: 700; color: var(--color-income); }
   &__remaining { color: var(--text-muted, #94a3b8); }
 }
 
@@ -193,14 +197,14 @@
 
   &__fill {
     height: 100%;
-    background: #22c55e;
+    background: var(--success);
     border-radius: 6px;
     transition: width 0.6s ease;
 
-    &--warning { background: #f59e0b; }
-    &--danger { background: #ef4444; }
+    &--warning { background: var(--warning); }
+    &--danger { background: var(--danger); }
   }
 }
 
-.text-warning { color: #f59e0b !important; }
-.text-danger { color: #ef4444 !important; }
+.text-warning { color: var(--warning) !important; }
+.text-danger { color: var(--danger) !important; }

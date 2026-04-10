@@ -82,7 +82,7 @@
     }
 
     &--active {
-      background: rgba(99, 102, 241, 0.12);
+      background: var(--sidebar-link-active-bg);
       color: var(--primary);
       font-weight: 700;
       box-shadow: inset 3px 0 0 var(--primary);

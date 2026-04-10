@@ -47,7 +47,7 @@
   }
 
   &--cash {
-    border-left: 4px solid #22c55e;
+    border-left: 4px solid var(--success);
   }
 
   &__icon {
@@ -85,12 +85,12 @@
   &__balance {
     font-size: 1.05rem;
     font-weight: 800;
-    color: #16a34a;
+    color: var(--color-income);
     white-space: nowrap;
     flex-shrink: 0;
 
     &--negative {
-      color: #ef4444;
+      color: var(--color-expense);
     }
   }
 

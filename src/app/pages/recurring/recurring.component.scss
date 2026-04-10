@@ -81,12 +81,13 @@
   }
 
   &__amount {
+    font-family: 'DM Sans', sans-serif;
     font-size: 0.95rem;
     font-weight: 700;
-    color: #ef4444;
+    color: var(--color-expense);
 
     &--income {
-      color: #22c55e;
+      color: var(--color-income);
     }
   }
 
@@ -141,7 +142,7 @@
   }
 
   input:checked+&__slider {
-    background: #6366f1;
+    background: var(--primary);
   }
 
   input:checked+&__slider::before {

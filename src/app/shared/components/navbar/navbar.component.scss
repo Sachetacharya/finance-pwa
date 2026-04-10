@@ -1,8 +1,10 @@
 .navbar {
   height: calc(var(--navbar-height, 64px) + env(safe-area-inset-top, 0px));
   padding-top: env(safe-area-inset-top, 0px);
-  background: var(--bg-card, #fff);
-  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px) saturate(1.8);
+  -webkit-backdrop-filter: blur(16px) saturate(1.8);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -141,13 +143,19 @@
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    width: 260px;
-    background: var(--bg-card, #fff);
-    border: 1px solid var(--border-color, #e2e8f0);
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    width: 280px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
     padding: 12px 0;
     z-index: 200;
+    animation: dropIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   &__title {
@@ -175,10 +183,11 @@
   }
 
   &__amount {
+    font-family: 'DM Sans', sans-serif;
     font-weight: 700;
-    color: #16a34a;
+    color: var(--color-income);
 
-    &--negative { color: #ef4444; }
+    &--negative { color: var(--color-expense); }
   }
 
   &__empty {
@@ -224,12 +233,13 @@
   transform: translateX(-50%);
   width: calc(100% - 32px);
   max-width: 520px;
-  background: var(--bg-card, #fff);
-  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--border-color);
   z-index: 301;
   overflow: hidden;
+  animation: searchIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   &__backdrop {
     position: fixed;
@@ -303,18 +313,24 @@
   }
   &__item-meta { font-size: 0.72rem; color: var(--text-muted, #94a3b8); }
   &__item-amount {
+    font-family: 'DM Sans', sans-serif;
     font-size: 0.85rem;
     font-weight: 700;
-    color: #ef4444;
+    color: var(--color-expense);
     flex-shrink: 0;
 
-    &.income { color: #22c55e; }
+    &.income { color: var(--color-income); }
   }
 
   &__empty {
     padding: 24px 18px;
     text-align: center;
     font-size: 0.85rem;
-    color: var(--text-muted, #94a3b8);
+    color: var(--text-muted);
+  }
+
+  @keyframes searchIn {
+    from { opacity: 0; transform: translateX(-50%) scale(0.97); }
+    to { opacity: 1; transform: translateX(-50%) scale(1); }
   }
 }
