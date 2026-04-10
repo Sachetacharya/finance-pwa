@@ -31,6 +31,7 @@ export class SidebarComponent {
     { path: '/analytics', label: 'Analytics', icon: '📊' },
     { path: '/recurring', label: 'Recurring', icon: '🔄' },
     { path: '/budgets', label: 'Budgets', icon: '📋' },
+    { path: '/loans', label: 'Loans', icon: '🤝' },
     { path: '/accounts', label: 'Accounts', icon: '🏦' },
   ];
 

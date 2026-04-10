@@ -1,0 +1,205 @@
+<div class="loans-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Loans</h1>
+      <p class="page-subtitle">Track money borrowed and lent</p>
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="loan-summary">
+    <div class="loan-summary__card loan-summary__card--borrowed">
+      <div class="loan-summary__label">You owe</div>
+      <div class="loan-summary__amount">{{ loanService.totalBorrowedOutstanding() | currencyFormat }}</div>
+    </div>
+    <div class="loan-summary__card loan-summary__card--lent">
+      <div class="loan-summary__label">Others owe you</div>
+      <div class="loan-summary__amount">{{ loanService.totalLentOutstanding() | currencyFormat }}</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tabs__btn" [class.tabs__btn--active]="activeTab() === 'borrowed'" (click)="activeTab.set('borrowed')">
+      Borrowed
+    </button>
+    <button class="tabs__btn" [class.tabs__btn--active]="activeTab() === 'lent'" (click)="activeTab.set('lent')">
+      Lent
+    </button>
+    <button class="btn btn--primary btn--sm tabs__add" (click)="openAdd(activeTab())">
+      + {{ activeTab() === 'borrowed' ? 'Add Loan' : 'Add Lent' }}
+    </button>
+  </div>
+
+  <!-- Loan cards -->
+  @for (s of filteredStatuses; track s.loan.id) {
+    <div class="loan-card" [class.loan-card--resolved]="s.outstanding <= 0">
+      <div class="loan-card__top">
+        <div class="loan-card__info">
+          <span class="loan-card__icon">{{ s.loan.type === 'borrowed' ? '🏦' : '🤝' }}</span>
+          <div>
+            <div class="loan-card__title">{{ s.loan.title }}</div>
+            <div class="loan-card__meta">
+              {{ s.loan.date }} · {{ accountService.getLabel(s.loan.accountId) }}
+              @if (s.loan.notes) { · {{ s.loan.notes }} }
+            </div>
+          </div>
+        </div>
+        <div class="loan-card__actions">
+          @if (s.outstanding > 0) {
+            <button class="loan-card__pay-btn" (click)="openPayment(s)">
+              {{ s.loan.type === 'borrowed' ? 'Pay' : 'Received' }}
+            </button>
+          } @else {
+            <span class="loan-card__resolved-badge">Resolved</span>
+          }
+          <button class="loan-card__delete" (click)="deletingLoanId.set(s.loan.id)" title="Remove">✕</button>
+        </div>
+      </div>
+
+      <div class="loan-card__bar">
+        <div class="loan-card__bar-fill"
+          [class.loan-card__bar-fill--full]="s.percentage >= 100"
+          [style.width.%]="s.percentage > 100 ? 100 : s.percentage">
+        </div>
+      </div>
+
+      <div class="loan-card__bottom">
+        <div class="loan-card__amounts">
+          <span class="loan-card__paid">{{ s.totalPaid | currencyFormat }} paid</span>
+          <span class="loan-card__separator">of</span>
+          <span class="loan-card__total">{{ s.loan.amount | currencyFormat }}</span>
+        </div>
+        @if (s.outstanding > 0) {
+          <span class="loan-card__outstanding">{{ s.outstanding | currencyFormat }} remaining</span>
+        }
+      </div>
+
+      <!-- Payment history -->
+      @if (s.loan.payments.length) {
+        <details class="loan-card__history">
+          <summary>{{ s.loan.payments.length }} payment{{ s.loan.payments.length > 1 ? 's' : '' }}</summary>
+          <div class="loan-card__payments">
+            @for (p of s.loan.payments; track p.id) {
+              <div class="loan-card__payment">
+                <span>{{ p.date }}</span>
+                <span>{{ p.amount | currencyFormat }}</span>
+                @if (p.notes) { <span class="loan-card__payment-note">{{ p.notes }}</span> }
+              </div>
+            }
+          </div>
+        </details>
+      }
+    </div>
+  } @empty {
+    <div class="empty-state">
+      <div class="empty-state__icon">{{ activeTab() === 'borrowed' ? '🏦' : '🤝' }}</div>
+      <h3 class="empty-state__title">No {{ activeTab() === 'borrowed' ? 'loans' : 'lent records' }}</h3>
+      <p class="empty-state__text">
+        {{ activeTab() === 'borrowed' ? 'Track money you borrow from banks or people' : 'Track money you lend to others' }}
+      </p>
+    </div>
+  }
+</div>
+
+<!-- Add loan modal -->
+@if (showAddForm()) {
+  <div class="modal-overlay" lockScroll (click)="showAddForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">{{ newType === 'borrowed' ? 'Add Loan (Borrowed)' : 'Record Lent Money' }}</h2>
+        <button class="modal__close" (click)="showAddForm.set(false)">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label class="form-label">{{ newType === 'borrowed' ? 'Loan from (who/where)' : 'Lent to (who)' }} *</label>
+          <input class="form-control" type="text" [(ngModel)]="newTitle"
+            placeholder="{{ newType === 'borrowed' ? 'e.g. Home Loan - Siddhartha Bank' : 'e.g. Ram Sharma' }}" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount (NPR) *</label>
+            <input class="form-control" type="number" [(ngModel)]="newAmount"
+              placeholder="0.00" min="0.01" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input class="form-control" type="date" [(ngModel)]="newDate" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account *</label>
+          <select class="form-control" [(ngModel)]="newAccount">
+            <option value="">{{ newType === 'borrowed' ? 'Money goes to...' : 'Money comes from...' }}</option>
+            @for (acc of allAccounts; track acc.id) {
+              <option [value]="acc.id">{{ acc.icon }} {{ acc.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input class="form-control" type="text" [(ngModel)]="newNotes" placeholder="Optional" />
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="showAddForm.set(false)">Cancel</button>
+          <button class="btn btn--primary" (click)="onAddLoan()" [disabled]="!canAddLoan">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Payment modal -->
+@if (payingLoan(); as paying) {
+  <div class="modal-overlay" lockScroll (click)="payingLoan.set(null)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">
+          {{ paying.loan.type === 'borrowed' ? 'Make Payment' : 'Record Repayment' }}
+        </h2>
+        <button class="modal__close" (click)="payingLoan.set(null)">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="pay-info">
+          <span class="pay-info__label">{{ paying.loan.title }}</span>
+          <span class="pay-info__outstanding">Outstanding: {{ paying.outstanding | currencyFormat }}</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount (NPR) *</label>
+            <input class="form-control" type="number" [(ngModel)]="payAmount"
+              placeholder="0.00" min="0.01" [max]="paying.outstanding" step="0.01" />
+            @if (payAmount && payAmount > paying.outstanding) {
+              <span class="form-error">Cannot exceed outstanding ({{ paying.outstanding | currencyFormat }})</span>
+            }
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input class="form-control" type="date" [(ngModel)]="payDate" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input class="form-control" type="text" [(ngModel)]="payNotes" placeholder="e.g. EMI #3" />
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="payFull()">Pay Full</button>
+          <button class="btn btn--primary" (click)="onPay()" [disabled]="!canPay">
+            {{ paying.loan.type === 'borrowed' ? 'Pay' : 'Mark Received' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete confirmation -->
+@if (deletingLoanId()) {
+  <app-confirm-dialog
+    title="Remove Loan"
+    message="Remove this loan and all its payment history?"
+    confirmText="Remove"
+    (confirmed)="onDelete()"
+    (cancelled)="deletingLoanId.set(null)"
+  />
+}
