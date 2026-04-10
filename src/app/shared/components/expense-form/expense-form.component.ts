@@ -10,11 +10,12 @@ import {
 import { AccountService } from '../../../core/services/account.service';
 import { CurrencyFormatPipe } from '../../pipes/currency-format.pipe';
 import { LockScrollDirective } from '../../directives/lock-scroll.directive';
+import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-expense-form',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyFormatPipe, LockScrollDirective],
+  imports: [ReactiveFormsModule, CurrencyFormatPipe, LockScrollDirective, NgIcon],
   templateUrl: './expense-form.component.html',
   styleUrl: './expense-form.component.scss',
 })

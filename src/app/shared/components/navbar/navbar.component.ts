@@ -7,12 +7,13 @@ import { ExpenseService } from '../../../core/services/expense.service';
 import { CurrencyFormatPipe } from '../../pipes/currency-format.pipe';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { LockScrollDirective } from '../../directives/lock-scroll.directive';
+import { NgIcon } from '@ng-icons/core';
 import { Expense, ALL_CATEGORY_LABELS } from '../../../core/models/expense.model';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterModule, CurrencyFormatPipe, ConfirmDialogComponent, LockScrollDirective],
+  imports: [RouterModule, CurrencyFormatPipe, ConfirmDialogComponent, LockScrollDirective, NgIcon],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })

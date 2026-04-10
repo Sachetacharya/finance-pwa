@@ -164,6 +164,14 @@ svg {
   max-width: 100%;
 }
 
+/* ng-icon inherits parent text color */
+ng-icon {
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
 a {
   color: var(--primary);
   text-decoration: none;

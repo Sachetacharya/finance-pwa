@@ -6,6 +6,7 @@ import { ExportService } from '../../core/services/export.service';
 import { ExpenseFormComponent } from '../../shared/components/expense-form/expense-form.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
+import { NgIcon } from '@ng-icons/core';
 import {
   Expense,
   ExpenseFilter,
@@ -26,7 +27,7 @@ type SortDir = 'asc' | 'desc';
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [FormsModule, ExpenseFormComponent, ConfirmDialogComponent, CurrencyFormatPipe],
+  imports: [FormsModule, ExpenseFormComponent, ConfirmDialogComponent, CurrencyFormatPipe, NgIcon],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
 })

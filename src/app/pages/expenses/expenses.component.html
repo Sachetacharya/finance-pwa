@@ -10,8 +10,8 @@
       </p>
     </div>
     <div class="header-actions">
-      <button class="btn btn--ghost btn--sm" (click)="exportCSV()">📥 CSV</button>
-      <button class="btn btn--ghost btn--sm" (click)="exportPrint()">🖨️ Print</button>
+      <button class="btn btn--ghost btn--sm" (click)="exportCSV()"><ng-icon name="lucideDownload" size="14" /> CSV</button>
+      <button class="btn btn--ghost btn--sm" (click)="exportPrint()"><ng-icon name="lucideReceipt" size="14" /> Print</button>
       <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Add</button>
     </div>
   </div>
@@ -21,7 +21,7 @@
     <input
       class="form-control toolbar__search"
       type="text"
-      placeholder="🔍 Search by title or notes..."
+      placeholder="Search by title or notes..."
       [value]="filter().search ?? ''"
       (input)="onFilterChange('search', $any($event.target).value)"
     />
@@ -31,7 +31,7 @@
         [class.filter-toggle--active]="showFilters() || activeFilterCount() > 0"
         (click)="showFilters.update(v => !v)"
       >
-        ⚙ Filters
+        <ng-icon name="lucideFilter" size="14" /> Filters
         @if (activeFilterCount() > 0) {
           <span class="filter-badge">{{ activeFilterCount() }}</span>
         }
@@ -43,7 +43,7 @@
           <div class="filter-panel__header">
             <span class="filter-panel__title">Filters</span>
             @if (activeFilterCount() > 0) {
-              <button class="filter-panel__clear" (click)="clearFilters()">✕ Clear all</button>
+              <button class="filter-panel__clear" (click)="clearFilters()"><ng-icon name="lucideX" size="12" /> Clear all</button>
             }
           </div>
           <div class="filter-grid">
@@ -136,14 +136,14 @@
               </td>
               <td>
                 <span class="category-badge">
-                  {{ allCategoryIcons[expense.category] }} {{ allCategoryLabels[expense.category] }}
+                  <ng-icon [name]="allCategoryIcons[expense.category]" size="14" /> {{ allCategoryLabels[expense.category] }}
                 </span>
               </td>
               <td class="amount-cell"
                   [class.amount-cell--income]="expense.type === 'income'"
                   [class.amount-cell--transfer]="expense.type === 'transfer'">
                 @if (expense.type === 'income') { + }
-                @else if (expense.type === 'transfer') { 🔄 }
+                @else if (expense.type === 'transfer') { <ng-icon name="lucideArrowRightLeft" size="12" /> }
                 @else { - }
                 {{ expense.amount | currencyFormat }}
               </td>
@@ -151,21 +151,21 @@
                 <span class="payment-badge">
                   {{ accountService.getLabel(expense.paymentMethod) }}
                   @if (expense.toAccount) {
-                    → {{ accountService.getLabel(expense.toAccount) }}
+                    <ng-icon name="lucideArrowRightLeft" size="10" /> {{ accountService.getLabel(expense.toAccount) }}
                   }
                 </span>
               </td>
               <td class="notes-cell" [title]="expense.notes ?? ''">{{ expense.notes || '—' }}</td>
               <td class="actions-cell">
-                <button class="action-btn" (click)="editingExpense.set(expense)" title="Edit">✏️</button>
-                <button class="action-btn action-btn--delete" (click)="deletingExpenseId.set(expense.id)" title="Delete">🗑️</button>
+                <button class="action-btn" (click)="editingExpense.set(expense)" title="Edit"><ng-icon name="lucidePencil" size="16" /></button>
+                <button class="action-btn action-btn--delete" (click)="deletingExpenseId.set(expense.id)" title="Delete"><ng-icon name="lucideTrash2" size="16" /></button>
               </td>
             </tr>
           } @empty {
             <tr>
               <td colspan="7" class="empty-row">
                 <div class="empty-state">
-                  <span class="empty-icon">📭</span>
+                  <span class="empty-icon"><ng-icon name="lucidePackage" size="36" /></span>
                   <p>No expenses found matching your filters.</p>
                   <button class="btn btn--ghost btn--sm" (click)="clearFilters()">Clear Filters</button>
                 </div>
@@ -187,7 +187,7 @@
           (touchend)="onTouchEnd(expense.id)">
           <div class="m-card__content" [style.transform]="'translateX(' + getSwipeX(expense.id) + 'px)'">
             <div class="m-card__left">
-              <span class="m-card__icon">{{ allCategoryIcons[expense.category] }}</span>
+              <span class="m-card__icon"><ng-icon [name]="allCategoryIcons[expense.category]" size="20" /></span>
               <div class="m-card__info">
                 <div class="m-card__title">{{ expense.title }}</div>
                 <div class="m-card__meta">
@@ -200,20 +200,20 @@
               <div class="m-card__amount"
                 [class.m-card__amount--income]="expense.type === 'income'"
                 [class.m-card__amount--transfer]="expense.type === 'transfer'">
-                @if (expense.type === 'income') { + } @else if (expense.type === 'transfer') { 🔄 } @else { - }
+                @if (expense.type === 'income') { + } @else if (expense.type === 'transfer') { <ng-icon name="lucideArrowRightLeft" size="12" /> } @else { - }
                 {{ expense.amount | currencyFormat }}
               </div>
               <div class="m-card__actions">
-                <button class="action-btn" (click)="editingExpense.set(expense)">✏️</button>
-                <button class="action-btn action-btn--delete" (click)="deletingExpenseId.set(expense.id)">🗑️</button>
+                <button class="action-btn" (click)="editingExpense.set(expense)"><ng-icon name="lucidePencil" size="16" /></button>
+                <button class="action-btn action-btn--delete" (click)="deletingExpenseId.set(expense.id)"><ng-icon name="lucideTrash2" size="16" /></button>
               </div>
             </div>
           </div>
-          <div class="m-card__swipe-action">🗑️ Delete</div>
+          <div class="m-card__swipe-action"><ng-icon name="lucideTrash2" size="16" /> Delete</div>
         </div>
       } @empty {
         <div class="empty-state">
-          <span class="empty-icon">📭</span>
+          <span class="empty-icon"><ng-icon name="lucidePackage" size="36" /></span>
           <p>No expenses found.</p>
           <button class="btn btn--ghost btn--sm" (click)="clearFilters()">Clear Filters</button>
         </div>

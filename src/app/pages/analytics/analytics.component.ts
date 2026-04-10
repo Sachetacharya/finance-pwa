@@ -4,6 +4,7 @@ import { AccountService } from '../../core/services/account.service';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { ChartComponent } from '../../shared/components/chart/chart.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
+import { NgIcon } from '@ng-icons/core';
 import {
   CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS,
   INCOME_SOURCE_LABELS, INCOME_SOURCE_ICONS,
@@ -14,7 +15,7 @@ import { ChartConfiguration } from 'chart.js';
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [StatCardComponent, ChartComponent, CurrencyFormatPipe],
+  imports: [StatCardComponent, ChartComponent, CurrencyFormatPipe, NgIcon],
   templateUrl: './analytics.component.html',
   styleUrl: './analytics.component.scss',
 })

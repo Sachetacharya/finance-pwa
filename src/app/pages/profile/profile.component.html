@@ -27,7 +27,8 @@
       </div>
     </div>
     <button class="setting-card__action" (click)="theme.toggle()">
-      {{ theme.isDarkMode() ? '☀️ Light' : '🌙 Dark' }}
+      <ng-icon [name]="theme.isDarkMode() ? 'lucideSun' : 'lucideMoon'" size="16" />
+      {{ theme.isDarkMode() ? 'Light' : 'Dark' }}
     </button>
   </div>
 

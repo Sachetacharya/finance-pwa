@@ -62,17 +62,17 @@ export const CATEGORY_LABELS: Record<ExpenseCategory, string> = {
 };
 
 export const CATEGORY_ICONS: Record<ExpenseCategory, string> = {
-  food: '🍕',
-  transport: '🚗',
-  entertainment: '🎬',
-  shopping: '🛍️',
-  health: '💊',
-  utilities: '💡',
-  housing: '🏠',
-  education: '📚',
-  travel: '✈️',
-  personal: '💇',
-  other: '📦',
+  food: 'lucideUtensilsCrossed',
+  transport: 'lucideCar',
+  entertainment: 'lucideFilm',
+  shopping: 'lucideShoppingBag',
+  health: 'lucideHeart',
+  utilities: 'lucideZap',
+  housing: 'lucideHome',
+  education: 'lucideBookOpen',
+  travel: 'lucidePlane',
+  personal: 'lucideUser',
+  other: 'lucidePackage',
 };
 
 export const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
@@ -99,12 +99,12 @@ export const INCOME_SOURCE_LABELS: Record<IncomeSource, string> = {
 };
 
 export const INCOME_SOURCE_ICONS: Record<IncomeSource, string> = {
-  salary: '💼',
-  freelance: '💻',
-  investment: '📈',
-  'return-pay': '🔄',
-  gift: '🎁',
-  'other-income': '💰',
+  salary: 'lucideBriefcase',
+  freelance: 'lucideLaptop',
+  investment: 'lucideTrendingUp',
+  'return-pay': 'lucideRefreshCw',
+  gift: 'lucideGift',
+  'other-income': 'lucideCircleDollarSign',
 };
 
 export const ALL_CATEGORY_LABELS: Record<RecordCategory, string> = {
@@ -116,5 +116,5 @@ export const ALL_CATEGORY_LABELS: Record<RecordCategory, string> = {
 export const ALL_CATEGORY_ICONS: Record<RecordCategory, string> = {
   ...CATEGORY_ICONS,
   ...INCOME_SOURCE_ICONS,
-  transfer: '🔄',
+  transfer: 'lucideArrowRightLeft',
 };

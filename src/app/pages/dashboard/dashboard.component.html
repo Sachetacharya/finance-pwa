@@ -14,7 +14,7 @@
       title="This Month Spent"
       [value]="expenseService.currentMonthTotal() | currencyFormat"
       subtitle="Expenses this month"
-      icon="💳"
+      icon="lucideCreditCard"
       [trend]="monthChangePct()"
       trendLabel="vs last month"
       color="primary"
@@ -23,21 +23,21 @@
       title="This Month Income"
       [value]="expenseService.currentMonthIncome() | currencyFormat"
       subtitle="Income this month"
-      icon="💰"
+      icon="lucideCircleDollarSign"
       color="success"
     />
     <app-stat-card
       title="Net Balance"
       [value]="expenseService.netBalance() | currencyFormat"
       subtitle="Income minus expenses"
-      icon="⚖️"
+      icon="lucideArrowLeftRight"
       color="info"
     />
     <app-stat-card
       title="Transactions"
       [value]="expenseService.currentMonthExpenses().length.toString()"
       subtitle="Expenses this month"
-      icon="🧾"
+      icon="lucideReceipt"
       color="warning"
     />
   </div>
@@ -75,7 +75,7 @@
         @for (s of budgetService.budgetStatuses(); track s.budget.id) {
           <div class="budget-item">
             <div class="budget-item__header">
-              <span class="budget-item__name">{{ categoryIcons[s.budget.category] }} {{ categoryLabels[s.budget.category] }}</span>
+              <span class="budget-item__name"><ng-icon [name]="categoryIcons[s.budget.category]" size="16" /> {{ categoryLabels[s.budget.category] }}</span>
               <span class="budget-item__values">{{ s.spent | currencyFormat }} / {{ s.budget.monthlyLimit | currencyFormat }}</span>
             </div>
             <div class="budget-bar">
@@ -113,7 +113,7 @@
         @for (cat of expenseService.categoryTotals().slice(0, 5); track cat.category) {
           <div class="category-item">
             <div class="category-item__left">
-              <span class="category-item__icon">{{ categoryIcons[cat.category] }}</span>
+              <span class="category-item__icon"><ng-icon [name]="categoryIcons[cat.category]" size="18" /></span>
               <div>
                 <div class="category-item__name">{{ categoryLabels[cat.category] }}</div>
                 <div class="category-item__count">{{ cat.count }} transactions</div>
@@ -139,7 +139,7 @@
       <div class="recent-list">
         @for (expense of recentExpenses(); track expense.id) {
           <div class="recent-item">
-            <div class="recent-item__icon">{{ allCategoryIcons[expense.category] }}</div>
+            <div class="recent-item__icon"><ng-icon [name]="allCategoryIcons[expense.category]" size="20" /></div>
             <div class="recent-item__info">
               <div class="recent-item__title">{{ expense.title }}</div>
               <div class="recent-item__meta">{{ expense.date }} · {{ allCategoryLabels[expense.category] }}</div>

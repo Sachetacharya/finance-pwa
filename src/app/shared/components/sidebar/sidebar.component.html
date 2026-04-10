@@ -1,6 +1,6 @@
 <aside class="sidebar" [class.sidebar--open]="isOpen()">
   <div class="sidebar__brand">
-    <span class="sidebar__logo">💰</span>
+    <ng-icon name="lucideCircleDollarSign" class="sidebar__logo" size="28" />
     <div>
       <div class="sidebar__app-name">FinanceApp</div>
       <div class="sidebar__app-tagline">Expense Manager</div>
@@ -17,7 +17,7 @@
         (click)="onNavClick()"
         [attr.aria-label]="item.label"
       >
-        <span class="sidebar__icon" aria-hidden="true">{{ item.icon }}</span>
+        <ng-icon [name]="item.icon" class="sidebar__icon" size="20" aria-hidden="true" />
         <span class="sidebar__label">{{ item.label }}</span>
       </a>
     }
@@ -25,7 +25,7 @@
 
   <div class="sidebar__footer">
     <button class="sidebar__theme-btn" (click)="theme.toggle()" [attr.aria-label]="theme.isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'">
-      <span class="sidebar__theme-icon">{{ theme.isDarkMode() ? '☀️' : '🌙' }}</span>
+      <ng-icon [name]="theme.isDarkMode() ? 'lucideSun' : 'lucideMoon'" size="18" />
       <span class="sidebar__theme-label">{{ theme.isDarkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
     </button>
   </div>

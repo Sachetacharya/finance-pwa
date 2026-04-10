@@ -4,10 +4,12 @@ import { AuthService } from '../../core/auth/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { PwaService } from '../../core/services/pwa.service';
+import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
+  imports: [NgIcon],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })

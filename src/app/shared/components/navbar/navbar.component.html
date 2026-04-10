@@ -1,42 +1,43 @@
 <nav class="navbar">
   <div class="navbar__left">
     <button class="navbar__menu-btn" (click)="toggleSidebar.emit()" aria-label="Toggle sidebar">
-      <span class="hamburger" [class.open]="sidebarOpen()">
-        <span></span><span></span><span></span>
-      </span>
+      <ng-icon name="lucideMenu" size="20" />
     </button>
   </div>
 
   <div class="navbar__right">
     @if (!pwa.isOnline()) {
       <div class="navbar__badge navbar__badge--offline" title="You are offline">
-        <span>📵</span>
+        <ng-icon name="lucideWifiOff" size="14" />
         <span class="badge-text">Offline</span>
       </div>
     }
 
     <!-- Global search -->
     <button class="navbar__icon-btn" (click)="openSearch()" title="Search (/)">
-      🔍
+      <ng-icon name="lucideSearch" size="20" />
     </button>
 
     <!-- Account balances dropdown -->
     <div class="balance-dropdown">
       <button class="navbar__icon-btn" (click)="toggleBalances()" title="Account Balances">
-        💰
+        <ng-icon name="lucideWallet" size="20" />
       </button>
       @if (showBalances()) {
         <div class="balance-dropdown__panel">
           <div class="balance-dropdown__title">Account Balances</div>
           <div class="balance-dropdown__item">
-            <span class="balance-dropdown__name">💵 Cash</span>
+            <span class="balance-dropdown__name"><ng-icon name="lucideBanknote" size="16" /> Cash</span>
             <span class="balance-dropdown__amount" [class.balance-dropdown__amount--negative]="accountService.accountBalances()['cash'] < 0">
               {{ accountService.accountBalances()['cash'] | currencyFormat }}
             </span>
           </div>
           @for (acc of accountService.accounts(); track acc.id) {
             <div class="balance-dropdown__item">
-              <span class="balance-dropdown__name">{{ acc.type === 'bank' ? '🏦' : '📱' }} {{ acc.name }}</span>
+              <span class="balance-dropdown__name">
+                <ng-icon [name]="acc.type === 'bank' ? 'lucideLandmark' : 'lucideSmartphone'" size="16" />
+                {{ acc.name }}
+              </span>
               <span class="balance-dropdown__amount" [class.balance-dropdown__amount--negative]="accountService.accountBalances()[acc.id] < 0">
                 {{ accountService.accountBalances()[acc.id] | currencyFormat }}
               </span>
@@ -52,7 +53,7 @@
 
     @if (pwa.canInstall()) {
       <button class="btn btn--ghost btn--sm navbar__install" (click)="pwa.installApp()">
-        ⬇ Install App
+        <ng-icon name="lucideDownload" size="14" /> Install
       </button>
     }
 
@@ -67,7 +68,7 @@
     </a>
 
     <button class="navbar__icon-btn" (click)="confirmLogout()" title="Sign out" aria-label="Sign out">
-      🚪
+      <ng-icon name="lucideLogOut" size="20" />
     </button>
   </div>
 </nav>
@@ -76,7 +77,7 @@
   <div class="global-search__backdrop" lockScroll (click)="closeSearch()"></div>
   <div class="global-search">
     <div class="global-search__header">
-      <span class="global-search__icon">🔍</span>
+      <ng-icon name="lucideSearch" size="20" class="global-search__icon" />
       <input
         class="global-search__input"
         type="text"
@@ -91,7 +92,7 @@
       <div class="global-search__results">
         @for (r of searchResults(); track r.id) {
           <button class="global-search__item" (click)="goToResult(r)">
-            <span class="global-search__item-icon">{{ r.type === 'income' ? '💰' : r.type === 'transfer' ? '🔄' : '💸' }}</span>
+            <ng-icon [name]="r.type === 'income' ? 'lucideTrendingUp' : r.type === 'transfer' ? 'lucideArrowRightLeft' : 'lucideTrendingDown'" size="18" class="global-search__item-icon" />
             <div class="global-search__item-info">
               <div class="global-search__item-title">{{ r.title }}</div>
               <div class="global-search__item-meta">{{ r.date }} · {{ accountService.getLabel(r.paymentMethod) }}</div>

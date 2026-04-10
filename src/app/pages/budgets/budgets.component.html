@@ -13,7 +13,7 @@
     <div class="budget-card" [class.budget-card--warning]="s.percentage >= 80 && s.percentage < 100" [class.budget-card--danger]="s.percentage >= 100">
       <div class="budget-card__top">
         <div class="budget-card__info">
-          <span class="budget-card__icon">{{ categoryIcons[s.budget.category] }}</span>
+          <span class="budget-card__icon"><ng-icon [name]="categoryIcons[s.budget.category]" size="20" /></span>
           <div>
             <div class="budget-card__name">{{ categoryLabels[s.budget.category] }}</div>
             <div class="budget-card__meta">{{ s.spent | currencyFormat }} of {{ s.budget.monthlyLimit | currencyFormat }}</div>
@@ -26,7 +26,7 @@
             [class.text-over]="s.percentage >= 100">
             {{ s.percentage }}%
           </div>
-          <button class="budget-card__remove" (click)="onRemove(s.budget.category)" title="Remove budget">✕</button>
+          <button class="budget-card__remove" (click)="onRemove(s.budget.category)" title="Remove budget"><ng-icon name="lucideX" size="14" /></button>
         </div>
       </div>
       <div class="budget-card__bar">
@@ -64,7 +64,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h2 class="modal__title">Set Budget</h2>
-        <button class="modal__close" (click)="showAddForm.set(false)">✕</button>
+        <button class="modal__close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
       </div>
       <div class="modal__body">
         <div class="form-group">

@@ -7,13 +7,15 @@
       }
     </div>
     @if (icon()) {
-      <div class="stat-card__icon">{{ icon() }}</div>
+      <div class="stat-card__icon">
+        <ng-icon [name]="icon()" size="22" />
+      </div>
     }
   </div>
   <div class="stat-card__value">{{ value() }}</div>
   @if (trend() !== null) {
     <div class="stat-card__trend" [class.positive]="trend()! >= 0" [class.negative]="trend()! < 0">
-      <span class="trend-arrow">{{ trend()! >= 0 ? '↑' : '↓' }}</span>
+      <ng-icon [name]="trend()! >= 0 ? 'lucideTrendingUp' : 'lucideTrendingDown'" size="14" />
       <span>{{ trend()! | number:'1.1-1' }}% {{ trendLabel() }}</span>
     </div>
   } @else if (trendLabel()) {

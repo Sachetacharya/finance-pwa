@@ -6,11 +6,12 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
+import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
-  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe, LockScrollDirective],
+  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe, LockScrollDirective, NgIcon],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.scss',
 })

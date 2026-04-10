@@ -11,11 +11,12 @@ import {
   ALL_CATEGORY_LABELS, ALL_CATEGORY_ICONS,
 } from '../../core/models/expense.model';
 import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
+import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-recurring',
   standalone: true,
-  imports: [FormsModule, CurrencyFormatPipe, ConfirmDialogComponent, LockScrollDirective],
+  imports: [FormsModule, CurrencyFormatPipe, ConfirmDialogComponent, LockScrollDirective, NgIcon],
   templateUrl: './recurring.component.html',
   styleUrl: './recurring.component.scss',
 })

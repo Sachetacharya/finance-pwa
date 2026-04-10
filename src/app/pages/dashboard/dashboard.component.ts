@@ -8,6 +8,7 @@ import { StatCardComponent } from '../../shared/components/stat-card/stat-card.c
 import { ChartComponent } from '../../shared/components/chart/chart.component';
 import { ExpenseFormComponent } from '../../shared/components/expense-form/expense-form.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
+import { NgIcon } from '@ng-icons/core';
 import { Expense, CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS, ALL_CATEGORY_LABELS, ALL_CATEGORY_ICONS } from '../../core/models/expense.model';
 import { formatCurrency } from '../../shared/utils/currency.utils';
 import { ChartConfiguration } from 'chart.js';
@@ -15,7 +16,7 @@ import { ChartConfiguration } from 'chart.js';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterModule, StatCardComponent, ChartComponent, ExpenseFormComponent, CurrencyFormatPipe],
+  imports: [RouterModule, StatCardComponent, ChartComponent, ExpenseFormComponent, CurrencyFormatPipe, NgIcon],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })

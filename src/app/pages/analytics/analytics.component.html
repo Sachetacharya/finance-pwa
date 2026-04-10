@@ -20,21 +20,21 @@
       title="Avg Monthly Expenses"
       [value]="avgMonthlyExpense() | currencyFormat"
       subtitle="Per month spending"
-      icon="💸"
+      icon="lucideTrendingDown"
       color="danger"
     />
     <app-stat-card
       title="Avg Monthly Income"
       [value]="avgMonthlyIncome() | currencyFormat"
       subtitle="Per month income"
-      icon="💰"
+      icon="lucideTrendingUp"
       color="success"
     />
     <app-stat-card
       title="Net Balance"
       [value]="expenseService.netBalance() | currencyFormat"
       subtitle="Total income minus expenses"
-      icon="⚖️"
+      icon="lucideArrowLeftRight"
       color="info"
     />
     @if (highestExpenseMonth()) {
@@ -42,7 +42,7 @@
         title="Highest Expense Month"
         [value]="highestExpenseMonth()!.total | currencyFormat"
         [subtitle]="highestExpenseMonth()!.month + ' ' + highestExpenseMonth()!.year"
-        icon="📊"
+        icon="lucidePieChart"
         color="warning"
       />
     }
@@ -96,7 +96,7 @@
           <tbody>
             @for (cat of expenseService.categoryTotals(); track cat.category) {
               <tr>
-                <td><span class="cat-label">{{ categoryIcons[cat.category] }} {{ categoryLabels[cat.category] }}</span></td>
+                <td><span class="cat-label"><ng-icon [name]="categoryIcons[cat.category]" size="14" /> {{ categoryLabels[cat.category] }}</span></td>
                 <td class="center">{{ cat.count }}</td>
                 <td class="amount">{{ cat.total | currencyFormat }}</td>
                 <td>
@@ -142,7 +142,7 @@
           <tbody>
             @for (src of expenseService.incomeSourceTotals(); track src.source) {
               <tr>
-                <td><span class="cat-label cat-label--income">{{ incomeSourceIcons[src.source] }} {{ incomeSourceLabels[src.source] }}</span></td>
+                <td><span class="cat-label cat-label--income"><ng-icon [name]="incomeSourceIcons[src.source]" size="14" /> {{ incomeSourceLabels[src.source] }}</span></td>
                 <td class="center">{{ src.count }}</td>
                 <td class="amount amount--income">{{ src.total | currencyFormat }}</td>
                 <td>

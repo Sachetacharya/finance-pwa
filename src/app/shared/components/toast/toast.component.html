@@ -1,9 +1,11 @@
 <div class="toast-container" aria-live="polite" aria-label="Notifications">
   @for (toast of notificationService.toasts(); track trackById($index, toast)) {
     <div class="toast toast--{{ toast.type }}" role="alert">
-      <span class="toast__icon">{{ getIcon(toast.type) }}</span>
+      <ng-icon [name]="getIcon(toast.type)" size="16" class="toast__icon" />
       <span class="toast__message">{{ toast.message }}</span>
-      <button class="toast__close" (click)="dismiss(toast.id)" aria-label="Dismiss notification">✕</button>
+      <button class="toast__close" (click)="dismiss(toast.id)" aria-label="Dismiss notification">
+        <ng-icon name="lucideX" size="14" />
+      </button>
     </div>
   }
 </div>

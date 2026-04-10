@@ -5,7 +5,7 @@
       <p class="page-subtitle">Manage your bank accounts and wallets</p>
     </div>
     <div class="page-header__actions">
-      <button class="btn btn--outline" (click)="openTransfer()">🔄 Transfer</button>
+      <button class="btn btn--outline" (click)="openTransfer()"><ng-icon name="lucideArrowRightLeft" size="16" /> Transfer</button>
       <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Add Account</button>
     </div>
   </div>
@@ -20,7 +20,7 @@
     <div class="account-card__balance" [class.account-card__balance--negative]="accountService.accountBalances()['cash'] < 0">
       {{ accountService.accountBalances()['cash'] | currencyFormat }}
     </div>
-    <button class="account-card__action" (click)="openTransfer('cash')" title="Transfer from Cash">🔄</button>
+    <button class="account-card__action" (click)="openTransfer('cash')" title="Transfer from Cash"><ng-icon name="lucideArrowRightLeft" size="16" /></button>
   </div>
 
   <!-- User accounts -->
@@ -34,8 +34,8 @@
       <div class="account-card__balance" [class.account-card__balance--negative]="accountService.accountBalances()[acc.id] < 0">
         {{ accountService.accountBalances()[acc.id] | currencyFormat }}
       </div>
-      <button class="account-card__action" (click)="openTransfer(acc.id)" title="Transfer from {{ acc.name }}">🔄</button>
-      <button class="account-card__delete" (click)="deletingAccountId.set(acc.id)" title="Delete account">🗑️</button>
+      <button class="account-card__action" (click)="openTransfer(acc.id)" title="Transfer from {{ acc.name }}"><ng-icon name="lucideArrowRightLeft" size="16" /></button>
+      <button class="account-card__delete" (click)="deletingAccountId.set(acc.id)" title="Delete account"><ng-icon name="lucideTrash2" size="16" /></button>
     </div>
   } @empty {
     <div class="empty-state">
@@ -63,7 +63,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h2 class="modal__title">Add Account</h2>
-        <button class="modal__close" (click)="showAddForm.set(false)">✕</button>
+        <button class="modal__close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
       </div>
       <div class="modal__body">
         <div class="form-group">
@@ -97,8 +97,8 @@
   <div class="modal-overlay" lockScroll (click)="showTransferForm.set(false)">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
-        <h2 class="modal__title">🔄 Transfer Money</h2>
-        <button class="modal__close" (click)="showTransferForm.set(false)">✕</button>
+        <h2 class="modal__title"><ng-icon name="lucideArrowRightLeft" size="16" /> Transfer Money</h2>
+        <button class="modal__close" (click)="showTransferForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
       </div>
       <div class="modal__body">
         <div class="form-group">

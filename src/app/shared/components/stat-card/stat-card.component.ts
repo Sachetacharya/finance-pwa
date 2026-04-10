@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, input } from '@angular/core';
+import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-stat-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [NgIcon,CommonModule],
   templateUrl: './stat-card.component.html',
   styleUrl: './stat-card.component.scss',
 })
@@ -12,7 +13,7 @@ export class StatCardComponent {
   title = input.required<string>();
   value = input.required<string>();
   subtitle = input<string>('');
-  icon = input<string>('');
+  icon = input<string>(''); // lucide icon name e.g. 'lucideWallet'
   trend = input<number | null>(null);
   trendLabel = input<string>('');
   color = input<'primary' | 'success' | 'warning' | 'danger' | 'info'>('primary');

@@ -10,7 +10,7 @@
   @for (item of recurringService.items(); track item.id) {
     <div class="rec-card" [class.rec-card--disabled]="!item.enabled">
       <div class="rec-card__left">
-        <span class="rec-card__icon">{{ allCategoryIcons[item.category] }}</span>
+        <span class="rec-card__icon"><ng-icon [name]="allCategoryIcons[item.category]" size="20" /></span>
         <div>
           <div class="rec-card__title">{{ item.title }}</div>
           <div class="rec-card__meta">
@@ -28,7 +28,7 @@
           <input type="checkbox" [checked]="item.enabled" (change)="onToggle(item.id)" />
           <span class="rec-toggle__slider"></span>
         </label>
-        <button class="rec-card__delete" (click)="deletingId.set(item.id)" title="Remove">🗑️</button>
+        <button class="rec-card__delete" (click)="deletingId.set(item.id)" title="Remove"><ng-icon name="lucideTrash2" size="16" /></button>
       </div>
     </div>
   } @empty {
@@ -46,7 +46,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
         <h2 class="modal__title">Add Recurring Transaction</h2>
-        <button class="modal__close" (click)="showAddForm.set(false)">✕</button>
+        <button class="modal__close" (click)="showAddForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
       </div>
       <div class="modal__body">
         <div class="form-row">

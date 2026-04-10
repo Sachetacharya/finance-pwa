@@ -7,11 +7,12 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
 import { LoanStatus } from '../../core/models/loan.model';
+import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-loans',
   standalone: true,
-  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe, LockScrollDirective],
+  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe, LockScrollDirective, NgIcon],
   templateUrl: './loans.component.html',
   styleUrl: './loans.component.scss',
 })
