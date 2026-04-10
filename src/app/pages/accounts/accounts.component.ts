@@ -1,7 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountService } from '../../core/services/account.service';
-import { BackupService } from '../../core/services/backup.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
@@ -17,7 +16,6 @@ import { NgIcon } from '@ng-icons/core';
 })
 export class AccountsComponent {
   readonly accountService = inject(AccountService);
-  private readonly backup = inject(BackupService);
   private readonly notification = inject(NotificationService);
 
   readonly showAddForm = signal(false);
@@ -100,25 +98,6 @@ export class AccountsComponent {
     this.newName = '';
     this.newBalance = 0;
     this.showAddForm.set(false);
-  }
-
-  onExportBackup(): void {
-    this.backup.exportBackup();
-    this.notification.success('Backup downloaded');
-  }
-
-  async onImportBackup(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    const result = await this.backup.importBackup(file);
-    if (result.success) {
-      this.notification.success(result.message);
-      setTimeout(() => window.location.reload(), 1000);
-    } else {
-      this.notification.error(result.message);
-    }
-    input.value = ''; // reset so same file can be selected again
   }
 
   onDelete(): void {

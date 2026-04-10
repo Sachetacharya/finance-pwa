@@ -73,6 +73,26 @@
     </button>
   </div>
 
+  <!-- Data Backup -->
+  <div class="setting-card">
+    <div class="setting-card__header">
+      <span class="setting-card__icon"><ng-icon name="lucideDownload" size="20" /></span>
+      <div>
+        <div class="setting-card__title">Data Backup</div>
+        <div class="setting-card__desc">Export all data as JSON or restore from a backup file</div>
+      </div>
+    </div>
+    <div class="setting-card__buttons">
+      <button class="btn btn--ghost btn--sm" (click)="onExportBackup()">
+        <ng-icon name="lucideDownload" size="14" /> Export
+      </button>
+      <label class="btn btn--ghost btn--sm">
+        <ng-icon name="lucideUpload" size="14" /> Import
+        <input type="file" accept=".json" hidden (change)="onImportBackup($event)" />
+      </label>
+    </div>
+  </div>
+
   <!-- PWA Status -->
   <div class="setting-card">
     <div class="setting-card__header">

@@ -44,19 +44,6 @@
   }
 </div>
 
-<!-- Data Backup -->
-<div class="backup-section">
-  <h2 class="backup-section__title">Data Backup</h2>
-  <p class="backup-section__desc">Export your data as a JSON file or restore from a previous backup.</p>
-  <div class="backup-section__actions">
-    <button class="btn btn--outline" (click)="onExportBackup()">📥 Export Backup</button>
-    <label class="btn btn--outline">
-      📤 Import Backup
-      <input type="file" accept=".json" hidden (change)="onImportBackup($event)" />
-    </label>
-  </div>
-</div>
-
 <!-- Add account modal -->
 @if (showAddForm()) {
   <div class="modal-overlay" lockScroll (click)="showAddForm.set(false)">

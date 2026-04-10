@@ -4,6 +4,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { PwaService } from '../../core/services/pwa.service';
+import { BackupService } from '../../core/services/backup.service';
 import { NgIcon } from '@ng-icons/core';
 
 @Component({
@@ -19,6 +20,7 @@ export class ProfileComponent {
   readonly pwa = inject(PwaService);
   private readonly swUpdate = inject(SwUpdate);
   private readonly notification = inject(NotificationService);
+  private readonly backup = inject(BackupService);
 
   readonly appVersion = '1.0.0';
   readonly isChecking = signal(false);
@@ -87,5 +89,24 @@ export class ProfileComponent {
       // fallback to force reload
       this.forceReload();
     }
+  }
+
+  onExportBackup(): void {
+    this.backup.exportBackup();
+    this.notification.success('Backup downloaded');
+  }
+
+  async onImportBackup(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const result = await this.backup.importBackup(file);
+    if (result.success) {
+      this.notification.success(result.message);
+      setTimeout(() => window.location.reload(), 1000);
+    } else {
+      this.notification.error(result.message);
+    }
+    input.value = '';
   }
 }
