@@ -343,6 +343,91 @@ export class InsightsService {
     return { label: 'Needs Work', color: 'var(--danger)' };
   });
 
+  // ── 11. Loan & Lent Analysis ──
+  readonly loanAnalysis = computed(() => {
+    const statuses = this.loan.loanStatuses();
+    const borrowed = statuses.filter(s => s.loan.type === 'borrowed');
+    const lent = statuses.filter(s => s.loan.type === 'lent');
+
+    const totalBorrowed = borrowed.reduce((s, l) => s + l.loan.amount, 0);
+    const totalBorrowedPaid = borrowed.reduce((s, l) => s + l.totalPaid, 0);
+    const totalBorrowedOutstanding = this.loan.totalBorrowedOutstanding();
+    const borrowedProgress = totalBorrowed > 0 ? Math.round((totalBorrowedPaid / totalBorrowed) * 1000) / 10 : 0;
+
+    const totalLent = lent.reduce((s, l) => s + l.loan.amount, 0);
+    const totalLentReceived = lent.reduce((s, l) => s + l.totalPaid, 0);
+    const totalLentOutstanding = this.loan.totalLentOutstanding();
+    const lentProgress = totalLent > 0 ? Math.round((totalLentReceived / totalLent) * 1000) / 10 : 0;
+
+    const activeBorrowed = borrowed.filter(s => s.outstanding > 0);
+    const activeLent = lent.filter(s => s.outstanding > 0);
+    const resolvedBorrowed = borrowed.filter(s => s.outstanding <= 0).length;
+    const resolvedLent = lent.filter(s => s.outstanding <= 0).length;
+
+    // Net position: positive = others owe you more than you owe
+    const netPosition = totalLentOutstanding - totalBorrowedOutstanding;
+
+    return {
+      totalBorrowed, totalBorrowedPaid, totalBorrowedOutstanding, borrowedProgress,
+      totalLent, totalLentReceived, totalLentOutstanding, lentProgress,
+      activeBorrowed, activeLent,
+      resolvedBorrowed, resolvedLent,
+      borrowedCount: borrowed.length, lentCount: lent.length,
+      netPosition,
+    };
+  });
+
+  readonly loanInsights = computed((): Insight[] => {
+    const la = this.loanAnalysis();
+    const insights: Insight[] = [];
+
+    if (la.totalBorrowedOutstanding > 0) {
+      insights.push({
+        type: la.borrowedProgress > 50 ? 'info' : 'warning',
+        icon: 'lucideLandmark',
+        text: `You owe NPR ${Math.round(la.totalBorrowedOutstanding)} across ${la.activeBorrowed.length} loan${la.activeBorrowed.length > 1 ? 's' : ''} (${la.borrowedProgress}% repaid)`,
+      });
+    }
+
+    if (la.totalLentOutstanding > 0) {
+      insights.push({
+        type: 'info',
+        icon: 'lucideHandshake',
+        text: `Others owe you NPR ${Math.round(la.totalLentOutstanding)} across ${la.activeLent.length} record${la.activeLent.length > 1 ? 's' : ''} (${la.lentProgress}% collected)`,
+      });
+    }
+
+    if (la.netPosition > 0) {
+      insights.push({ type: 'success', icon: 'lucideTrendingUp', text: `Net position: +NPR ${Math.round(la.netPosition)} in your favor` });
+    } else if (la.netPosition < 0) {
+      insights.push({ type: 'warning', icon: 'lucideTrendingDown', text: `Net position: -NPR ${Math.round(Math.abs(la.netPosition))} — you owe more than owed to you` });
+    }
+
+    if (la.resolvedBorrowed > 0 || la.resolvedLent > 0) {
+      insights.push({ type: 'success', icon: 'lucideCheck', text: `${la.resolvedBorrowed + la.resolvedLent} loan${(la.resolvedBorrowed + la.resolvedLent) > 1 ? 's' : ''} fully resolved` });
+    }
+
+    // Warn about large outstanding single loans
+    la.activeBorrowed.forEach(s => {
+      if (s.outstanding > 50000) {
+        insights.push({ type: 'warning', icon: 'lucideAlertTriangle', text: `"${s.loan.title}" has NPR ${Math.round(s.outstanding)} outstanding` });
+      }
+    });
+
+    // Remind about lent money not collected
+    la.activeLent.forEach(s => {
+      if (s.percentage < 10 && s.loan.amount > 1000) {
+        insights.push({ type: 'info', icon: 'lucideInfo', text: `"${s.loan.title}" — barely collected (${s.percentage}%). Follow up?` });
+      }
+    });
+
+    if (!insights.length) {
+      insights.push({ type: 'success', icon: 'lucideCheck', text: 'No active loans or debts' });
+    }
+
+    return insights;
+  });
+
   // ── 10. Personalized Tips ──
   readonly tips = computed((): Insight[] => {
     const tips: Insight[] = [];

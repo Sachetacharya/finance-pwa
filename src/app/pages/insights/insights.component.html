@@ -131,6 +131,74 @@
     }
   </div>
 
+  <!-- 11. Loan & Lent Analysis -->
+  @if (insights.loanAnalysis().borrowedCount > 0 || insights.loanAnalysis().lentCount > 0) {
+    <div class="section">
+      <h2 class="section__title"><ng-icon name="lucideHandshake" size="18" /> Loan & Lent</h2>
+
+      <div class="loan-overview-grid">
+        <div class="loan-ov-card loan-ov-card--borrowed">
+          <div class="loan-ov-card__label">Borrowed</div>
+          <div class="loan-ov-card__row">
+            <span>Total</span>
+            <strong>{{ insights.loanAnalysis().totalBorrowed | currencyFormat | privacyMask }}</strong>
+          </div>
+          <div class="loan-ov-card__row">
+            <span>Paid Back</span>
+            <strong>{{ insights.loanAnalysis().totalBorrowedPaid | currencyFormat | privacyMask }}</strong>
+          </div>
+          <div class="loan-ov-card__row">
+            <span>Outstanding</span>
+            <strong class="text-danger">{{ insights.loanAnalysis().totalBorrowedOutstanding | currencyFormat | privacyMask }}</strong>
+          </div>
+          <div class="loan-ov-card__bar">
+            <div class="loan-ov-card__bar-fill" [style.width.%]="insights.loanAnalysis().borrowedProgress"></div>
+          </div>
+          <div class="loan-ov-card__footer">{{ insights.loanAnalysis().borrowedProgress }}% repaid · {{ insights.loanAnalysis().resolvedBorrowed }} resolved</div>
+        </div>
+
+        <div class="loan-ov-card loan-ov-card--lent">
+          <div class="loan-ov-card__label">Lent</div>
+          <div class="loan-ov-card__row">
+            <span>Total</span>
+            <strong>{{ insights.loanAnalysis().totalLent | currencyFormat | privacyMask }}</strong>
+          </div>
+          <div class="loan-ov-card__row">
+            <span>Collected</span>
+            <strong>{{ insights.loanAnalysis().totalLentReceived | currencyFormat | privacyMask }}</strong>
+          </div>
+          <div class="loan-ov-card__row">
+            <span>Pending</span>
+            <strong class="text-success">{{ insights.loanAnalysis().totalLentOutstanding | currencyFormat | privacyMask }}</strong>
+          </div>
+          <div class="loan-ov-card__bar loan-ov-card__bar--green">
+            <div class="loan-ov-card__bar-fill" [style.width.%]="insights.loanAnalysis().lentProgress"></div>
+          </div>
+          <div class="loan-ov-card__footer">{{ insights.loanAnalysis().lentProgress }}% collected · {{ insights.loanAnalysis().resolvedLent }} resolved</div>
+        </div>
+      </div>
+
+      <!-- Net position -->
+      <div class="net-position" [class.net-position--positive]="insights.loanAnalysis().netPosition >= 0" [class.net-position--negative]="insights.loanAnalysis().netPosition < 0">
+        <span>Net Position:</span>
+        <strong>
+          @if (insights.loanAnalysis().netPosition >= 0) { + } @else { - }
+          {{ (insights.loanAnalysis().netPosition >= 0 ? insights.loanAnalysis().netPosition : insights.loanAnalysis().netPosition * -1) | currencyFormat | privacyMask }}
+        </strong>
+      </div>
+
+      <!-- Loan-specific insights -->
+      <div class="insight-list" style="margin-top: 12px;">
+        @for (item of insights.loanInsights(); track item.text) {
+          <div class="insight-item insight-item--{{ item.type }}">
+            <ng-icon [name]="item.icon" size="18" />
+            <span>{{ item.text }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   <!-- 5. Expense Leak Detection -->
   <div class="section">
     <h2 class="section__title"><ng-icon name="lucideSearch" size="18" /> Leak Detection</h2>
