@@ -191,6 +191,10 @@ export class ExpensesComponent {
 
   // === Swipe to delete (mobile) ===
   readonly swipeOffset = signal<Record<string, number>>({});
+
+  getSwipeX(id: string): number {
+    return this.swipeOffset()[id] || 0;
+  }
   private touchStartX = 0;
   private touchCurrentId = '';
   private readonly SWIPE_THRESHOLD = -80;

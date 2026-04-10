@@ -185,7 +185,7 @@
           (touchstart)="onTouchStart($event, expense.id)"
           (touchmove)="onTouchMove($event, expense.id)"
           (touchend)="onTouchEnd(expense.id)">
-          <div class="m-card__content" [style.transform]="'translateX(' + (swipeOffset()[expense.id] ?? 0) + 'px)'">
+          <div class="m-card__content" [style.transform]="'translateX(' + getSwipeX(expense.id) + 'px)'">
             <div class="m-card__left">
               <span class="m-card__icon">{{ allCategoryIcons[expense.category] }}</span>
               <div class="m-card__info">
