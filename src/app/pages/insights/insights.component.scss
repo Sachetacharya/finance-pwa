@@ -1,0 +1,148 @@
+.insights-page { display: flex; flex-direction: column; gap: 20px; }
+
+.page-header { margin-bottom: 4px; }
+.page-title { font-family: 'DM Sans', sans-serif; font-size: 1.75rem; font-weight: 800; color: var(--text-primary); margin: 0 0 4px; letter-spacing: -0.02em; }
+.page-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin: 0; }
+
+// ── Health Score ──
+.health-score {
+  display: flex; align-items: center; gap: 20px;
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 16px; padding: 24px 28px; box-shadow: var(--shadow-card);
+
+  &__ring {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: conic-gradient(var(--color, var(--primary)) calc(var(--score, 0) * 3.6deg), var(--bg-secondary) 0);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+
+  &__inner {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: var(--bg-card); display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+
+  &__number { font-family: 'DM Sans', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--text-primary); line-height: 1; }
+  &__of { font-size: 0.65rem; color: var(--text-muted); }
+  &__label { font-family: 'DM Sans', sans-serif; font-size: 1.2rem; font-weight: 800; }
+  &__desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+}
+
+// ── Sections ──
+.section {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 16px; padding: 20px; box-shadow: var(--shadow-card);
+
+  &__title {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700;
+    color: var(--text-primary); margin: 0 0 16px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+  }
+}
+
+.sub-title { font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin: 16px 0 8px; }
+
+// ── Overview Grid ──
+.overview-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
+}
+
+.ov-card {
+  background: var(--bg-secondary); border-radius: 12px; padding: 14px 16px;
+
+  &--income { border-left: 3px solid var(--success); }
+  &--expense { border-left: 3px solid var(--danger); }
+  &--success { border-left: 3px solid var(--success); }
+  &--danger { border-left: 3px solid var(--danger); }
+
+  &__label { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  &__value { font-family: 'DM Sans', sans-serif; font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;
+    &--small { font-size: 0.95rem; }
+  }
+}
+
+.ov-up { color: var(--danger); display: flex; align-items: center; gap: 4px; }
+.ov-down { color: var(--success); display: flex; align-items: center; gap: 4px; }
+
+.alert {
+  display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+  border-radius: 10px; font-size: 0.82rem; font-weight: 600; margin-top: 10px;
+  &--danger { background: var(--danger-light); color: var(--danger); }
+}
+
+// ── Insight List ──
+.insight-list { display: flex; flex-direction: column; gap: 8px; }
+
+.insight-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 14px; border-radius: 10px; font-size: 0.85rem; font-weight: 500; line-height: 1.4;
+
+  &--success { background: var(--success-light); color: var(--success); }
+  &--warning { background: var(--warning-light); color: var(--warning); }
+  &--danger { background: var(--danger-light); color: var(--danger); }
+  &--info { background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary); }
+}
+
+// ── Category Grid ──
+.cat-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+.cat-section__title { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px; }
+
+.cat-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 0.82rem;
+
+  &__name { min-width: 80px; font-weight: 600; color: var(--text-primary); }
+  &__bar-wrap { flex: 1; display: flex; align-items: center; gap: 8px; }
+  &__bar { flex: 1; height: 6px; background: var(--bg-secondary); border-radius: 6px; overflow: hidden; }
+  &__bar-fill { height: 100%; background: var(--primary); border-radius: 6px; }
+  &__pct { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); min-width: 36px; text-align: right; }
+  &__amount { font-family: 'DM Sans', sans-serif; font-weight: 700; color: var(--text-primary); min-width: 70px; text-align: right; }
+  &__change { font-weight: 700; font-size: 0.78rem; margin-left: auto;
+    &--up { color: var(--danger); }
+    &--down { color: var(--success); }
+  }
+}
+
+// ── Pattern Grid ──
+.pattern-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+
+.pattern-card {
+  background: var(--bg-secondary); border-radius: 10px; padding: 12px 14px; text-align: center;
+  &__label { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  &__value { font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;
+    &--small { font-size: 0.9rem; }
+  }
+}
+
+.freq-list { display: flex; flex-direction: column; gap: 4px; }
+.freq-item {
+  display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 0.82rem;
+  border-bottom: 1px solid var(--border-color);
+  &:last-child { border-bottom: none; }
+  &__title { flex: 1; font-weight: 600; color: var(--text-primary); text-transform: capitalize; }
+  &__count { font-weight: 700; color: var(--primary); font-size: 0.75rem; background: var(--primary-glow); padding: 2px 8px; border-radius: 10px; }
+  &__total { font-family: 'DM Sans', sans-serif; font-weight: 700; color: var(--text-secondary); }
+}
+
+// ── Month Grid ──
+.month-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+.month-card {
+  background: var(--bg-secondary); border-radius: 10px; padding: 12px 14px; text-align: center;
+  &__label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+  &__expense { font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 700; color: var(--color-expense); margin-top: 6px; }
+  &__income { font-size: 0.75rem; color: var(--color-income); margin-top: 2px; }
+}
+
+.compare-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+.compare-item {
+  display: flex; align-items: center; gap: 6px; padding: 8px 12px;
+  border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+  &--good { background: var(--success-light); color: var(--success); }
+  &--bad { background: var(--danger-light); color: var(--danger); }
+}

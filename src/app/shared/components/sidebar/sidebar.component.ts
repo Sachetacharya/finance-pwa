@@ -29,8 +29,9 @@ export class SidebarComponent {
   readonly navItems: NavItem[] = [
     { path: '/dashboard', label: 'Dashboard', icon: 'lucideLayoutDashboard' },
     { path: '/expenses', label: 'Expenses', icon: 'lucideReceipt' },
+    { path: '/insights', label: 'Insights', icon: 'lucideZap' },
     { path: '/analytics', label: 'Analytics', icon: 'lucideBarChart3' },
-    { path: '/templates', label: 'Templates', icon: 'lucideZap' },
+    { path: '/templates', label: 'Templates', icon: 'lucideClipboardList' },
     { path: '/recurring', label: 'Recurring', icon: 'lucideRepeat' },
     { path: '/budgets', label: 'Budgets', icon: 'lucideTarget' },
     { path: '/loans', label: 'Loans', icon: 'lucideHandshake' },

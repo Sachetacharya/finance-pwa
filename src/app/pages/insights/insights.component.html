@@ -1,0 +1,200 @@
+<div class="insights-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Insights</h1>
+      <p class="page-subtitle">Smart analysis of your finances</p>
+    </div>
+  </div>
+
+  <!-- 8. Financial Health Score -->
+  <div class="health-score">
+    <div class="health-score__ring" [style.--score]="insights.healthScore()" [style.--color]="insights.healthLabel().color">
+      <div class="health-score__inner">
+        <span class="health-score__number">{{ insights.healthScore() }}</span>
+        <span class="health-score__of">/100</span>
+      </div>
+    </div>
+    <div class="health-score__info">
+      <div class="health-score__label" [style.color]="insights.healthLabel().color">{{ insights.healthLabel().label }}</div>
+      <div class="health-score__desc">Financial Health Score</div>
+    </div>
+  </div>
+
+  <!-- 1. Overview Summary -->
+  <div class="section">
+    <h2 class="section__title"><ng-icon name="lucideLayoutDashboard" size="18" /> Overview</h2>
+    <div class="overview-grid">
+      <div class="ov-card ov-card--income">
+        <div class="ov-card__label">Total Income</div>
+        <div class="ov-card__value">{{ insights.overview().totalIncome | currencyFormat | privacyMask }}</div>
+      </div>
+      <div class="ov-card ov-card--expense">
+        <div class="ov-card__label">Total Expenses</div>
+        <div class="ov-card__value">{{ insights.overview().totalExpenses | currencyFormat | privacyMask }}</div>
+      </div>
+      <div class="ov-card" [class.ov-card--success]="insights.overview().savings >= 0" [class.ov-card--danger]="insights.overview().savings < 0">
+        <div class="ov-card__label">Savings ({{ insights.overview().savingsRate }}%)</div>
+        <div class="ov-card__value">{{ insights.overview().savings | currencyFormat | privacyMask }}</div>
+      </div>
+      <div class="ov-card">
+        <div class="ov-card__label">This Month vs Last</div>
+        <div class="ov-card__value ov-card__value--small">
+          @if (insights.overview().monthChange > 0) {
+            <span class="ov-up"><ng-icon name="lucideTrendingUp" size="14" /> +{{ insights.overview().monthChange }}%</span>
+          } @else {
+            <span class="ov-down"><ng-icon name="lucideTrendingDown" size="14" /> {{ insights.overview().monthChange }}%</span>
+          }
+        </div>
+      </div>
+    </div>
+    @if (insights.overview().overspending) {
+      <div class="alert alert--danger"><ng-icon name="lucideAlertTriangle" size="16" /> You're spending more than you earn this month</div>
+    }
+  </div>
+
+  <!-- 3. Spending Insights -->
+  <div class="section">
+    <h2 class="section__title"><ng-icon name="lucideTrendingUp" size="18" /> Spending Insights</h2>
+    <div class="insight-list">
+      @for (item of insights.spendingInsights(); track item.text) {
+        <div class="insight-item insight-item--{{ item.type }}">
+          <ng-icon [name]="item.icon" size="18" />
+          <span>{{ item.text }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- 2. Category Breakdown -->
+  <div class="section">
+    <h2 class="section__title"><ng-icon name="lucidePieChart" size="18" /> Category Breakdown</h2>
+    <div class="cat-grid">
+      <div class="cat-section">
+        <h3 class="cat-section__title">Top Spending</h3>
+        @for (cat of insights.categoryBreakdown().top3; track cat.category) {
+          <div class="cat-row">
+            <span class="cat-row__name">{{ cat.label }}</span>
+            <div class="cat-row__bar-wrap">
+              <div class="cat-row__bar"><div class="cat-row__bar-fill" [style.width.%]="cat.percentage"></div></div>
+              <span class="cat-row__pct">{{ cat.percentage }}%</span>
+            </div>
+            <span class="cat-row__amount">{{ cat.amount | currencyFormat | privacyMask }}</span>
+          </div>
+        }
+      </div>
+      <div class="cat-section">
+        <h3 class="cat-section__title">Category Trends (vs Last Month)</h3>
+        @for (t of insights.categoryBreakdown().trends.slice(0, 5); track t.category) {
+          <div class="cat-row">
+            <span class="cat-row__name">{{ t.label }}</span>
+            <span class="cat-row__change" [class.cat-row__change--up]="t.change > 0" [class.cat-row__change--down]="t.change < 0">
+              @if (t.change > 0) { +{{ t.change }}% } @else { {{ t.change }}% }
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Expense Patterns -->
+  <div class="section">
+    <h2 class="section__title"><ng-icon name="lucideBarChart3" size="18" /> Expense Patterns</h2>
+    <div class="pattern-grid">
+      <div class="pattern-card">
+        <div class="pattern-card__label">Daily Average</div>
+        <div class="pattern-card__value">{{ insights.patterns().dailyAvg | currencyFormat | privacyMask }}</div>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-card__label">Weekday Avg</div>
+        <div class="pattern-card__value">{{ insights.patterns().weekdayAvg | currencyFormat | privacyMask }}</div>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-card__label">Weekend Avg</div>
+        <div class="pattern-card__value">{{ insights.patterns().weekendAvg | currencyFormat | privacyMask }}</div>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-card__label">Cash vs Digital</div>
+        <div class="pattern-card__value pattern-card__value--small">{{ insights.patterns().cashPercent }}% / {{ insights.patterns().digitalPercent }}%</div>
+      </div>
+    </div>
+    @if (insights.patterns().frequentItems.length) {
+      <h3 class="sub-title">Frequent Expenses</h3>
+      <div class="freq-list">
+        @for (item of insights.patterns().frequentItems; track item.title) {
+          <div class="freq-item">
+            <span class="freq-item__title">{{ item.title }}</span>
+            <span class="freq-item__count">{{ item.count }}x</span>
+            <span class="freq-item__total">{{ item.total | currencyFormat | privacyMask }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- 5. Expense Leak Detection -->
+  <div class="section">
+    <h2 class="section__title"><ng-icon name="lucideSearch" size="18" /> Leak Detection</h2>
+    <div class="insight-list">
+      @for (leak of insights.leaks(); track leak.text) {
+        <div class="insight-item insight-item--{{ leak.type }}">
+          <ng-icon [name]="leak.icon" size="18" />
+          <span>{{ leak.text }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- 6. Budget Recommendations -->
+  <div class="section">
+    <h2 class="section__title"><ng-icon name="lucideTarget" size="18" /> Budget Recommendations</h2>
+    <div class="insight-list">
+      @for (rec of insights.budgetRecs(); track rec.text) {
+        <div class="insight-item insight-item--{{ rec.type }}">
+          <ng-icon [name]="rec.icon" size="18" />
+          <span>{{ rec.text }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- 7. Month-to-Month Comparison -->
+  <div class="section">
+    <h2 class="section__title"><ng-icon name="lucideCalendar" size="18" /> Month Comparison</h2>
+    <div class="month-grid">
+      @for (m of insights.monthComparison().months; track m.label) {
+        <div class="month-card">
+          <div class="month-card__label">{{ m.label }}</div>
+          <div class="month-card__expense">Spent: {{ m.total | currencyFormat | privacyMask }}</div>
+          <div class="month-card__income">Earned: {{ m.income | currencyFormat | privacyMask }}</div>
+        </div>
+      }
+    </div>
+    <div class="compare-row">
+      @if (insights.monthComparison().biggest_improvement) {
+        <div class="compare-item compare-item--good">
+          <ng-icon name="lucideTrendingDown" size="16" />
+          <span>Improved: {{ insights.monthComparison().biggest_improvement!.label }} ({{ insights.monthComparison().biggest_improvement!.change }}%)</span>
+        </div>
+      }
+      @if (insights.monthComparison().biggest_decline) {
+        <div class="compare-item compare-item--bad">
+          <ng-icon name="lucideTrendingUp" size="16" />
+          <span>Increased: {{ insights.monthComparison().biggest_decline!.label }} (+{{ insights.monthComparison().biggest_decline!.change }}%)</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- 10. Personalized Tips -->
+  <div class="section">
+    <h2 class="section__title"><ng-icon name="lucideInfo" size="18" /> Tips & Suggestions</h2>
+    <div class="insight-list">
+      @for (tip of insights.tips(); track tip.text) {
+        <div class="insight-item insight-item--{{ tip.type }}">
+          <ng-icon [name]="tip.icon" size="18" />
+          <span>{{ tip.text }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>
