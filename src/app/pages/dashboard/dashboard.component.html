@@ -49,6 +49,13 @@
       icon="lucideReceipt"
       color="warning"
     />
+    <app-stat-card
+      title="Total Balance"
+      [value]="totalRemaining() | currencyFormat"
+      subtitle="All accounts combined"
+      icon="lucideWallet"
+      [color]="totalRemaining() >= 0 ? 'success' : 'danger'"
+    />
   </div>
 
   <!-- Charts -->

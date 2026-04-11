@@ -57,6 +57,11 @@ export class DashboardComponent {
     return Math.round(((curr - prev) / prev) * 1000) / 10;
   });
 
+  readonly totalRemaining = computed(() => {
+    const balances = this.accountService.accountBalances();
+    return Object.values(balances).reduce((sum, b) => sum + b, 0);
+  });
+
   readonly recentExpenses = computed(() => this.expenseService.expenses().slice(0, 8));
 
   readonly pieChartData = computed((): ChartConfiguration['data'] => {
