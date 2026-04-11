@@ -4,6 +4,7 @@ import { ExpenseService } from '../../core/services/expense.service';
 import { AccountService } from '../../core/services/account.service';
 import { BudgetService } from '../../core/services/budget.service';
 import { LoanService } from '../../core/services/loan.service';
+import { Expense } from '../../core/models/expense.model';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { ChartComponent } from '../../shared/components/chart/chart.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
@@ -25,7 +26,7 @@ import { ChartConfiguration } from 'chart.js';
 })
 export class AnalyticsComponent {
   readonly expenseService = inject(ExpenseService);
-  private readonly accountService = inject(AccountService);
+  readonly accountService = inject(AccountService);
   readonly budgetService = inject(BudgetService);
   readonly loanService = inject(LoanService);
   readonly categoryLabels = CATEGORY_LABELS;
@@ -33,9 +34,104 @@ export class AnalyticsComponent {
   readonly incomeSourceLabels = INCOME_SOURCE_LABELS;
   readonly incomeSourceIcons = INCOME_SOURCE_ICONS;
 
-  readonly hasExpenses = computed(() => this.expenseService.expenses().some(e => e.type === 'expense'));
-  readonly hasIncome = computed(() => this.expenseService.expenses().some(e => e.type === 'income'));
-  readonly hasAnyData = computed(() => this.expenseService.expenses().some(e => e.type !== 'transfer'));
+  // ── Filters ──
+  readonly dateRange = signal<'all' | 'week' | 'month' | '3months' | 'custom'>('all');
+  readonly customStart = signal('');
+  readonly customEnd = signal('');
+  readonly filterAccount = signal('');
+  readonly compareMode = signal(false);
+  readonly compareMonthA = signal('');
+  readonly compareMonthB = signal('');
+
+  get allAccounts() {
+    return [
+      { id: 'cash', name: 'Cash' },
+      ...this.accountService.accounts().map(a => ({ id: a.id, name: a.name })),
+    ];
+  }
+
+  /** Available months for comparison dropdown */
+  readonly availableMonths = computed(() => {
+    const set = new Set<string>();
+    this.expenseService.expenses().forEach(e => {
+      const d = new Date(e.date);
+      set.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    });
+    return Array.from(set).sort().reverse();
+  });
+
+  formatMonth(ym: string): string {
+    const [y, m] = ym.split('-');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[+m - 1]} ${y}`;
+  }
+
+  /** Filtered expenses based on date range + account */
+  readonly filtered = computed((): Expense[] => {
+    let items = this.expenseService.expenses().filter(e => e.type !== 'transfer');
+    const range = this.dateRange();
+    const now = new Date();
+
+    if (range === 'week') {
+      const weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7);
+      const cutoff = weekAgo.toISOString().split('T')[0];
+      items = items.filter(e => e.date >= cutoff);
+    } else if (range === 'month') {
+      const start = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+      items = items.filter(e => e.date >= start);
+    } else if (range === '3months') {
+      const three = new Date(now); three.setMonth(now.getMonth() - 3);
+      const cutoff = three.toISOString().split('T')[0];
+      items = items.filter(e => e.date >= cutoff);
+    } else if (range === 'custom') {
+      const s = this.customStart(), end = this.customEnd();
+      if (s) items = items.filter(e => e.date >= s);
+      if (end) items = items.filter(e => e.date <= end);
+    }
+
+    const acc = this.filterAccount();
+    if (acc) items = items.filter(e => e.paymentMethod === acc);
+
+    return items;
+  });
+
+  readonly filteredExpenses = computed(() => this.filtered().filter(e => e.type === 'expense'));
+  readonly filteredIncome = computed(() => this.filtered().filter(e => e.type === 'income'));
+
+  readonly hasExpenses = computed(() => this.filteredExpenses().length > 0);
+  readonly hasIncome = computed(() => this.filteredIncome().length > 0);
+  readonly hasAnyData = computed(() => this.filtered().length > 0);
+
+  // ── Month Comparison ──
+  readonly compareData = computed(() => {
+    const a = this.compareMonthA(), b = this.compareMonthB();
+    if (!a || !b) return null;
+
+    const getMonth = (ym: string) => {
+      const [y, m] = ym.split('-').map(Number);
+      const exps = this.expenseService.expenses().filter(e => {
+        const d = new Date(e.date);
+        return d.getFullYear() === y && d.getMonth() === m - 1;
+      });
+      const expenses = exps.filter(e => e.type === 'expense');
+      const income = exps.filter(e => e.type === 'income');
+      const totalExp = expenses.reduce((s, e) => s + e.amount, 0);
+      const totalInc = income.reduce((s, e) => s + e.amount, 0);
+
+      const catMap = new Map<string, number>();
+      expenses.forEach(e => catMap.set(e.category, (catMap.get(e.category) ?? 0) + e.amount));
+      const categories = Array.from(catMap.entries())
+        .map(([cat, total]) => ({ cat, label: CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ?? cat, total }))
+        .sort((x, y) => y.total - x.total);
+
+      return { label: this.formatMonth(ym), totalExp, totalInc, savings: totalInc - totalExp, categories, count: expenses.length };
+    };
+
+    return { a: getMonth(a), b: getMonth(b) };
+  });
+
+  readonly filteredTotalExpense = computed(() => this.filteredExpenses().reduce((s, e) => s + e.amount, 0));
+  readonly filteredTotalIncome = computed(() => this.filteredIncome().reduce((s, e) => s + e.amount, 0));
 
   readonly avgMonthlyExpense = computed(() => {
     const totals = this.expenseService.monthlyTotals();
@@ -347,7 +443,7 @@ export class AnalyticsComponent {
 
   readonly paymentMethodData = computed((): ChartConfiguration['data'] => {
     const map = new Map<string, number>();
-    this.expenseService.expenses().filter(e => e.type === 'expense').forEach(e => {
+    this.filteredExpenses().forEach(e => {
       map.set(e.paymentMethod, (map.get(e.paymentMethod) ?? 0) + e.amount);
     });
     const entries = Array.from(map.entries())
