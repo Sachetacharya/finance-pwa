@@ -1,0 +1,25 @@
+<div class="quick-add">
+  <div class="quick-add__label">Quick Add</div>
+  <div class="quick-add__list">
+    @for (tpl of templates(); track tpl.id) {
+      <div class="quick-add__btn"
+        [class.quick-add__btn--expense]="tpl.type === 'expense'"
+        [class.quick-add__btn--income]="tpl.type === 'income'">
+        <button class="quick-add__main" (click)="quickUse.emit(tpl.id)" [title]="tpl.title">
+          <ng-icon [name]="allCategoryIcons[tpl.category]" size="16" />
+          <span class="quick-add__name">{{ tpl.name }}</span>
+          @if (!privacy.isHidden()) {
+            <span class="quick-add__amount">{{ tpl.amount | currencyFormat | privacyMask }}</span>
+          }
+        </button>
+        <button class="quick-add__edit" (click)="editUse.emit(tpl.id)" title="Edit & add" aria-label="Edit template values">
+          <ng-icon name="lucidePencil" size="12" />
+        </button>
+      </div>
+    }
+    <a class="quick-add__btn quick-add__btn--manage" routerLink="/templates">
+      <ng-icon name="lucideSettings" size="14" />
+      <span>Manage</span>
+    </a>
+  </div>
+</div>

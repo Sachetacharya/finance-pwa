@@ -19,11 +19,12 @@ import { TransactionTemplate } from '../../core/models/template.model';
 import { Expense, CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS, ALL_CATEGORY_LABELS, ALL_CATEGORY_ICONS } from '../../core/models/expense.model';
 import { formatCurrency } from '../../shared/utils/currency.utils';
 import { ChartConfiguration } from 'chart.js';
+import { DashboardQuickAddComponent } from './dashboard-quick-add/dashboard-quick-add.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterModule, StatCardComponent, ChartComponent, ExpenseFormComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon, FormsModule, LockScrollDirective],
+  imports: [RouterModule, StatCardComponent, ChartComponent, ExpenseFormComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon, FormsModule, LockScrollDirective, DashboardQuickAddComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })

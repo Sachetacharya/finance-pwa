@@ -1,13 +1,12 @@
 import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgIcon } from '@ng-icons/core';
 import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
 import { PrivacyMaskPipe } from '../../../shared/pipes/privacy-mask.pipe';
 
 @Component({
   selector: 'app-analytics-compare',
   standalone: true,
-  imports: [FormsModule, NgIcon, CurrencyFormatPipe, PrivacyMaskPipe],
+  imports: [FormsModule, CurrencyFormatPipe, PrivacyMaskPipe],
   templateUrl: './analytics-compare.component.html',
   styleUrl: './analytics-compare.component.scss',
 })

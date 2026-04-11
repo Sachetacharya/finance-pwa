@@ -1,0 +1,45 @@
+.quick-add {
+  &__label {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 8px;
+  }
+
+  &__list {
+    display: flex; gap: 8px; overflow-x: auto;
+    -webkit-overflow-scrolling: touch; padding-bottom: 4px;
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  &__btn {
+    display: flex; align-items: center; min-height: 40px;
+    border: 1px solid var(--border-color); border-radius: 10px;
+    white-space: nowrap; text-decoration: none;
+    box-shadow: var(--shadow-sm); overflow: hidden; flex-shrink: 0;
+    background: var(--bg-card);
+    transition: box-shadow 0.2s, transform 0.2s;
+
+    &:hover { box-shadow: var(--shadow-card); transform: translateY(-1px); }
+    &--expense { background: var(--danger-light); border-color: color-mix(in srgb, var(--danger) 15%, transparent); }
+    &--income { background: var(--success-light); border-color: color-mix(in srgb, var(--success) 15%, transparent); }
+    &--manage { color: var(--text-muted); border-style: dashed; font-weight: 500; padding: 8px 14px; font-size: 0.82rem; gap: 6px; cursor: pointer; }
+  }
+
+  &__main {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 10px 8px 14px; background: none; border: none;
+    cursor: pointer; font-size: 0.82rem; font-weight: 600;
+    color: var(--text-primary); font-family: inherit;
+    &:active { opacity: 0.7; }
+  }
+
+  &__edit {
+    display: flex; align-items: center; justify-content: center;
+    padding: 8px 10px; background: none; border: none;
+    border-left: 1px solid var(--border-color); cursor: pointer;
+    color: var(--text-muted); align-self: stretch;
+    &:hover { color: var(--primary); background: var(--primary-glow); }
+  }
+
+  &__name { flex-shrink: 0; }
+  &__amount { font-family: 'DM Sans', sans-serif; font-size: 0.72rem; color: var(--text-muted); font-weight: 700; }
+}
