@@ -144,7 +144,7 @@
           <input class="form-control" type="text" [(ngModel)]="newNotes" placeholder="Optional" />
         </div>
         <label class="already-recorded-check">
-          <input type="checkbox" [(ngModel)]="newAlreadyRecorded" />
+          <input type="checkbox" [checked]="newAlreadyRecorded" (change)="newAlreadyRecorded = !newAlreadyRecorded" />
           <span>Already recorded as {{ newType === 'borrowed' ? 'income' : 'expense' }}</span>
         </label>
         <div class="modal__footer">
@@ -292,7 +292,7 @@
         </div>
 
         <label class="already-recorded-check">
-          <input type="checkbox" [(ngModel)]="splitAlreadyRecorded" />
+          <input type="checkbox" [checked]="splitAlreadyRecorded" (change)="splitAlreadyRecorded = !splitAlreadyRecorded" />
           <span>Already recorded as expense</span>
         </label>
 

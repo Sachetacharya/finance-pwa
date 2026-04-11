@@ -34,8 +34,9 @@
       <div class="account-card__balance" [class.account-card__balance--negative]="accountService.accountBalances()[acc.id] < 0">
         {{ accountService.accountBalances()[acc.id] | currencyFormat | privacyMask }}
       </div>
-      <button class="account-card__action" (click)="openTransfer(acc.id)" title="Transfer from {{ acc.name }}"><ng-icon name="lucideArrowRightLeft" size="16" /></button>
-      <button class="account-card__delete" (click)="deletingAccountId.set(acc.id)" title="Delete account"><ng-icon name="lucideTrash2" size="16" /></button>
+      <button class="account-card__action" (click)="openEdit(acc.id)" title="Edit account" aria-label="Edit"><ng-icon name="lucidePencil" size="16" /></button>
+      <button class="account-card__action" (click)="openTransfer(acc.id)" title="Transfer from {{ acc.name }}" aria-label="Transfer"><ng-icon name="lucideArrowRightLeft" size="16" /></button>
+      <button class="account-card__delete" (click)="deletingAccountId.set(acc.id)" title="Delete account" aria-label="Delete"><ng-icon name="lucideTrash2" size="16" /></button>
     </div>
   } @empty {
     <div class="empty-state">
@@ -43,6 +44,32 @@
     </div>
   }
 </div>
+
+<!-- Edit account modal -->
+@if (editingAccountId()) {
+  <div class="modal-overlay" lockScroll (click)="editingAccountId.set(null)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">Edit Account</h2>
+        <button class="modal__close" aria-label="Close" (click)="editingAccountId.set(null)"><ng-icon name="lucideX" size="18" /></button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label class="form-label">Account Name</label>
+          <input class="form-control" type="text" [(ngModel)]="editName" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current Balance (NPR)</label>
+          <input class="form-control" type="number" [(ngModel)]="editCurrentBalance" step="0.01" />
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="editingAccountId.set(null)">Cancel</button>
+          <button class="btn btn--primary" (click)="onSaveEdit()" [disabled]="!editName.trim()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
 <!-- Add account modal -->
 @if (showAddForm()) {

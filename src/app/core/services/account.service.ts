@@ -70,6 +70,14 @@ export class AccountService {
     return account;
   }
 
+  updateAccount(id: string, name: string, initialBalance: number): void {
+    const updated = this._accounts().map(a =>
+      a.id === id ? { ...a, name, initialBalance } : a
+    );
+    this._accounts.set(updated);
+    this.persist(updated);
+  }
+
   transfer(fromId: string, toId: string, amount: number, date: string, notes?: string): void {
     const fromLabel = this.getLabel(fromId);
     const toLabel = this.getLabel(toId);

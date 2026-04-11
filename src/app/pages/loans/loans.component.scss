@@ -184,13 +184,44 @@
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--text-primary);
+  transition: background 0.2s;
+
+  &:has(input:checked) {
+    background: var(--primary-glow);
+    color: var(--primary);
+  }
 
   input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--primary);
+    -webkit-appearance: none;
+    appearance: none;
+    width: 40px;
+    height: 22px;
+    border-radius: 22px;
+    background: var(--border-color);
     cursor: pointer;
     flex-shrink: 0;
+    position: relative;
+    transition: background 0.3s;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    &:checked {
+      background: var(--primary);
+    }
+
+    &:checked::before {
+      transform: translateX(18px);
+    }
   }
 }
 

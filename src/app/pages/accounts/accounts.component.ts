@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountService } from '../../core/services/account.service';
+import { ExpenseService } from '../../core/services/expense.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
@@ -17,16 +18,22 @@ import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
 })
 export class AccountsComponent {
   readonly accountService = inject(AccountService);
+  private readonly expenseService = inject(ExpenseService);
   private readonly notification = inject(NotificationService);
 
   readonly showAddForm = signal(false);
   readonly showTransferForm = signal(false);
+  readonly editingAccountId = signal<string | null>(null);
   readonly deletingAccountId = signal<string | null>(null);
 
   // Add account fields
   newName = '';
   newType: 'bank' | 'wallet' = 'bank';
   newBalance = 0;
+
+  // Edit account fields
+  editName = '';
+  editBalance = 0;
 
   // Transfer fields
   transferFrom = '';
@@ -74,6 +81,61 @@ export class AccountsComponent {
     this.transferDate = new Date().toISOString().split('T')[0];
     this.transferNotes = '';
     this.showTransferForm.set(true);
+  }
+
+  editCurrentBalance = 0;
+
+  openEdit(id: string): void {
+    const acc = this.accountService.accounts().find(a => a.id === id);
+    if (!acc) return;
+    this.editName = acc.name;
+    this.editBalance = acc.initialBalance;
+    this.editCurrentBalance = this.accountService.accountBalances()[id] ?? 0;
+    this.editingAccountId.set(id);
+  }
+
+  onSaveEdit(): void {
+    const id = this.editingAccountId();
+    if (!id || !this.editName.trim()) return;
+
+    const currentBalance = this.accountService.accountBalances()[id] ?? 0;
+    const diff = Math.round((this.editCurrentBalance - currentBalance) * 100) / 100;
+
+    // Update name
+    this.accountService.updateAccount(id, this.editName.trim(), this.editBalance);
+
+    // Create balance adjustment record if balance changed
+    if (diff !== 0) {
+      const accName = this.editName.trim();
+      if (diff > 0) {
+        // Balance increased → income adjustment
+        this.expenseService.addExpense({
+          type: 'income',
+          title: `Balance adjustment — ${accName}`,
+          amount: diff,
+          category: 'other-income',
+          date: new Date().toISOString().split('T')[0],
+          paymentMethod: id,
+          notes: `Corrected from ${Math.round(currentBalance)} to ${Math.round(this.editCurrentBalance)}`,
+        });
+      } else {
+        // Balance decreased → expense adjustment
+        this.expenseService.addExpense({
+          type: 'expense',
+          title: `Balance adjustment — ${accName}`,
+          amount: Math.abs(diff),
+          category: 'other',
+          date: new Date().toISOString().split('T')[0],
+          paymentMethod: id,
+          notes: `Corrected from ${Math.round(currentBalance)} to ${Math.round(this.editCurrentBalance)}`,
+        });
+      }
+      this.notification.success(`Balance adjusted by ${diff > 0 ? '+' : ''}${diff}`);
+    } else {
+      this.notification.success('Account updated');
+    }
+
+    this.editingAccountId.set(null);
   }
 
   onTransfer(): void {
