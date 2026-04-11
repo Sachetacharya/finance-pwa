@@ -9,13 +9,18 @@
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 8px;
 
   &__actions {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+
+    @media (max-width: 480px) {
+      width: 100%;
+      .btn { flex: 1; justify-content: center; }
+    }
   }
 }
 
@@ -24,6 +29,8 @@
   font-weight: 800;
   color: var(--text-primary, #1e293b);
   margin: 0 0 4px;
+
+  @media (max-width: 480px) { font-size: 1.4rem; }
 }
 
 .page-subtitle {
@@ -42,6 +49,7 @@
   border-radius: 14px;
   padding: 18px 20px;
   transition: box-shadow 0.2s;
+  flex-wrap: wrap;
 
   &:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -61,6 +69,11 @@
     justify-content: center;
     background: var(--bg-secondary, #f1f5f9);
     border-radius: 10px;
+
+    @media (max-width: 480px) {
+      width: 36px;
+      height: 36px;
+    }
   }
 
   &__info {
@@ -75,24 +88,43 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    @media (max-width: 480px) { font-size: 0.9rem; }
   }
 
   &__type {
     font-size: 0.78rem;
     color: var(--text-muted, #94a3b8);
     margin-top: 2px;
+
+    @media (max-width: 480px) { font-size: 0.7rem; }
   }
 
   &__balance {
+    font-family: 'DM Sans', sans-serif;
     font-size: 1.05rem;
     font-weight: 800;
     color: var(--color-income);
     white-space: nowrap;
-    flex-shrink: 0;
 
     &--negative {
       color: var(--color-expense);
     }
+
+    @media (max-width: 480px) {
+      font-size: 0.92rem;
+      // Move to full width row below name
+      flex-basis: 100%;
+      order: 5;
+      padding-left: 50px; // align with name (icon width + gap)
+      margin-top: -4px;
+    }
+  }
+
+  &__actions-row {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
   }
 
   &__action,
@@ -111,6 +143,12 @@
     opacity: 0.5;
     transition: opacity 0.2s, background 0.2s;
     flex-shrink: 0;
+
+    @media (max-width: 480px) {
+      padding: 8px;
+      min-width: 38px;
+      min-height: 38px;
+    }
 
     &:hover {
       opacity: 1;
@@ -231,7 +269,8 @@
 .color-picker {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
 
   &__input {
     width: 44px;

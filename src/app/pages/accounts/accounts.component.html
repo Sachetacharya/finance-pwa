@@ -20,7 +20,9 @@
     <div class="account-card__balance" [class.account-card__balance--negative]="accountService.accountBalances()['cash'] < 0">
       {{ accountService.accountBalances()['cash'] | currencyFormat | privacyMask }}
     </div>
-    <button class="account-card__action" (click)="openTransfer('cash')" title="Transfer from Cash"><ng-icon name="lucideArrowRightLeft" size="16" /></button>
+    <div class="account-card__actions-row">
+      <button class="account-card__action" (click)="openTransfer('cash')" title="Transfer from Cash" aria-label="Transfer"><ng-icon name="lucideArrowRightLeft" size="16" /></button>
+    </div>
   </div>
 
   <!-- User accounts -->
@@ -34,9 +36,11 @@
       <div class="account-card__balance" [class.account-card__balance--negative]="accountService.accountBalances()[acc.id] < 0">
         {{ accountService.accountBalances()[acc.id] | currencyFormat | privacyMask }}
       </div>
-      <button class="account-card__action" (click)="openEdit(acc.id)" title="Edit account" aria-label="Edit"><ng-icon name="lucidePencil" size="16" /></button>
-      <button class="account-card__action" (click)="openTransfer(acc.id)" title="Transfer from {{ acc.name }}" aria-label="Transfer"><ng-icon name="lucideArrowRightLeft" size="16" /></button>
-      <button class="account-card__delete" (click)="deletingAccountId.set(acc.id)" title="Delete account" aria-label="Delete"><ng-icon name="lucideTrash2" size="16" /></button>
+      <div class="account-card__actions-row">
+        <button class="account-card__action" (click)="openEdit(acc.id)" title="Edit account" aria-label="Edit"><ng-icon name="lucidePencil" size="16" /></button>
+        <button class="account-card__action" (click)="openTransfer(acc.id)" title="Transfer from {{ acc.name }}" aria-label="Transfer"><ng-icon name="lucideArrowRightLeft" size="16" /></button>
+        <button class="account-card__delete" (click)="deletingAccountId.set(acc.id)" title="Delete account" aria-label="Delete"><ng-icon name="lucideTrash2" size="16" /></button>
+      </div>
     </div>
   } @empty {
     <div class="empty-state">
