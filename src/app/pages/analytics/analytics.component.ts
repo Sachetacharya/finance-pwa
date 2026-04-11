@@ -16,11 +16,13 @@ import {
 } from '../../core/models/expense.model';
 import { formatCurrency } from '../../shared/utils/currency.utils';
 import { ChartConfiguration } from 'chart.js';
+import { AnalyticsFiltersComponent } from './analytics-filters/analytics-filters.component';
+import { AnalyticsCompareComponent } from './analytics-compare/analytics-compare.component';
 
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [StatCardComponent, ChartComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon, FormsModule],
+  imports: [StatCardComponent, ChartComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon, FormsModule, AnalyticsFiltersComponent, AnalyticsCompareComponent],
   templateUrl: './analytics.component.html',
   styleUrl: './analytics.component.scss',
 })

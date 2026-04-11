@@ -1,0 +1,33 @@
+<div class="compare-panel">
+  <div class="compare-panel__selects">
+    <select class="compare-select" [ngModel]="monthA()" (ngModelChange)="monthAChange.emit($event)">
+      <option value="">Month A</option>
+      @for (m of availableMonths(); track m) {
+        <option [value]="m">{{ formatMonth(m) }}</option>
+      }
+    </select>
+    <span class="compare-panel__vs">vs</span>
+    <select class="compare-select" [ngModel]="monthB()" (ngModelChange)="monthBChange.emit($event)">
+      <option value="">Month B</option>
+      @for (m of availableMonths(); track m) {
+        <option [value]="m">{{ formatMonth(m) }}</option>
+      }
+    </select>
+  </div>
+  @if (compareData(); as cd) {
+    <div class="compare-cards">
+      @for (side of [cd.a, cd.b]; track side.label) {
+        <div class="compare-card">
+          <div class="compare-card__label">{{ side.label }}</div>
+          <div class="compare-card__row"><span>Expenses</span><strong class="text-danger">{{ side.totalExp | currencyFormat | privacyMask }}</strong></div>
+          <div class="compare-card__row"><span>Income</span><strong class="text-success">{{ side.totalInc | currencyFormat | privacyMask }}</strong></div>
+          <div class="compare-card__row"><span>Savings</span><strong>{{ side.savings | currencyFormat | privacyMask }}</strong></div>
+          <div class="compare-card__row"><span>Transactions</span><strong>{{ side.count }}</strong></div>
+          @for (cat of side.categories.slice(0, 3); track cat.cat) {
+            <div class="compare-card__cat">{{ cat.label }}: {{ cat.total | currencyFormat | privacyMask }}</div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

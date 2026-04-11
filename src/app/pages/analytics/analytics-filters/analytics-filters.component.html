@@ -1,0 +1,39 @@
+<div class="filter-toolbar">
+  <div class="filter-toolbar__group">
+    <label class="filter-toolbar__label">Period</label>
+    <select class="filter-toolbar__select" [ngModel]="dateRange()" (ngModelChange)="dateRangeChange.emit($event)">
+      <option value="all">All Time</option>
+      <option value="week">This Week</option>
+      <option value="month">This Month</option>
+      <option value="3months">Last 3 Months</option>
+      <option value="custom">Custom Range</option>
+    </select>
+  </div>
+  @if (dateRange() === 'custom') {
+    <div class="filter-toolbar__group">
+      <label class="filter-toolbar__label">From</label>
+      <input class="filter-toolbar__input" type="date" [ngModel]="customStart()" (ngModelChange)="customStartChange.emit($event)" />
+    </div>
+    <div class="filter-toolbar__group">
+      <label class="filter-toolbar__label">To</label>
+      <input class="filter-toolbar__input" type="date" [ngModel]="customEnd()" (ngModelChange)="customEndChange.emit($event)" />
+    </div>
+  }
+  <div class="filter-toolbar__group">
+    <label class="filter-toolbar__label">Account</label>
+    <select class="filter-toolbar__select" [ngModel]="filterAccount()" (ngModelChange)="filterAccountChange.emit($event)">
+      <option value="">All Accounts</option>
+      @for (acc of accounts(); track acc.id) {
+        <option [value]="acc.id">{{ acc.name }}</option>
+      }
+    </select>
+  </div>
+  <button class="filter-toolbar__compare" [class.active]="compareMode()" (click)="compareModeChange.emit(!compareMode())">
+    <ng-icon name="lucideArrowLeftRight" size="14" /> Compare
+  </button>
+  @if (hasActiveFilters) {
+    <button class="filter-toolbar__reset" (click)="reset.emit()">
+      <ng-icon name="lucideX" size="14" /> Reset
+    </button>
+  }
+</div>
