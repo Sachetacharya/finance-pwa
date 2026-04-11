@@ -155,12 +155,15 @@
                 }
               </td>
               <td class="hide-mobile">
-                <span class="payment-badge">
+                <span class="payment-text" [style.color]="accountService.getColor(expense.paymentMethod)">
                   {{ accountService.getLabel(expense.paymentMethod) }}
-                  @if (expense.toAccount) {
-                    <ng-icon name="lucideArrowRightLeft" size="10" /> {{ accountService.getLabel(expense.toAccount) }}
-                  }
                 </span>
+                @if (expense.toAccount) {
+                  <ng-icon name="lucideArrowRightLeft" size="10" />
+                  <span class="payment-text" [style.color]="accountService.getColor(expense.toAccount)">
+                    {{ accountService.getLabel(expense.toAccount) }}
+                  </span>
+                }
               </td>
               <td class="notes-cell" [title]="expense.notes ?? ''">{{ expense.notes || '—' }}</td>
               <td class="actions-cell">

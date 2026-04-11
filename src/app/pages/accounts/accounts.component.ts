@@ -30,10 +30,12 @@ export class AccountsComponent {
   newName = '';
   newType: 'bank' | 'wallet' = 'bank';
   newBalance = 0;
+  newColor = '#6366f1';
 
   // Edit account fields
   editName = '';
   editBalance = 0;
+  editColor = '#6366f1';
 
   // Transfer fields
   transferFrom = '';
@@ -90,6 +92,7 @@ export class AccountsComponent {
     if (!acc) return;
     this.editName = acc.name;
     this.editBalance = acc.initialBalance;
+    this.editColor = acc.color ?? '#6366f1';
     this.editCurrentBalance = this.accountService.accountBalances()[id] ?? 0;
     this.editingAccountId.set(id);
   }
@@ -101,8 +104,8 @@ export class AccountsComponent {
     const currentBalance = this.accountService.accountBalances()[id] ?? 0;
     const diff = Math.round((this.editCurrentBalance - currentBalance) * 100) / 100;
 
-    // Update name
-    this.accountService.updateAccount(id, this.editName.trim(), this.editBalance);
+    // Update name + color
+    this.accountService.updateAccount(id, this.editName.trim(), this.editBalance, this.editColor);
 
     // Create balance adjustment record if balance changed
     if (diff !== 0) {
@@ -156,7 +159,7 @@ export class AccountsComponent {
   onAdd(): void {
     const name = this.newName.trim();
     if (!name) return;
-    this.accountService.addAccount(name, this.newType, this.newBalance);
+    this.accountService.addAccount(name, this.newType, this.newBalance, this.newColor);
     this.notification.success(`${name} added`);
     this.newName = '';
     this.newBalance = 0;

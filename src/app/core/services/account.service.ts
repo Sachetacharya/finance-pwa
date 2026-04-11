@@ -56,12 +56,20 @@ export class AccountService {
     return balances;
   });
 
-  addAccount(name: string, type: 'bank' | 'wallet', initialBalance: number): Account {
+  /** Color for an account (cash = green, accounts = their color) */
+  getColor(paymentMethod: string): string {
+    if (paymentMethod === 'cash') return '#22c55e';
+    const acc = this._accounts().find(a => a.id === paymentMethod);
+    return acc?.color ?? '#6366f1';
+  }
+
+  addAccount(name: string, type: 'bank' | 'wallet', initialBalance: number, color = '#6366f1'): Account {
     const account: Account = {
       id: `acc-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       name,
       type,
       initialBalance,
+      color,
       createdAt: new Date().toISOString(),
     };
     const updated = [...this._accounts(), account];
@@ -70,9 +78,9 @@ export class AccountService {
     return account;
   }
 
-  updateAccount(id: string, name: string, initialBalance: number): void {
+  updateAccount(id: string, name: string, initialBalance: number, color?: string): void {
     const updated = this._accounts().map(a =>
-      a.id === id ? { ...a, name, initialBalance } : a
+      a.id === id ? { ...a, name, initialBalance, ...(color !== undefined ? { color } : {}) } : a
     );
     this._accounts.set(updated);
     this.persist(updated);
@@ -108,7 +116,12 @@ export class AccountService {
   private loadFromStorage(): Account[] {
     try {
       const stored = localStorage.getItem('fp_accounts');
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        return JSON.parse(stored).map((a: any) => ({
+          ...a,
+          color: a.color ?? (a.type === 'bank' ? '#6366f1' : '#8b5cf6'),
+        }));
+      }
     } catch { /* ignore */ }
     return [];
   }

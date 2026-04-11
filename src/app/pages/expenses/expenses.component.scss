@@ -394,41 +394,10 @@
   @media (max-width: 768px) { padding: 3px 6px; font-size: 0.68rem; }
 }
 
-.payment-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.72rem;
+.payment-text {
+  font-size: 0.8rem;
   font-weight: 700;
   white-space: nowrap;
-
-  &--cash {
-    background: #fef9c3;
-    color: #713f12;
-  }
-
-  &--card {
-    background: #eff6ff;
-    color: #1e40af;
-  }
-
-  &--bank-siddhartha,
-  &--bank-nabil,
-  &--bank-kumari,
-  &--bank-global {
-    background: #f5f3ff;
-    color: #5b21b6;
-  }
-
-  &--esewa {
-    background: #fff7ed;
-    color: #9a3412;
-  }
-
-  &--khalti {
-    background: #fdf4ff;
-    color: #7e22ce;
-  }
 }
 
 .actions-cell {
