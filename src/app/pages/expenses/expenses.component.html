@@ -17,97 +17,18 @@
   </div>
 
   <!-- Search + Filter toolbar -->
-  <div class="toolbar">
-    <input
-      class="form-control toolbar__search"
-      type="text"
-      placeholder="Search by title or notes..."
-      [value]="filter().search ?? ''"
-      (input)="onFilterChange('search', $any($event.target).value)"
-    />
-    <div class="filter-btn-wrap">
-      <button
-        class="btn btn--ghost btn--sm filter-toggle"
-        [class.filter-toggle--active]="showFilters() || activeFilterCount() > 0"
-        (click)="showFilters.update(v => !v)"
-      >
-        <ng-icon name="lucideFilter" size="14" /> Filters
-        @if (activeFilterCount() > 0) {
-          <span class="filter-badge">{{ activeFilterCount() }}</span>
-        }
-      </button>
-
-      @if (showFilters()) {
-        <div class="filter-backdrop" (click)="showFilters.set(false)"></div>
-        <div class="filter-panel" (click)="$event.stopPropagation()">
-          <div class="filter-panel__header">
-            <span class="filter-panel__title">Filters</span>
-            @if (activeFilterCount() > 0) {
-              <button class="filter-panel__clear" (click)="clearFilters()"><ng-icon name="lucideX" size="12" /> Clear all</button>
-            }
-          </div>
-          <div class="filter-grid">
-            <div class="filter-field">
-              <label class="filter-label">Type</label>
-              <select class="form-control" [value]="filter().type"
-                (change)="onFilterChange('type', $any($event.target).value); onFilterChange('category', '')">
-                <option value="">All Types</option>
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-                <option value="transfer">Transfer</option>
-              </select>
-            </div>
-            <div class="filter-field">
-              <label class="filter-label">{{ filter().type === 'income' ? 'Income Source' : 'Category' }}</label>
-              <select class="form-control" [value]="filter().category"
-                (change)="onFilterChange('category', $any($event.target).value)">
-                <option value="">{{ filter().type === 'income' ? 'All Sources' : 'All Categories' }}</option>
-                @for (cat of filteredCategories(); track cat[0]) {
-                  <option [value]="cat[0]">{{ cat[1] }}</option>
-                }
-              </select>
-            </div>
-            <div class="filter-field">
-              <label class="filter-label">Payment Method</label>
-              <select class="form-control" [value]="filter().paymentMethod"
-                (change)="onFilterChange('paymentMethod', $any($event.target).value)">
-                <option value="">All Methods</option>
-                <option value="cash">Cash</option>
-                @for (acc of accountService.accounts(); track acc.id) {
-                  <option [value]="acc.id">{{ acc.name }}</option>
-                }
-                <option value="deleted-account">Deleted Account</option>
-              </select>
-            </div>
-            <div class="filter-field">
-              <label class="filter-label">From Date</label>
-              <input class="form-control" type="date"
-                [value]="filter().startDate ?? ''"
-                (change)="onFilterChange('startDate', $any($event.target).value)" />
-            </div>
-            <div class="filter-field">
-              <label class="filter-label">To Date</label>
-              <input class="form-control" type="date"
-                [value]="filter().endDate ?? ''"
-                (change)="onFilterChange('endDate', $any($event.target).value)" />
-            </div>
-            <div class="filter-field">
-              <label class="filter-label">Min Amount</label>
-              <input class="form-control" type="number" min="0" step="0.01" placeholder="0.00"
-                [value]="filter().minAmount ?? ''"
-                (input)="onAmountChange('minAmount', $any($event.target).value)" />
-            </div>
-            <div class="filter-field">
-              <label class="filter-label">Max Amount</label>
-              <input class="form-control" type="number" min="0" step="0.01" placeholder="Any"
-                [value]="filter().maxAmount ?? ''"
-                (input)="onAmountChange('maxAmount', $any($event.target).value)" />
-            </div>
-          </div>
-        </div>
-      }
-    </div>
-  </div>
+  <app-expenses-filters
+    [filter]="filter()"
+    [categories]="categories"
+    [incomeSources]="incomeSources"
+    [showFilters]="showFilters()"
+    [activeFilterCount]="activeFilterCount()"
+    (searchChange)="onFilterChange('search', $event)"
+    (filterChange)="onFilterChange($event.key, $event.value)"
+    (amountFilterChange)="onAmountChange($event.key, $event.value)"
+    (toggleFilters)="showFilters.update(v => !v)"
+    (clearFilters)="clearFilters()"
+  />
 
   <!-- Table -->
   <div class="card table-card">

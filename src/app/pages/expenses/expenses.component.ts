@@ -8,6 +8,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
 import { NgIcon } from '@ng-icons/core';
+import { ExpensesFiltersComponent } from './expenses-filters/expenses-filters.component';
 import {
   Expense,
   ExpenseFilter,
@@ -28,7 +29,7 @@ type SortDir = 'asc' | 'desc';
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [FormsModule, ExpenseFormComponent, ConfirmDialogComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon],
+  imports: [FormsModule, ExpenseFormComponent, ConfirmDialogComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon, ExpensesFiltersComponent],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
 })
@@ -160,14 +161,13 @@ export class ExpensesComponent {
     return Math.min(this.currentPage() * this.pageSize, this.totalFiltered());
   }
 
-  onFilterChange(key: keyof ExpenseFilter, value: string): void {
+  onFilterChange(key: any, value: string): void {
     this.filter.update(f => ({ ...f, [key]: value }));
     this.currentPage.set(1);
   }
 
-  onAmountChange(key: 'minAmount' | 'maxAmount', value: string): void {
-    const num = value === '' ? undefined : Number(value);
-    this.filter.update(f => ({ ...f, [key]: num }));
+  onAmountChange(key: any, value: any): void {
+    this.filter.update(f => ({ ...f, [key]: value }));
     this.currentPage.set(1);
   }
 
