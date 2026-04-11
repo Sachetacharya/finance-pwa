@@ -2,6 +2,7 @@ import { Injectable, inject, computed } from '@angular/core';
 import { ExpenseService } from './expense.service';
 import { BudgetService } from './budget.service';
 import { LoanService } from './loan.service';
+import { AccountService } from './account.service';
 import { Expense, ExpenseCategory, CATEGORY_LABELS } from '../models/expense.model';
 
 export interface Insight {
@@ -23,6 +24,7 @@ export class InsightsService {
   private readonly exp = inject(ExpenseService);
   private readonly budget = inject(BudgetService);
   private readonly loan = inject(LoanService);
+  private readonly account = inject(AccountService);
 
   // ── Helpers ──
   private getMonthExpenses(monthsAgo: number): Expense[] {
@@ -367,10 +369,37 @@ export class InsightsService {
     // Net position: positive = others owe you more than you owe
     const netPosition = totalLentOutstanding - totalBorrowedOutstanding;
 
+    // Group by person — extract name from title (after "—" or inside "()")
+    const groupByPerson = (list: typeof statuses) => {
+      const map = new Map<string, { name: string; count: number; totalAmount: number; outstanding: number; loans: string[] }>();
+      list.forEach(s => {
+        // Try to extract person name from title patterns like "Loan — Ram", "Split - Food (Ram)", "Ram"
+        let name = s.loan.title;
+        const parenMatch = name.match(/\(([^)]+)\)/);
+        const dashMatch = name.match(/[—–-]\s*(.+)/);
+        if (parenMatch) name = parenMatch[1].trim();
+        else if (dashMatch) name = dashMatch[1].trim();
+        name = name.replace(/^(Split|Loan received|Lent)\s*[-—]?\s*/i, '').trim() || s.loan.title;
+        const key = name.toLowerCase();
+
+        const entry = map.get(key) ?? { name, count: 0, totalAmount: 0, outstanding: 0, loans: [] };
+        entry.count++;
+        entry.totalAmount += s.loan.amount;
+        entry.outstanding += s.outstanding;
+        entry.loans.push(s.loan.title);
+        map.set(key, entry);
+      });
+      return Array.from(map.values()).filter(g => g.count > 0).sort((a, b) => b.outstanding - a.outstanding);
+    };
+
+    const borrowedByPerson = groupByPerson(borrowed);
+    const lentByPerson = groupByPerson(lent);
+
     return {
       totalBorrowed, totalBorrowedPaid, totalBorrowedOutstanding, borrowedProgress,
       totalLent, totalLentReceived, totalLentOutstanding, lentProgress,
       activeBorrowed, activeLent,
+      borrowedByPerson, lentByPerson,
       resolvedBorrowed, resolvedLent,
       borrowedCount: borrowed.length, lentCount: lent.length,
       netPosition,
@@ -421,6 +450,14 @@ export class InsightsService {
       }
     });
 
+    // Multiple loans from same person
+    la.borrowedByPerson.filter(g => g.count >= 2 && g.outstanding > 0).forEach(g => {
+      insights.push({ type: 'warning', icon: 'lucideUser', text: `You have ${g.count} loans from "${g.name}" totalling NPR ${Math.round(g.outstanding)} outstanding` });
+    });
+    la.lentByPerson.filter(g => g.count >= 2 && g.outstanding > 0).forEach(g => {
+      insights.push({ type: 'info', icon: 'lucideUser', text: `"${g.name}" owes you across ${g.count} records — NPR ${Math.round(g.outstanding)} total` });
+    });
+
     if (!insights.length) {
       insights.push({ type: 'success', icon: 'lucideCheck', text: 'No active loans or debts' });
     }
@@ -465,5 +502,206 @@ export class InsightsService {
     }
 
     return tips;
+  });
+
+  // ── 12. Prediction & Forecast ──
+  readonly forecast = computed(() => {
+    const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+    const today = new Date().getDate();
+    const thisMonthSpent = this.monthTotal(0);
+    const thisMonthIncome = this.getMonthIncome(0);
+    const dailyRate = today > 0 ? thisMonthSpent / today : 0;
+    const predictedTotal = Math.round(dailyRate * daysInMonth);
+    const predictedSavings = thisMonthIncome - predictedTotal;
+    const daysLeft = daysInMonth - today;
+    const remainingBudget = thisMonthIncome - thisMonthSpent;
+    const dailyBudgetLeft = daysLeft > 0 ? Math.round(remainingBudget / daysLeft) : 0;
+
+    // Will exceed any budget?
+    const budgetAlerts: string[] = [];
+    this.budget.budgetStatuses().forEach(b => {
+      if (b.percentage < 100) {
+        const catDaily = today > 0 ? b.spent / today : 0;
+        const catPredicted = catDaily * daysInMonth;
+        if (catPredicted > b.budget.monthlyLimit) {
+          budgetAlerts.push(CATEGORY_LABELS[b.budget.category] ?? b.budget.category);
+        }
+      }
+    });
+
+    // Next month forecast (average of last 3 months)
+    const avg3 = [0, 1, 2].reduce((s, i) => s + this.monthTotal(i), 0) / 3;
+
+    return {
+      predictedTotal, predictedSavings, dailyRate: Math.round(dailyRate),
+      daysLeft, dailyBudgetLeft, budgetAlerts,
+      nextMonthForecast: Math.round(avg3),
+    };
+  });
+
+  // ── 13. Lifestyle & Habits ──
+  readonly lifestyle = computed(() => {
+    const expenses = this.exp.expenses().filter(e => e.type === 'expense');
+    const thisMonth = this.getMonthExpenses(0);
+
+    // Most expensive day of month
+    const dayTotals = new Map<number, number>();
+    thisMonth.forEach(e => {
+      const day = new Date(e.date).getDate();
+      dayTotals.set(day, (dayTotals.get(day) ?? 0) + e.amount);
+    });
+    let mostExpensiveDay = { day: 0, amount: 0 };
+    dayTotals.forEach((amount, day) => {
+      if (amount > mostExpensiveDay.amount) mostExpensiveDay = { day, amount };
+    });
+
+    // Impulse detection: small frequent buys (< 500, same title, 3+ times this month)
+    const titleCount = new Map<string, { count: number; total: number }>();
+    thisMonth.forEach(e => {
+      if (e.amount < 500) {
+        const key = e.title.toLowerCase();
+        const entry = titleCount.get(key) ?? { count: 0, total: 0 };
+        entry.count++; entry.total += e.amount;
+        titleCount.set(key, entry);
+      }
+    });
+    const impulseItems = Array.from(titleCount.entries())
+      .filter(([, v]) => v.count >= 3)
+      .sort((a, b) => b[1].total - a[1].total)
+      .slice(0, 3)
+      .map(([title, data]) => ({ title, ...data }));
+
+    // Most expense type (category breakdown sorted)
+    const catMap = new Map<string, { count: number; total: number }>();
+    expenses.forEach(e => {
+      const entry = catMap.get(e.category) ?? { count: 0, total: 0 };
+      entry.count++; entry.total += e.amount;
+      catMap.set(e.category, entry);
+    });
+    const expenseByType = Array.from(catMap.entries())
+      .map(([cat, data]) => ({
+        category: cat,
+        label: CATEGORY_LABELS[cat as ExpenseCategory] ?? cat,
+        ...data,
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    // Spending per category this month
+    const monthCatMap = new Map<string, number>();
+    thisMonth.forEach(e => monthCatMap.set(e.category, (monthCatMap.get(e.category) ?? 0) + e.amount));
+    const monthByCategory = Array.from(monthCatMap.entries())
+      .map(([cat, total]) => ({ category: cat, label: CATEGORY_LABELS[cat as ExpenseCategory] ?? cat, total: Math.round(total) }))
+      .sort((a, b) => b.total - a.total);
+
+    return { mostExpensiveDay, impulseItems, expenseByType, monthByCategory };
+  });
+
+  // ── 14. Account Health ──
+  readonly accountHealth = computed((): Insight[] => {
+    const insights: Insight[] = [];
+    const balances = this.exp.expenses().filter(e => e.type === 'expense');
+    const accountService = this.account;
+
+    // Account with most transactions (most used)
+    const usageMap = new Map<string, number>();
+    balances.forEach(e => usageMap.set(e.paymentMethod, (usageMap.get(e.paymentMethod) ?? 0) + 1));
+    const sorted = Array.from(usageMap.entries()).sort((a, b) => b[1] - a[1]);
+    if (sorted.length > 0) {
+      const [accId, count] = sorted[0];
+      insights.push({ type: 'info', icon: 'lucideBarChart3', text: `Most used: ${accountService.getLabel(accId)} (${count} transactions)` });
+    }
+
+    // Lowest balance warning
+    const allBalances = accountService.accountBalances();
+    const accounts = accountService.accounts();
+    for (const acc of accounts) {
+      const bal = allBalances[acc.id] ?? 0;
+      if (bal < 1000 && bal >= 0) {
+        insights.push({ type: 'warning', icon: 'lucideAlertTriangle', text: `${acc.name} balance is low (NPR ${Math.round(bal)})` });
+      } else if (bal < 0) {
+        insights.push({ type: 'danger', icon: 'lucideAlertTriangle', text: `${acc.name} is in negative (NPR ${Math.round(bal)})` });
+      }
+    }
+
+    // Account drain rate (spending per day this month from each account)
+    const thisMonth = this.getMonthExpenses(0);
+    const today = new Date().getDate() || 1;
+    const drainMap = new Map<string, number>();
+    thisMonth.forEach(e => drainMap.set(e.paymentMethod, (drainMap.get(e.paymentMethod) ?? 0) + e.amount));
+    const fastestDrain = Array.from(drainMap.entries())
+      .map(([id, total]) => ({ id, label: accountService.getLabel(id), rate: Math.round(total / today) }))
+      .sort((a, b) => b.rate - a.rate)[0];
+    if (fastestDrain && fastestDrain.rate > 0) {
+      insights.push({ type: 'info', icon: 'lucideTrendingDown', text: `Fastest spending: ${fastestDrain.label} at NPR ${fastestDrain.rate}/day` });
+    }
+
+    // Dormant accounts (no transactions in 30 days)
+    const last30 = new Date();
+    last30.setDate(last30.getDate() - 30);
+    const last30Str = last30.toISOString().split('T')[0];
+    const recentAccounts = new Set(this.exp.expenses().filter(e => e.date >= last30Str).map(e => e.paymentMethod));
+    for (const acc of accounts) {
+      if (!recentAccounts.has(acc.id)) {
+        insights.push({ type: 'info', icon: 'lucideInfo', text: `${acc.name} has no activity in 30 days` });
+      }
+    }
+
+    if (!insights.length) {
+      insights.push({ type: 'success', icon: 'lucideCheck', text: 'All accounts are healthy' });
+    }
+    return insights;
+  });
+
+  // ── 15. Loan Intelligence ──
+  readonly loanIntelligence = computed((): Insight[] => {
+    const insights: Insight[] = [];
+    const statuses = this.loan.loanStatuses();
+    const borrowed = statuses.filter(s => s.loan.type === 'borrowed' && s.outstanding > 0);
+    const lent = statuses.filter(s => s.loan.type === 'lent' && s.outstanding > 0);
+
+    // Debt-to-income ratio
+    const totalDebt = this.loan.totalBorrowedOutstanding();
+    const monthlyIncome = this.getMonthIncome(0) || this.exp.totalIncome() / Math.max(this.exp.monthlyIncomeTotals().length, 1);
+    if (monthlyIncome > 0 && totalDebt > 0) {
+      const dti = Math.round((totalDebt / (monthlyIncome * 12)) * 100);
+      const level = dti > 50 ? 'danger' : dti > 30 ? 'warning' : 'success';
+      insights.push({ type: level as any, icon: 'lucidePieChart', text: `Debt-to-annual-income ratio: ${dti}%${dti > 50 ? ' — high risk' : dti > 30 ? ' — moderate' : ' — healthy'}` });
+    }
+
+    // Payoff timeline estimate
+    if (borrowed.length > 0) {
+      const totalOutstanding = borrowed.reduce((s, l) => s + l.outstanding, 0);
+      const totalPaid = borrowed.reduce((s, l) => s + l.totalPaid, 0);
+      const monthsActive = borrowed.reduce((s, l) => {
+        const created = new Date(l.loan.createdAt);
+        const months = (new Date().getTime() - created.getTime()) / (30 * 86400000);
+        return s + Math.max(months, 1);
+      }, 0) / borrowed.length;
+      const avgMonthlyPayment = monthsActive > 0 ? totalPaid / monthsActive : 0;
+      if (avgMonthlyPayment > 0) {
+        const monthsToPayoff = Math.ceil(totalOutstanding / avgMonthlyPayment);
+        insights.push({ type: 'info', icon: 'lucideCalendar', text: `At current rate, debt-free in ~${monthsToPayoff} month${monthsToPayoff > 1 ? 's' : ''}` });
+      }
+    }
+
+    // Who owes you the longest
+    if (lent.length > 0) {
+      const oldest = lent.sort((a, b) => a.loan.date.localeCompare(b.loan.date))[0];
+      const daysAgo = Math.round((new Date().getTime() - new Date(oldest.loan.date).getTime()) / 86400000);
+      if (daysAgo > 30) {
+        insights.push({ type: 'warning', icon: 'lucideInfo', text: `"${oldest.loan.title}" has been pending for ${daysAgo} days. Follow up.` });
+      }
+    }
+
+    // Largest single debt
+    if (borrowed.length > 0) {
+      const largest = borrowed.sort((a, b) => b.outstanding - a.outstanding)[0];
+      insights.push({ type: 'info', icon: 'lucideLandmark', text: `Largest debt: "${largest.loan.title}" — NPR ${Math.round(largest.outstanding)} remaining` });
+    }
+
+    if (!insights.length) {
+      insights.push({ type: 'success', icon: 'lucideCheck', text: 'No active debts — you\'re debt-free!' });
+    }
+    return insights;
   });
 }

@@ -38,6 +38,21 @@
 .text-danger { color: var(--danger) !important; }
 .text-success { color: var(--success) !important; }
 
+.person-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px;
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+.person-row {
+  display: flex; align-items: center; gap: 8px; padding: 8px 0;
+  border-bottom: 1px solid var(--border-color); font-size: 0.82rem;
+  &:last-child { border-bottom: none; }
+
+  &__name { flex: 1; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
+  &__meta { font-size: 0.7rem; color: var(--text-muted); background: var(--bg-secondary); padding: 2px 6px; border-radius: 8px; }
+  &__amount { font-family: 'DM Sans', sans-serif; font-weight: 700; }
+}
+
 .net-position {
   display: flex; justify-content: space-between; align-items: center;
   padding: 12px 16px; border-radius: 10px; margin-top: 10px;
@@ -474,6 +489,29 @@
   margin-top: 12px;
   flex-wrap: wrap;
 }
+
+.alert--info { background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary); }
+
+.type-list { display: flex; flex-direction: column; gap: 2px; }
+
+.type-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 0;
+  border-bottom: 1px solid var(--border-color); font-size: 0.82rem;
+
+  &:last-child { border-bottom: none; }
+
+  &__rank {
+    width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+    background: var(--bg-secondary); border-radius: 6px;
+    font-size: 0.7rem; font-weight: 700; color: var(--text-muted); flex-shrink: 0;
+  }
+
+  &__label { flex: 1; font-weight: 600; color: var(--text-primary); }
+  &__count { font-size: 0.72rem; font-weight: 700; color: var(--primary); background: var(--primary-glow); padding: 2px 6px; border-radius: 8px; }
+  &__amount { font-family: 'DM Sans', sans-serif; font-weight: 700; color: var(--text-primary); }
+}
+
+.pattern-card__sub { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
 
 .compare-item {
   display: flex;
