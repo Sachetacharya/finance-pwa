@@ -7,18 +7,11 @@
   </div>
 
   <!-- 8. Financial Health Score -->
-  <div class="health-score">
-    <div class="health-score__ring" [style.--score]="insights.healthScore()" [style.--color]="insights.healthLabel().color">
-      <div class="health-score__inner">
-        <span class="health-score__number">{{ insights.healthScore() }}</span>
-        <span class="health-score__of">/100</span>
-      </div>
-    </div>
-    <div class="health-score__info">
-      <div class="health-score__label" [style.color]="insights.healthLabel().color">{{ insights.healthLabel().label }}</div>
-      <div class="health-score__desc">Financial Health Score</div>
-    </div>
-  </div>
+  <app-insight-health-score
+    [score]="insights.healthScore()"
+    [label]="insights.healthLabel().label"
+    [color]="insights.healthLabel().color"
+  />
 
   <!-- 1. Overview Summary -->
   <div class="section">
@@ -53,17 +46,7 @@
   </div>
 
   <!-- 3. Spending Insights -->
-  <div class="section">
-    <h2 class="section__title"><ng-icon name="lucideTrendingUp" size="18" /> Spending Insights</h2>
-    <div class="insight-list">
-      @for (item of insights.spendingInsights(); track item.text) {
-        <div class="insight-item insight-item--{{ item.type }}">
-          <ng-icon [name]="item.icon" size="18" />
-          <span>{{ item.text }}</span>
-        </div>
-      }
-    </div>
-  </div>
+  <app-insight-card title="Spending Insights" icon="lucideTrendingUp" [items]="insights.spendingInsights()" />
 
   <!-- 2. Category Breakdown -->
   <div class="section">
@@ -230,30 +213,10 @@
   }
 
   <!-- 5. Expense Leak Detection -->
-  <div class="section">
-    <h2 class="section__title"><ng-icon name="lucideSearch" size="18" /> Leak Detection</h2>
-    <div class="insight-list">
-      @for (leak of insights.leaks(); track leak.text) {
-        <div class="insight-item insight-item--{{ leak.type }}">
-          <ng-icon [name]="leak.icon" size="18" />
-          <span>{{ leak.text }}</span>
-        </div>
-      }
-    </div>
-  </div>
+  <app-insight-card title="Leak Detection" icon="lucideSearch" [items]="insights.leaks()" />
 
   <!-- 6. Budget Recommendations -->
-  <div class="section">
-    <h2 class="section__title"><ng-icon name="lucideTarget" size="18" /> Budget Recommendations</h2>
-    <div class="insight-list">
-      @for (rec of insights.budgetRecs(); track rec.text) {
-        <div class="insight-item insight-item--{{ rec.type }}">
-          <ng-icon [name]="rec.icon" size="18" />
-          <span>{{ rec.text }}</span>
-        </div>
-      }
-    </div>
-  </div>
+  <app-insight-card title="Budget Recommendations" icon="lucideTarget" [items]="insights.budgetRecs()" />
 
   <!-- 7. Month-to-Month Comparison -->
   <div class="section">
@@ -369,43 +332,13 @@
   </div>
 
   <!-- 14. Account Health -->
-  <div class="section">
-    <h2 class="section__title"><ng-icon name="lucideLandmark" size="18" /> Account Health</h2>
-    <div class="insight-list">
-      @for (item of insights.accountHealth(); track item.text) {
-        <div class="insight-item insight-item--{{ item.type }}">
-          <ng-icon [name]="item.icon" size="18" />
-          <span>{{ item.text }}</span>
-        </div>
-      }
-    </div>
-  </div>
+  <app-insight-card title="Account Health" icon="lucideLandmark" [items]="insights.accountHealth()" />
 
   <!-- 15. Loan Intelligence -->
   @if (insights.loanIntelligence().length) {
-    <div class="section">
-      <h2 class="section__title"><ng-icon name="lucideHandshake" size="18" /> Loan Intelligence</h2>
-      <div class="insight-list">
-        @for (item of insights.loanIntelligence(); track item.text) {
-          <div class="insight-item insight-item--{{ item.type }}">
-            <ng-icon [name]="item.icon" size="18" />
-            <span>{{ item.text }}</span>
-          </div>
-        }
-      </div>
-    </div>
+    <app-insight-card title="Loan Intelligence" icon="lucideHandshake" [items]="insights.loanIntelligence()" />
   }
 
   <!-- 10. Personalized Tips -->
-  <div class="section">
-    <h2 class="section__title"><ng-icon name="lucideInfo" size="18" /> Tips & Suggestions</h2>
-    <div class="insight-list">
-      @for (tip of insights.tips(); track tip.text) {
-        <div class="insight-item insight-item--{{ tip.type }}">
-          <ng-icon [name]="tip.icon" size="18" />
-          <span>{{ tip.text }}</span>
-        </div>
-      }
-    </div>
-  </div>
+  <app-insight-card title="Tips & Suggestions" icon="lucideInfo" [items]="insights.tips()" />
 </div>
