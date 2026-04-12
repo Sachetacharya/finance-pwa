@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -10,7 +10,7 @@ import { NotificationService } from '../../../core/services/notification.service
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly notification = inject(NotificationService);
   private readonly fb = inject(FormBuilder);
@@ -18,11 +18,25 @@ export class LoginComponent {
   readonly isLoading = signal(false);
   readonly showPassword = signal(false);
   readonly errorMessage = signal('');
+  readonly isFirstTime = signal(!localStorage.getItem('fp_logged_once'));
+  rememberMe = false;
 
   readonly form = this.fb.group({
-    email: ['sachet.acharya@gmail.com', [Validators.required, Validators.email]],
-    password: ['admin123', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', Validators.required],
   });
+
+  ngOnInit(): void {
+    // Load remembered credentials
+    const saved = localStorage.getItem('fp_remember');
+    if (saved) {
+      try {
+        const { email, password } = JSON.parse(saved);
+        this.form.patchValue({ email, password });
+        this.rememberMe = true;
+      } catch { /* ignore */ }
+    }
+  }
 
   isInvalid(field: string): boolean {
     const ctrl = this.form.get(field);
@@ -34,11 +48,19 @@ export class LoginComponent {
     this.isLoading.set(true);
     this.errorMessage.set('');
     try {
-      await this.auth.login({
-        email: this.form.value.email!,
-        password: this.form.value.password!,
-      });
-      this.notification.success('Welcome back! 👋');
+      const email = this.form.value.email!;
+      const password = this.form.value.password!;
+
+      // Save or clear remembered credentials
+      if (this.rememberMe) {
+        localStorage.setItem('fp_remember', JSON.stringify({ email, password }));
+      } else {
+        localStorage.removeItem('fp_remember');
+      }
+
+      await this.auth.login({ email, password });
+      localStorage.setItem('fp_logged_once', 'true');
+      this.notification.success('Welcome back!');
     } catch (err: any) {
       this.errorMessage.set(err.message ?? 'Login failed. Please try again.');
     } finally {

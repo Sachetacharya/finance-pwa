@@ -23,8 +23,18 @@
   }
 
   &__logo {
-    font-size: 3rem;
-    margin-bottom: 12px;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 12px;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
   }
 
   &__title {
@@ -139,6 +149,25 @@
   font-size: 0.75rem;
   color: #ef4444;
   font-weight: 500;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #64748b);
+
+  input[type="checkbox"] {
+    -webkit-appearance: checkbox !important;
+    appearance: checkbox !important;
+    width: 18px;
+    height: 18px;
+    accent-color: #6366f1;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
 }
 
 .auth-link {

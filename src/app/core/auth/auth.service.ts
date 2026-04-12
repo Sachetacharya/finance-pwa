@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { AuthResponse, LoginRequest, User } from '../models/user.model';
 
 const MOCK_USERS = [
-  { id: '1', name: 'Sachet Acharya', email: 'sachet.acharya@gmail.com', password: 'admin123', role: 'admin' as const },
+  { id: '1', name: 'Admin', email: 'admin@gmail.com', password: 'admin123', role: 'admin' as const },
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -40,6 +40,26 @@ export class AuthService {
         }
       }, 700);
     });
+  }
+
+  updateProfile(name: string, email: string): void {
+    const user = this._currentUser();
+    if (!user) return;
+    const updated = { ...user, name, email };
+    localStorage.setItem('auth_user', JSON.stringify(updated));
+    this._currentUser.set(updated);
+    // Update mock user
+    const mock = MOCK_USERS.find(u => u.id === user.id);
+    if (mock) { mock.name = name; mock.email = email; }
+  }
+
+  changePassword(currentPassword: string, newPassword: string): boolean {
+    const user = this._currentUser();
+    if (!user) return false;
+    const mock = MOCK_USERS.find(u => u.id === user.id);
+    if (!mock || mock.password !== currentPassword) return false;
+    mock.password = newPassword;
+    return true;
   }
 
   logout(): void {

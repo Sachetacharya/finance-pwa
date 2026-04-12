@@ -15,6 +15,14 @@
       <div class="profile-card__name">{{ auth.currentUser()?.name }}</div>
       <div class="profile-card__email">{{ auth.currentUser()?.email }}</div>
     </div>
+    <div class="profile-card__actions">
+      <button class="btn btn--ghost btn--sm" (click)="openEditProfile()">
+        <ng-icon name="lucidePencil" size="14" /> Edit
+      </button>
+      <button class="btn btn--ghost btn--sm" (click)="openChangePassword()">
+        <ng-icon name="lucideKeyRound" size="14" /> Password
+      </button>
+    </div>
   </div>
 
   <!-- Theme -->
@@ -112,3 +120,65 @@
     }
   </div>
 </div>
+
+<!-- Edit Profile Modal -->
+@if (showEditProfile()) {
+  <div class="modal-overlay" lockScroll (click)="showEditProfile.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">Edit Profile</h2>
+        <button class="modal__close" aria-label="Close" (click)="showEditProfile.set(false)"><ng-icon name="lucideX" size="18" /></button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input class="form-control" type="text" [(ngModel)]="editName" placeholder="Your name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-control" type="email" [(ngModel)]="editEmail" placeholder="you@example.com" />
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="showEditProfile.set(false)">Cancel</button>
+          <button class="btn btn--primary" (click)="onSaveProfile()" [disabled]="!editName.trim() || !editEmail.trim()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Change Password Modal -->
+@if (showChangePassword()) {
+  <div class="modal-overlay" lockScroll (click)="showChangePassword.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">Change Password</h2>
+        <button class="modal__close" aria-label="Close" (click)="showChangePassword.set(false)"><ng-icon name="lucideX" size="18" /></button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <input class="form-control" type="password" [(ngModel)]="currentPassword" placeholder="Enter current password" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input class="form-control" type="password" [(ngModel)]="newPassword" placeholder="Min 4 characters" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm New Password</label>
+          <input class="form-control" type="password" [(ngModel)]="confirmPassword" placeholder="Repeat new password" />
+          @if (confirmPassword && newPassword !== confirmPassword) {
+            <span class="form-error">Passwords do not match</span>
+          }
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="showChangePassword.set(false)">Cancel</button>
+          <button class="btn btn--primary" (click)="onChangePassword()"
+            [disabled]="!currentPassword || !newPassword || newPassword !== confirmPassword">
+            Change Password
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

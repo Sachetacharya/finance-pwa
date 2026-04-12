@@ -1,18 +1,19 @@
 <div class="auth-page">
   <div class="auth-card">
     <div class="auth-card__header">
-      <div class="auth-card__logo">💰</div>
+      <div class="auth-card__logo">F</div>
       <h1 class="auth-card__title">Welcome Back</h1>
       <p class="auth-card__subtitle">Sign in to your FinanceApp account</p>
     </div>
 
-    <div class="auth-hint">
-      <span>🔑</span>
-      <span><strong>Credentials:</strong> admin&#64;financeapp.com / admin123</span>
-    </div>
+    @if (isFirstTime()) {
+      <div class="auth-hint">
+        <strong>First time?</strong> Use: admin&#64;gmail.com / admin123
+      </div>
+    }
 
     @if (errorMessage()) {
-      <div class="auth-alert auth-alert--error">⚠️ {{ errorMessage() }}</div>
+      <div class="auth-alert auth-alert--error">{{ errorMessage() }}</div>
     }
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="auth-form">
@@ -56,11 +57,16 @@
         }
       </div>
 
+      <label class="remember-me">
+        <input type="checkbox" [checked]="rememberMe" (change)="rememberMe = !rememberMe" />
+        <span>Remember me</span>
+      </label>
+
       <button type="submit" class="btn btn--primary btn--full" [disabled]="isLoading()">
         @if (isLoading()) {
           <span class="spinner"></span> Signing in...
         } @else {
-          Sign In →
+          Sign In
         }
       </button>
     </form>
