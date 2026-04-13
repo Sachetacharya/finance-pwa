@@ -415,3 +415,71 @@ textarea {
   background: rgba(99, 102, 241, 0.2);
   color: var(--text-primary);
 }
+
+/* -------------------------
+   Loan Table Cell Styles (global for data-table template)
+   ------------------------- */
+.lt-title { font-weight: 600; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lt-date { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+.lt-income { color: var(--color-income); font-family: 'DM Sans', sans-serif; font-weight: 700; }
+.lt-expense { color: var(--color-expense); font-family: 'DM Sans', sans-serif; font-weight: 700; }
+.lt-resolved { opacity: 0.5; }
+.lt-hide-m { @media (max-width: 768px) { display: none !important; } }
+.lt-actions { white-space: nowrap; }
+
+.lt-progress {
+  display: flex; align-items: center; gap: 6px;
+  &__bar { width: 60px; height: 6px; background: var(--bg-secondary); border-radius: 6px; overflow: hidden; }
+  &__fill { height: 100%; background: var(--primary); border-radius: 6px; transition: width 0.4s;
+    &--done { background: var(--success); }
+  }
+  &__pct { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); min-width: 32px; }
+}
+
+/* -------------------------
+   Expense Table Cell Styles (global for data-table template)
+   ------------------------- */
+.et-date { white-space: nowrap; color: var(--text-muted) !important; font-size: 0.8rem !important; }
+.et-title { font-weight: 600; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.et-hide-m { @media (max-width: 768px) { display: none !important; } }
+.et-category {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--bg-secondary); padding: 4px 10px; border-radius: 20px;
+  font-size: 0.75rem; font-weight: 600; white-space: nowrap; color: var(--text-secondary);
+  @media (max-width: 768px) { padding: 3px 6px; font-size: 0.68rem; }
+}
+.et-amount {
+  font-family: 'DM Sans', sans-serif; font-weight: 700; color: var(--color-expense) !important; white-space: nowrap;
+  &--income { color: var(--color-income) !important; }
+  &--transfer { color: var(--color-transfer) !important; }
+}
+.et-stmt-before { display: block; font-size: 0.68rem; font-weight: 500; color: var(--text-muted); margin-bottom: 2px; }
+.et-stmt-main { display: block; }
+.et-stmt-after { display: block; font-size: 0.68rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;
+  &--neg { color: var(--color-expense); }
+}
+.et-payment { font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
+.et-notes { color: var(--text-muted) !important; font-size: 0.8rem !important; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.et-actions { white-space: nowrap; }
+.et-act {
+  background: none; border: none; cursor: pointer;
+  padding: 10px; min-width: 44px; min-height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 8px; color: var(--text-muted); transition: all 0.2s;
+  @media (max-width: 768px) { padding: 6px; min-width: 34px; min-height: 34px; }
+  &:hover { background: var(--bg-secondary); color: var(--text-primary); }
+  &--delete:hover { color: var(--danger); background: var(--danger-light); }
+}
+.et-row--income { background: rgba(16, 185, 129, 0.04); }
+.et-row--expense { background: rgba(239, 68, 68, 0.03); }
+.et-row--transfer { background: rgba(139, 92, 246, 0.03); }
+
+.lt-act {
+  background: none; border: none; cursor: pointer;
+  padding: 6px; min-width: 30px; min-height: 30px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 6px; color: var(--text-muted); transition: all 0.2s;
+  &--pay:hover { color: var(--success); background: var(--success-light); }
+  &--edit:hover { color: var(--primary); background: var(--primary-glow); }
+  &--delete:hover { color: var(--danger); background: var(--danger-light); }
+}

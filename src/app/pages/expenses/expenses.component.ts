@@ -9,6 +9,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
 import { NgIcon } from '@ng-icons/core';
 import { ExpensesFiltersComponent } from './expenses-filters/expenses-filters.component';
+import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import {
   Expense,
   ExpenseFilter,
@@ -29,7 +30,7 @@ type SortDir = 'asc' | 'desc';
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [FormsModule, ExpenseFormComponent, ConfirmDialogComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon, ExpensesFiltersComponent],
+  imports: [FormsModule, ExpenseFormComponent, ConfirmDialogComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon, ExpensesFiltersComponent, DataTableComponent],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
 })
@@ -37,6 +38,15 @@ export class ExpensesComponent {
   readonly expenseService = inject(ExpenseService);
   private readonly notification = inject(NotificationService);
   private readonly exportService = inject(ExportService);
+
+  getCategoryIcon(cat: string): string { return (this.allCategoryIcons as any)[cat] ?? 'lucidePackage'; }
+  getCategoryLabel(cat: string): string { return (this.allCategoryLabels as any)[cat] ?? cat; }
+
+  expenseRowClass = (e: any) => {
+    if (e.type === 'income') return 'et-row--income';
+    if (e.type === 'transfer') return 'et-row--transfer';
+    return 'et-row--expense';
+  };
 
   readonly filter = signal<ExpenseFilter>({ search: '', type: '', category: '', paymentMethod: '' });
   readonly sortField = signal<SortField>('date');
@@ -171,7 +181,7 @@ export class ExpensesComponent {
     this.currentPage.set(1);
   }
 
-  sort(field: SortField): void {
+  sort(field: any): void {
     if (this.sortField() === field) {
       this.sortDir.update(d => d === 'asc' ? 'desc' : 'asc');
     } else {

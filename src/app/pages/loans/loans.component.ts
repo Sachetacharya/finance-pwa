@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LoanService } from '../../core/services/loan.service';
 import { AccountService } from '../../core/services/account.service';
@@ -10,11 +10,12 @@ import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
 import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
 import { LoanStatus } from '../../core/models/loan.model';
 import { NgIcon } from '@ng-icons/core';
+import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 
 @Component({
   selector: 'app-loans',
   standalone: true,
-  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe, PrivacyMaskPipe, LockScrollDirective, NgIcon],
+  imports: [FormsModule, ConfirmDialogComponent, CurrencyFormatPipe, PrivacyMaskPipe, LockScrollDirective, NgIcon, DataTableComponent],
   templateUrl: './loans.component.html',
   styleUrl: './loans.component.scss',
 })
@@ -30,6 +31,46 @@ export class LoansComponent {
   readonly payingLoan = signal<LoanStatus | null>(null);
   readonly deletingLoanId = signal<string | null>(null);
   readonly activeTab = signal<'borrowed' | 'lent'>('borrowed');
+  readonly viewMode = signal<'cards' | 'table'>('cards');
+  loanRowClass = (s: any) => s.outstanding <= 0 ? 'lt-resolved' : '';
+  readonly tableSortField = signal<string>('date');
+  readonly tableSortDir = signal<'asc' | 'desc'>('desc');
+
+  readonly sortedStatuses = computed(() => {
+    const list = [...this.filteredStatuses];
+    const field = this.tableSortField();
+    const dir = this.tableSortDir();
+    list.sort((a, b) => {
+      let va: any, vb: any;
+      switch (field) {
+        case 'title': va = a.loan.title.toLowerCase(); vb = b.loan.title.toLowerCase(); break;
+        case 'amount': va = a.loan.amount; vb = b.loan.amount; break;
+        case 'paid': va = a.totalPaid; vb = b.totalPaid; break;
+        case 'outstanding': va = a.outstanding; vb = b.outstanding; break;
+        case 'progress': va = a.percentage; vb = b.percentage; break;
+        case 'date': va = a.loan.date; vb = b.loan.date; break;
+        default: return 0;
+      }
+      if (va < vb) return dir === 'asc' ? -1 : 1;
+      if (va > vb) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return list;
+  });
+
+  tableSort(field: string): void {
+    if (this.tableSortField() === field) {
+      this.tableSortDir.update(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.tableSortField.set(field);
+      this.tableSortDir.set('desc');
+    }
+  }
+
+  tableSortIcon(field: string): string {
+    if (this.tableSortField() !== field) return '↕';
+    return this.tableSortDir() === 'asc' ? '↑' : '↓';
+  }
 
   // Edit loan form
   editLoanId = '';

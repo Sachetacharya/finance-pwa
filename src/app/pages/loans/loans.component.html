@@ -29,12 +29,23 @@
     <button class="tabs__btn" [class.tabs__btn--active]="activeTab() === 'lent'" (click)="activeTab.set('lent')">
       Lent
     </button>
-    <button class="btn btn--primary btn--sm tabs__add" (click)="openAdd(activeTab())">
-      + {{ activeTab() === 'borrowed' ? 'Add Loan' : 'Add Lent' }}
-    </button>
+    <div class="tabs__right">
+      <div class="view-toggle">
+        <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'cards'" (click)="viewMode.set('cards')" aria-label="Card view">
+          <ng-icon name="lucideLayoutDashboard" size="16" />
+        </button>
+        <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'table'" (click)="viewMode.set('table')" aria-label="Table view">
+          <ng-icon name="lucideBarChart3" size="16" />
+        </button>
+      </div>
+      <button class="btn btn--primary btn--sm" (click)="openAdd(activeTab())">
+        <ng-icon name="lucidePlus" size="14" /> {{ activeTab() === 'borrowed' ? 'Add Loan' : 'Add Lent' }}
+      </button>
+    </div>
   </div>
 
-  <!-- Loan cards -->
+  <!-- Card View -->
+  @if (viewMode() === 'cards') {
   @for (s of filteredStatuses; track s.loan.id) {
     <div class="loan-card" [class.loan-card--resolved]="s.outstanding <= 0">
       <div class="loan-card__top">
@@ -103,6 +114,61 @@
         {{ activeTab() === 'borrowed' ? 'Track money you borrow from banks or people' : 'Track money you lend to others' }}
       </p>
     </div>
+  }
+  }
+
+  <!-- Table View -->
+  @if (viewMode() === 'table') {
+    <app-data-table
+      [columns]="[
+        { key: 'title', label: 'Title', sortable: true },
+        { key: 'amount', label: 'Amount', sortable: true },
+        { key: 'paid', label: 'Paid', sortable: true },
+        { key: 'outstanding', label: 'Outstanding', sortable: true },
+        { key: 'progress', label: 'Progress', sortable: true },
+        { key: 'account', label: 'Account', hideOnMobile: true },
+        { key: 'date', label: 'Date', sortable: true, hideOnMobile: true },
+        { key: 'actions', label: 'Actions' }
+      ]"
+      [data]="sortedStatuses()"
+      trackBy="loan"
+      [sortField]="tableSortField()"
+      [sortDir]="tableSortDir()"
+      [rowClass]="loanRowClass"
+      minWidth="650px"
+      [emptyMessage]="'No ' + (activeTab() === 'borrowed' ? 'loans' : 'lent records')"
+      (sortChange)="tableSort($event)"
+    >
+      <ng-template #rowTpl let-s>
+        <td class="lt-title">{{ s.loan.title }}</td>
+        <td>{{ s.loan.amount | currencyFormat | privacyMask }}</td>
+        <td class="lt-income">{{ s.totalPaid | currencyFormat | privacyMask }}</td>
+        <td [class.lt-expense]="s.outstanding > 0">{{ s.outstanding | currencyFormat | privacyMask }}</td>
+        <td>
+          <div class="lt-progress">
+            <div class="lt-progress__bar">
+              <div class="lt-progress__fill" [class.lt-progress__fill--done]="s.percentage >= 100" [style.width.%]="s.percentage > 100 ? 100 : s.percentage"></div>
+            </div>
+            <span class="lt-progress__pct">{{ s.percentage }}%</span>
+          </div>
+        </td>
+        <td class="lt-hide-m">{{ accountService.getLabel(s.loan.accountId) }}</td>
+        <td class="lt-hide-m lt-date">{{ s.loan.date }}</td>
+        <td class="lt-actions">
+          @if (s.outstanding > 0) {
+            <button class="lt-act lt-act--pay" (click)="openPayment(s)" [title]="s.loan.type === 'borrowed' ? 'Pay' : 'Received'">
+              <ng-icon name="lucideCheck" size="14" />
+            </button>
+          }
+          <button class="lt-act lt-act--edit" (click)="openEditLoan(s.loan)" title="Edit">
+            <ng-icon name="lucidePencil" size="14" />
+          </button>
+          <button class="lt-act lt-act--delete" (click)="deletingLoanId.set(s.loan.id)" title="Delete">
+            <ng-icon name="lucideTrash2" size="14" />
+          </button>
+        </td>
+      </ng-template>
+    </app-data-table>
   }
 </div>
 
