@@ -5,7 +5,7 @@
         @for (col of columns(); track col.key) {
           <th
             [class.sortable]="col.sortable"
-            [class.hide-mobile]="col.hideOnMobile"
+            [class.hide-mobile]="!showAllOnMobile() && col.hideOnMobile"
             (click)="onSort(col)"
           >
             {{ col.label }}
@@ -16,7 +16,7 @@
     </thead>
     <tbody>
       @if (rowTpl()) {
-        @for (row of data(); track trackByFn($index, row)) {
+        @for (row of paginatedData(); track trackByFn($index, row)) {
           <tr [class]="getRowClass(row)">
             <ng-container *ngTemplateOutlet="rowTpl()!; context: { $implicit: row, index: $index }" />
           </tr>
@@ -26,10 +26,10 @@
           </tr>
         }
       } @else {
-        @for (row of data(); track trackByFn($index, row)) {
+        @for (row of paginatedData(); track trackByFn($index, row)) {
           <tr [class]="getRowClass(row)">
             @for (col of columns(); track col.key) {
-              <td [class]="col.class ?? ''" [class.hide-mobile]="col.hideOnMobile">
+              <td [class]="col.class ?? ''" [class.hide-mobile]="!showAllOnMobile() && col.hideOnMobile">
                 <ng-container *ngComponentOutlet="getCellComponent(col.cell ?? 'text'); inputs: getCellInputs(row, col)" />
               </td>
             }
@@ -43,3 +43,20 @@
     </tbody>
   </table>
 </div>
+
+@if (hasPagination()) {
+  <div class="dt-pagination">
+    <span class="dt-pagination__info">
+      Showing {{ paginationStart() }}–{{ paginationEnd() }} of {{ totalItems() }}
+    </span>
+    <div class="dt-pagination__controls">
+      <button class="dt-page-btn" [disabled]="currentPage() === 1" (click)="goToPage(1)">«</button>
+      <button class="dt-page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">‹</button>
+      @for (page of visiblePages(); track page) {
+        <button class="dt-page-btn" [class.active]="page === currentPage()" (click)="goToPage(page)">{{ page }}</button>
+      }
+      <button class="dt-page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">›</button>
+      <button class="dt-page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(totalPages())">»</button>
+    </div>
+  </div>
+}

@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { TableActionEvent } from './types';
 
-export type { TableActionEvent } from './types';
-
 @Injectable()
 export class TableActionService {
   private readonly _action$ = new Subject<TableActionEvent>();

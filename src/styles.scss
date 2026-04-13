@@ -421,7 +421,6 @@ textarea {
    ------------------------- */
 .et-date { white-space: nowrap; color: var(--text-muted) !important; font-size: 0.8rem !important; }
 .et-title { font-weight: 600; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.et-hide-m { @media (max-width: 768px) { display: none !important; } }
 .et-category {
   display: inline-flex; align-items: center; gap: 4px;
   background: var(--bg-secondary); padding: 4px 10px; border-radius: 20px;

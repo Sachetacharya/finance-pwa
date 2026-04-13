@@ -7,7 +7,7 @@ import { ProgressCellComponent } from './cells/progress-cell.component';
 import { PaymentCellComponent } from './cells/payment-cell.component';
 import { ActionsCellComponent } from './cells/actions-cell.component';
 
-export type { TableAction, TableColumn, TableActionEvent, CellInputs } from './types';
+export type { TableAction, TableColumn, TableActionEvent } from './types';
 export { resolve } from './types';
 
 export const CELL_REGISTRY: Record<string, Type<unknown>> = {

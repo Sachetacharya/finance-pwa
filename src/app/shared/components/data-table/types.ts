@@ -1,5 +1,3 @@
-import { Type } from '@angular/core';
-
 // ── Table Action ──
 export interface TableAction {
   type: string;
@@ -34,9 +32,6 @@ export interface CellInputs {
   row: any;
   column: TableColumn;
 }
-
-// ── Cell Registry Type ──
-export type CellRegistry = Record<string, Type<unknown>>;
 
 // ── Utility: resolve dot-path ──
 export function resolve(obj: any | unknown, path: string): unknown {

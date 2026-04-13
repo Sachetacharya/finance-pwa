@@ -121,14 +121,11 @@
   @if (viewMode() === 'table') {
     <app-data-table
       [columns]="loanColumns"
-      [data]="sortedStatuses()"
+      [data]="filteredStatuses"
       trackBy="loan"
-      [sortField]="tableSortField()"
-      [sortDir]="tableSortDir()"
       [rowClass]="loanRowClass"
       minWidth="650px"
       [emptyMessage]="'No ' + (activeTab() === 'borrowed' ? 'loans' : 'lent records')"
-      (sortChange)="tableSort($event)"
       (action)="onTableAction($event)"
     />
   }

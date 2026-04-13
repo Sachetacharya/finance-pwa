@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LoanService } from '../../core/services/loan.service';
 import { AccountService } from '../../core/services/account.service';
@@ -35,49 +35,22 @@ export class LoansComponent {
   readonly viewMode = signal<'cards' | 'table'>('cards');
   // Table config
   readonly loanColumns: TableColumn[] = [
+    { key: 'loan.date', label: 'Date', cell: 'date', sortable: true, hideOnMobile: true },
     { key: 'loan.title', label: 'Title', cell: 'text', sortable: true, class: 'dt-bold' },
     { key: 'loan.amount', label: 'Amount', cell: 'amount', sortable: true },
     { key: 'totalPaid', label: 'Paid', cell: 'amount', sortable: true, class: 'dt-income' },
     { key: 'outstanding', label: 'Outstanding', cell: 'amount', sortable: true, class: 'dt-expense' },
     { key: 'percentage', label: 'Progress', cell: 'progress', sortable: true },
     { key: 'loan.accountId', label: 'Account', cell: 'payment', hideOnMobile: true },
-    { key: 'loan.date', label: 'Date', cell: 'date', sortable: true, hideOnMobile: true },
-    { key: 'actions', label: '', cell: 'actions', actions: [
-      { type: 'pay', icon: 'lucideCheck', label: 'Pay', show: (s: any) => s.outstanding > 0, class: 'dt-act--pay' },
-      { type: 'edit', icon: 'lucidePencil', label: 'Edit', class: 'dt-act--edit' },
-      { type: 'delete', icon: 'lucideTrash2', label: 'Delete', class: 'dt-act--delete' },
-    ]},
+    {
+      key: 'actions', label: '', cell: 'actions', actions: [
+        { type: 'pay', icon: 'lucideCheck', label: 'Pay', show: (s: any) => s.outstanding > 0, class: 'dt-act--pay' },
+        { type: 'edit', icon: 'lucidePencil', label: 'Edit', class: 'dt-act--edit' },
+        { type: 'delete', icon: 'lucideTrash2', label: 'Delete', class: 'dt-act--delete' },
+      ]
+    },
   ];
   loanRowClass = (s: any) => s.outstanding <= 0 ? 'dt-resolved' : '';
-  readonly tableSortField = signal<string>('loan.date');
-  readonly tableSortDir = signal<'asc' | 'desc'>('desc');
-
-  readonly sortedStatuses = computed(() => {
-    const list = [...this.filteredStatuses];
-    const field = this.tableSortField();
-    const dir = this.tableSortDir();
-    list.sort((a, b) => {
-      const va = this.resolveField(a, field);
-      const vb = this.resolveField(b, field);
-      if (va < vb) return dir === 'asc' ? -1 : 1;
-      if (va > vb) return dir === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return list;
-  });
-
-  private resolveField(obj: any, path: string): any {
-    return path.split('.').reduce((o, k) => o?.[k], obj) ?? '';
-  }
-
-  tableSort(field: string): void {
-    if (this.tableSortField() === field) {
-      this.tableSortDir.update(d => d === 'asc' ? 'desc' : 'asc');
-    } else {
-      this.tableSortField.set(field);
-      this.tableSortDir.set('desc');
-    }
-  }
 
   onTableAction(event: { type: string; row: any }): void {
     switch (event.type) {

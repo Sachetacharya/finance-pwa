@@ -39,12 +39,10 @@
         [columns]="expenseColumns"
         [data]="enrichedExpenses()"
         trackBy="id"
-        [sortField]="sortField()"
-        [sortDir]="sortDir()"
         [rowClass]="expenseRowClass"
         minWidth="580px"
         emptyMessage="No expenses found"
-        (sortChange)="sort($event)"
+        [pageSize]="10"
         (action)="onExpenseAction($event)"
       />
     }
@@ -53,19 +51,17 @@
     @if (isStatementMode()) {
       <app-data-table
         [columns]="expenseColumns"
-        [data]="paginatedExpenses()"
+        [data]="enrichedExpenses()"
         trackBy="id"
-        [sortField]="sortField()"
-        [sortDir]="sortDir()"
         [rowClass]="expenseRowClass"
         minWidth="580px"
         emptyMessage="No expenses found"
-        (sortChange)="sort($event)"
+        [pageSize]="10"
       >
         <ng-template #rowTpl let-expense>
           <td class="et-date">{{ expense.date }}</td>
           <td class="et-title" [title]="expense.title">{{ expense.title }}</td>
-          <td class="et-hide-m">
+          <td class="">
             <span class="et-category">
               <ng-icon [name]="getCategoryIcon(expense.category)" size="14" /> {{ getCategoryLabel(expense.category) }}
             </span>
@@ -84,12 +80,12 @@
               {{ statementBalances().get(expense.id)?.after | currencyFormat | privacyMask }}
             </span>
           </td>
-          <td class="et-hide-m">
+          <td class="">
             <span class="et-payment" [style.color]="accountService.getColor(expense.paymentMethod)">
               {{ accountService.getLabel(expense.paymentMethod) }}
             </span>
           </td>
-          <td class="et-hide-m et-notes" [title]="expense.notes ?? ''">{{ expense.notes || '—' }}</td>
+          <td class=" et-notes" [title]="expense.notes ?? ''">{{ expense.notes || '—' }}</td>
           <td class="et-actions">
             <button class="et-act" (click)="editingExpense.set(expense)" title="Edit"><ng-icon name="lucidePencil" size="16" color="currentColor" /></button>
             <button class="et-act et-act--delete" (click)="deletingExpenseId.set(expense.id)" title="Delete"><ng-icon name="lucideTrash2" size="16" color="currentColor" /></button>
@@ -98,79 +94,6 @@
       </app-data-table>
     }
 
-    <!-- Mobile card view -->
-    <div class="mobile-cards">
-      @for (expense of paginatedExpenses(); track expense.id) {
-        <div class="m-card"
-          [class.m-card--income]="expense.type === 'income'"
-          [class.m-card--transfer]="expense.type === 'transfer'"
-          (touchstart)="onTouchStart($event, expense.id)"
-          (touchmove)="onTouchMove($event, expense.id)"
-          (touchend)="onTouchEnd(expense.id)">
-          <div class="m-card__content" [style.transform]="'translateX(' + getSwipeX(expense.id) + 'px)'">
-            <div class="m-card__left">
-              <span class="m-card__icon"><ng-icon [name]="allCategoryIcons[expense.category]" size="20" /></span>
-              <div class="m-card__info">
-                <div class="m-card__title">{{ expense.title }}</div>
-                <div class="m-card__meta">
-                  {{ expense.date }} · {{ accountService.getLabel(expense.paymentMethod) }}
-                  @if (expense.toAccount) { → {{ accountService.getLabel(expense.toAccount) }} }
-                </div>
-              </div>
-            </div>
-            <div class="m-card__right">
-              @if (isStatementMode()) {
-                <div class="m-card__stmt-before">{{ statementBalances().get(expense.id)?.before | currencyFormat | privacyMask }}</div>
-              }
-              <div class="m-card__amount"
-                [class.m-card__amount--income]="expense.type === 'income'"
-                [class.m-card__amount--transfer]="expense.type === 'transfer'">
-                @if (expense.type === 'income') { + } @else if (expense.type === 'transfer') { <ng-icon name="lucideArrowRightLeft" size="12" /> } @else { - }
-                {{ expense.amount | currencyFormat | privacyMask }}
-              </div>
-              @if (isStatementMode()) {
-                <div class="m-card__stmt-after" [class.m-card__stmt-after--negative]="(statementBalances().get(expense.id)?.after ?? 0) < 0">
-                  {{ statementBalances().get(expense.id)?.after | currencyFormat | privacyMask }}
-                </div>
-              }
-              <div class="m-card__actions">
-                <button class="action-btn" (click)="editingExpense.set(expense)" aria-label="Edit"><ng-icon name="lucidePencil" size="16" /></button>
-                <button class="action-btn action-btn--delete" (click)="deletingExpenseId.set(expense.id)" aria-label="Delete"><ng-icon name="lucideTrash2" size="16" /></button>
-              </div>
-            </div>
-          </div>
-          <div class="m-card__swipe-action"><ng-icon name="lucideTrash2" size="16" /> Delete</div>
-        </div>
-      } @empty {
-        <div class="empty-state">
-          <span class="empty-icon"><ng-icon name="lucidePackage" size="36" /></span>
-          <p>No expenses found.</p>
-          <button class="btn btn--ghost btn--sm" (click)="clearFilters()">Clear Filters</button>
-        </div>
-      }
-    </div>
-
-    <!-- Pagination -->
-    @if (totalPages() > 1) {
-      <div class="pagination">
-        <span class="pagination__info">
-          Showing {{ (currentPage() - 1) * pageSize + 1 }}–{{ getPaginationEnd() }} of {{ totalFiltered() }}
-        </span>
-        <div class="pagination__controls">
-          <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(1)" title="First page">«</button>
-          <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" title="Previous page">‹</button>
-          @for (page of visiblePages(); track page) {
-            <button
-              class="page-btn"
-              [class.active]="page === currentPage()"
-              (click)="goToPage(page)"
-            >{{ page }}</button>
-          }
-          <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)" title="Next page">›</button>
-          <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(totalPages())" title="Last page">»</button>
-        </div>
-      </div>
-    }
   </div>
 </div>
 
