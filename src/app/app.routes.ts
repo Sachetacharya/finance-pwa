@@ -31,6 +31,11 @@ export const routes: Routes = [
           import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
+        path: 'monthly',
+        loadComponent: () =>
+          import('./pages/monthly/monthly.component').then(m => m.MonthlyComponent),
+      },
+      {
         path: 'expenses',
         loadComponent: () =>
           import('./pages/expenses/expenses.component').then(m => m.ExpensesComponent),

@@ -26,9 +26,16 @@ export class LoansComponent {
 
   readonly showAddForm = signal(false);
   readonly showSplitForm = signal(false);
+  readonly showEditForm = signal(false);
   readonly payingLoan = signal<LoanStatus | null>(null);
   readonly deletingLoanId = signal<string | null>(null);
   readonly activeTab = signal<'borrowed' | 'lent'>('borrowed');
+
+  // Edit loan form
+  editLoanId = '';
+  editTitle = '';
+  editAmount: number | null = null;
+  editNotes = '';
 
   // Add loan form
   newTitle = '';
@@ -220,6 +227,21 @@ export class LoansComponent {
     }
 
     this.showSplitForm.set(false);
+  }
+
+  openEditLoan(loan: any): void {
+    this.editLoanId = loan.id;
+    this.editTitle = loan.title;
+    this.editAmount = loan.amount;
+    this.editNotes = loan.notes ?? '';
+    this.showEditForm.set(true);
+  }
+
+  onSaveEdit(): void {
+    if (!this.editLoanId || !this.editTitle.trim() || !this.editAmount) return;
+    this.loanService.updateLoan(this.editLoanId, this.editTitle.trim(), this.editAmount, this.editNotes || undefined);
+    this.notification.success('Loan updated');
+    this.showEditForm.set(false);
   }
 
   onDelete(): void {

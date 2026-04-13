@@ -1,25 +1,62 @@
 .health-score {
-  display: flex; align-items: center; gap: 20px;
-  background: var(--bg-card); border: 1px solid var(--border-color);
-  border-radius: 16px; padding: 24px 28px; box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: var(--shadow-card);
 
   &__ring {
-    width: 90px; height: 90px; border-radius: 50%;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
     background: conic-gradient(var(--color, var(--primary)) calc(var(--score, 0) * 3.6deg), var(--bg-secondary) 0);
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
   &__inner {
-    width: 70px; height: 70px; border-radius: 50%;
-    background: var(--bg-card); display: flex; align-items: center; justify-content: center;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-direction: column;
   }
 
   &__number {
-    font-family: 'DM Sans', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--text-primary); line-height: 1;
-    &--na { color: var(--text-muted); font-size: 1.8rem; }
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+
+    &--na {
+      color: var(--text-muted);
+      font-size: 1.8rem;
+    }
   }
-  &__of { font-size: 0.65rem; color: var(--text-muted); }
-  &__label { font-family: 'DM Sans', sans-serif; font-size: 1.2rem; font-weight: 800; }
-  &__desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+
+  &__of {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+  }
+
+  &__label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+  }
+
+  &__desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
 }

@@ -124,6 +124,14 @@ export class LoanService {
     }
   }
 
+  updateLoan(id: string, title: string, amount: number, notes?: string): void {
+    const updated = this._loans().map(l =>
+      l.id === id ? { ...l, title, amount, notes } : l
+    );
+    this._loans.set(updated);
+    this.persist(updated);
+  }
+
   removeLoan(id: string): void {
     const updated = this._loans().filter(l => l.id !== id);
     this._loans.set(updated);

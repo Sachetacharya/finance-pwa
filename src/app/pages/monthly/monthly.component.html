@@ -1,0 +1,130 @@
+<div class="monthly-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Monthly Ledger</h1>
+      <p class="page-subtitle">Income & expenses breakdown by month</p>
+    </div>
+  </div>
+
+  <!-- Month Picker -->
+  <div class="month-picker">
+    <button class="month-picker__btn" (click)="prevMonth()" aria-label="Previous month">
+      <ng-icon name="lucideChevronLeft" size="20" />
+    </button>
+    <span class="month-picker__label">{{ monthLabel() }}</span>
+    <button class="month-picker__btn" (click)="nextMonth()" aria-label="Next month">
+      <ng-icon name="lucideChevronRight" size="20" />
+    </button>
+  </div>
+
+  <!-- Summary Bar -->
+  <div class="summary-bar">
+    <div class="summary-bar__item summary-bar__item--income">
+      <div class="summary-bar__label">Income</div>
+      <div class="summary-bar__value">{{ totalIncome() | currencyFormat | privacyMask }}</div>
+    </div>
+    <div class="summary-bar__item summary-bar__item--expense">
+      <div class="summary-bar__label">Expenses</div>
+      <div class="summary-bar__value">{{ totalExpense() | currencyFormat | privacyMask }}</div>
+    </div>
+    <div class="summary-bar__item" [class.summary-bar__item--positive]="savings() >= 0" [class.summary-bar__item--negative]="savings() < 0">
+      <div class="summary-bar__label">Saved ({{ savingsRate() }}%)</div>
+      <div class="summary-bar__value">{{ savings() | currencyFormat | privacyMask }}</div>
+    </div>
+  </div>
+
+  @if (!hasData()) {
+    <div class="empty-state">
+      <ng-icon name="lucideCalendar" size="36" />
+      <h3>No transactions</h3>
+      <p>No income or expenses recorded for {{ monthLabel() }}</p>
+    </div>
+  } @else {
+
+  <!-- Income & Expense Columns -->
+  <div class="ledger-grid">
+
+    <!-- Income Section -->
+    <div class="ledger-card">
+      <div class="ledger-card__header ledger-card__header--income">
+        <ng-icon name="lucideTrendingUp" size="18" />
+        <span>Income</span>
+        <span class="ledger-card__total">{{ totalIncome() | currencyFormat | privacyMask }}</span>
+      </div>
+      @if (monthIncome().length) {
+        <div class="ledger-card__list">
+          @for (item of monthIncome(); track item.id) {
+            <div class="ledger-item">
+              <div class="ledger-item__date">{{ item.date }}</div>
+              <div class="ledger-item__title">{{ item.title }}</div>
+              <div class="ledger-item__amount ledger-item__amount--income">+{{ item.amount | currencyFormat | privacyMask }}</div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="ledger-card__empty">No income this month</div>
+      }
+    </div>
+
+    <!-- Expense Section (by category) -->
+    <div class="ledger-card">
+      <div class="ledger-card__header ledger-card__header--expense">
+        <ng-icon name="lucideTrendingDown" size="18" />
+        <span>Expenses</span>
+        <span class="ledger-card__total">{{ totalExpense() | currencyFormat | privacyMask }}</span>
+      </div>
+      @if (expensesByCategory().length) {
+        <div class="ledger-card__list">
+          @for (group of expensesByCategory(); track group.label) {
+            <div class="category-group">
+              <div class="category-group__header">
+                <ng-icon [name]="group.icon" size="16" />
+                <span class="category-group__name">{{ group.label }}</span>
+                <span class="category-group__total">{{ group.total | currencyFormat | privacyMask }}</span>
+              </div>
+              @for (item of group.items; track item.id) {
+                <div class="ledger-item ledger-item--sub">
+                  <div class="ledger-item__date">{{ item.date }}</div>
+                  <div class="ledger-item__title">{{ item.title }}</div>
+                  <div class="ledger-item__amount ledger-item__amount--expense">-{{ item.amount | currencyFormat | privacyMask }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="ledger-card__empty">No expenses this month</div>
+      }
+    </div>
+  </div>
+
+  <!-- Account Breakdown -->
+  @if (accountBreakdown().length) {
+    <div class="account-section">
+      <h2 class="account-section__title"><ng-icon name="lucideLandmark" size="18" /> By Account</h2>
+      <div class="account-grid">
+        @for (acc of accountBreakdown(); track acc.id) {
+          <div class="account-item" [style.border-left-color]="acc.color">
+            <div class="account-item__name">{{ acc.label }}</div>
+            <div class="account-item__row">
+              <span>Income</span>
+              <span class="text-income">+{{ acc.income | currencyFormat | privacyMask }}</span>
+            </div>
+            <div class="account-item__row">
+              <span>Expense</span>
+              <span class="text-expense">-{{ acc.expense | currencyFormat | privacyMask }}</span>
+            </div>
+            <div class="account-item__row account-item__row--net">
+              <span>Net</span>
+              <span [class.text-income]="acc.net >= 0" [class.text-expense]="acc.net < 0">
+                {{ acc.net | currencyFormat | privacyMask }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  }
+</div>
