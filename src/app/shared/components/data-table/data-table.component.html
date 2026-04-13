@@ -2,22 +2,15 @@
   <table class="data-table">
     <thead>
       <tr>
-        @if (rowHeaderTpl()) {
-          <ng-container *ngTemplateOutlet="rowHeaderTpl()!" />
-        } @else {
-          @for (col of columns(); track col.key) {
-            <th
-              [class.sortable]="col.sortable"
-              [class.hide-mobile]="col.hideOnMobile"
-              [class.text-center]="col.align === 'center'"
-              [class.text-right]="col.align === 'right'"
-              [style.width]="col.width ?? 'auto'"
-              (click)="onSort(col)"
-            >
-              {{ col.label }}
-              @if (col.sortable) { {{ getSortIcon(col.key) }} }
-            </th>
-          }
+        @for (col of columns(); track col.key) {
+          <th
+            [class.sortable]="col.sortable"
+            [class.hide-mobile]="col.hideOnMobile"
+            (click)="onSort(col)"
+          >
+            {{ col.label }}
+            @if (col.sortable) { {{ getSortIcon(col.key) }} }
+          </th>
         }
       </tr>
     </thead>
@@ -36,12 +29,8 @@
         @for (row of data(); track trackByFn($index, row)) {
           <tr [class]="getRowClass(row)">
             @for (col of columns(); track col.key) {
-              <td
-                [class.hide-mobile]="col.hideOnMobile"
-                [class.text-center]="col.align === 'center'"
-                [class.text-right]="col.align === 'right'"
-              >
-                {{ row[col.key] }}
+              <td [class]="col.class ?? ''" [class.hide-mobile]="col.hideOnMobile">
+                <ng-container *ngComponentOutlet="getCellComponent(col.cell ?? 'text'); inputs: getCellInputs(row, col)" />
               </td>
             }
           </tr>

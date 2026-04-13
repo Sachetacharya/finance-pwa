@@ -417,26 +417,6 @@ textarea {
 }
 
 /* -------------------------
-   Loan Table Cell Styles (global for data-table template)
-   ------------------------- */
-.lt-title { font-weight: 600; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.lt-date { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
-.lt-income { color: var(--color-income); font-family: 'DM Sans', sans-serif; font-weight: 700; }
-.lt-expense { color: var(--color-expense); font-family: 'DM Sans', sans-serif; font-weight: 700; }
-.lt-resolved { opacity: 0.5; }
-.lt-hide-m { @media (max-width: 768px) { display: none !important; } }
-.lt-actions { white-space: nowrap; }
-
-.lt-progress {
-  display: flex; align-items: center; gap: 6px;
-  &__bar { width: 60px; height: 6px; background: var(--bg-secondary); border-radius: 6px; overflow: hidden; }
-  &__fill { height: 100%; background: var(--primary); border-radius: 6px; transition: width 0.4s;
-    &--done { background: var(--success); }
-  }
-  &__pct { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); min-width: 32px; }
-}
-
-/* -------------------------
    Expense Table Cell Styles (global for data-table template)
    ------------------------- */
 .et-date { white-space: nowrap; color: var(--text-muted) !important; font-size: 0.8rem !important; }
@@ -474,7 +454,31 @@ textarea {
 .et-row--expense { background: rgba(239, 68, 68, 0.03); }
 .et-row--transfer { background: rgba(139, 92, 246, 0.03); }
 
-.lt-act {
+/* -------------------------
+   Data Table Cell Styles (global — used by NgComponentOutlet cells)
+   ------------------------- */
+.dt-text { font-weight: 600; }
+.dt-date { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+.dt-amount { font-family: 'DM Sans', sans-serif; font-weight: 700; }
+.dt-income { color: var(--color-income) !important; }
+.dt-expense { color: var(--color-expense) !important; }
+.dt-bold { font-weight: 700; }
+.dt-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--bg-secondary); padding: 4px 10px; border-radius: 20px;
+  font-size: 0.75rem; font-weight: 600; white-space: nowrap; color: var(--text-secondary);
+}
+.dt-payment { font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
+.dt-progress {
+  display: flex; align-items: center; gap: 6px;
+  &__bar { width: 60px; height: 6px; background: var(--bg-secondary); border-radius: 6px; overflow: hidden; }
+  &__fill { height: 100%; background: var(--primary); border-radius: 6px; transition: width 0.4s;
+    &--done { background: var(--success); }
+  }
+  &__pct { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); min-width: 32px; }
+}
+.dt-actions { white-space: nowrap; display: flex; gap: 2px; }
+.dt-act {
   background: none; border: none; cursor: pointer;
   padding: 6px; min-width: 30px; min-height: 30px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -483,3 +487,4 @@ textarea {
   &--edit:hover { color: var(--primary); background: var(--primary-glow); }
   &--delete:hover { color: var(--danger); background: var(--danger-light); }
 }
+.dt-resolved { opacity: 0.5; }

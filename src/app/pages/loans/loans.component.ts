@@ -11,6 +11,7 @@ import { LockScrollDirective } from '../../shared/directives/lock-scroll.directi
 import { LoanStatus } from '../../core/models/loan.model';
 import { NgIcon } from '@ng-icons/core';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import { TableColumn } from '../../shared/components/data-table/cell-registry';
 
 @Component({
   selector: 'app-loans',
@@ -32,8 +33,23 @@ export class LoansComponent {
   readonly deletingLoanId = signal<string | null>(null);
   readonly activeTab = signal<'borrowed' | 'lent'>('borrowed');
   readonly viewMode = signal<'cards' | 'table'>('cards');
-  loanRowClass = (s: any) => s.outstanding <= 0 ? 'lt-resolved' : '';
-  readonly tableSortField = signal<string>('date');
+  // Table config
+  readonly loanColumns: TableColumn[] = [
+    { key: 'loan.title', label: 'Title', cell: 'text', sortable: true, class: 'dt-bold' },
+    { key: 'loan.amount', label: 'Amount', cell: 'amount', sortable: true },
+    { key: 'totalPaid', label: 'Paid', cell: 'amount', sortable: true, class: 'dt-income' },
+    { key: 'outstanding', label: 'Outstanding', cell: 'amount', sortable: true, class: 'dt-expense' },
+    { key: 'percentage', label: 'Progress', cell: 'progress', sortable: true },
+    { key: 'loan.accountId', label: 'Account', cell: 'payment', hideOnMobile: true },
+    { key: 'loan.date', label: 'Date', cell: 'date', sortable: true, hideOnMobile: true },
+    { key: 'actions', label: '', cell: 'actions', actions: [
+      { type: 'pay', icon: 'lucideCheck', label: 'Pay', show: (s: any) => s.outstanding > 0, class: 'dt-act--pay' },
+      { type: 'edit', icon: 'lucidePencil', label: 'Edit', class: 'dt-act--edit' },
+      { type: 'delete', icon: 'lucideTrash2', label: 'Delete', class: 'dt-act--delete' },
+    ]},
+  ];
+  loanRowClass = (s: any) => s.outstanding <= 0 ? 'dt-resolved' : '';
+  readonly tableSortField = signal<string>('loan.date');
   readonly tableSortDir = signal<'asc' | 'desc'>('desc');
 
   readonly sortedStatuses = computed(() => {
@@ -41,22 +57,18 @@ export class LoansComponent {
     const field = this.tableSortField();
     const dir = this.tableSortDir();
     list.sort((a, b) => {
-      let va: any, vb: any;
-      switch (field) {
-        case 'title': va = a.loan.title.toLowerCase(); vb = b.loan.title.toLowerCase(); break;
-        case 'amount': va = a.loan.amount; vb = b.loan.amount; break;
-        case 'paid': va = a.totalPaid; vb = b.totalPaid; break;
-        case 'outstanding': va = a.outstanding; vb = b.outstanding; break;
-        case 'progress': va = a.percentage; vb = b.percentage; break;
-        case 'date': va = a.loan.date; vb = b.loan.date; break;
-        default: return 0;
-      }
+      const va = this.resolveField(a, field);
+      const vb = this.resolveField(b, field);
       if (va < vb) return dir === 'asc' ? -1 : 1;
       if (va > vb) return dir === 'asc' ? 1 : -1;
       return 0;
     });
     return list;
   });
+
+  private resolveField(obj: any, path: string): any {
+    return path.split('.').reduce((o, k) => o?.[k], obj) ?? '';
+  }
 
   tableSort(field: string): void {
     if (this.tableSortField() === field) {
@@ -67,9 +79,12 @@ export class LoansComponent {
     }
   }
 
-  tableSortIcon(field: string): string {
-    if (this.tableSortField() !== field) return '↕';
-    return this.tableSortDir() === 'asc' ? '↑' : '↓';
+  onTableAction(event: { type: string; row: any }): void {
+    switch (event.type) {
+      case 'pay': this.openPayment(event.row); break;
+      case 'edit': this.openEditLoan(event.row.loan); break;
+      case 'delete': this.deletingLoanId.set(event.row.loan.id); break;
+    }
   }
 
   // Edit loan form

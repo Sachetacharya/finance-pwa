@@ -1,24 +1,23 @@
-import { Component, input, output, contentChild, TemplateRef, ViewEncapsulation } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
-
-export interface TableColumn {
-  key: string;
-  label: string;
-  sortable?: boolean;
-  hideOnMobile?: boolean;
-  align?: 'left' | 'center' | 'right';
-  width?: string;
-}
+import { Component, input, output, contentChild, TemplateRef, OnInit, OnDestroy, inject, ViewEncapsulation, Type } from '@angular/core';
+import { NgTemplateOutlet, NgComponentOutlet } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { CELL_REGISTRY } from './cell-registry';
+import { TableColumn, TableActionEvent, resolve } from './types';
+import { TableActionService } from './table-action.service';
 
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, NgComponentOutlet],
+  providers: [TableActionService],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
   encapsulation: ViewEncapsulation.None,
 })
-export class DataTableComponent {
+export class DataTableComponent implements OnInit, OnDestroy {
+  private readonly actionService = inject(TableActionService);
+  private actionSub?: Subscription;
+
   columns = input.required<TableColumn[]>();
   data = input.required<any[]>();
   trackBy = input<string>('id');
@@ -29,8 +28,16 @@ export class DataTableComponent {
   rowClass = input<(row: any) => string>();
 
   sortChange = output<string>();
-  rowHeaderTpl = contentChild<TemplateRef<any>>('headerTpl');
-  rowTpl = contentChild<TemplateRef<any>>('rowTpl');
+  action = output<TableActionEvent>();
+  rowTpl = contentChild<TemplateRef<unknown>>('rowTpl');
+
+  ngOnInit(): void {
+    this.actionSub = this.actionService.action$.subscribe(e => this.action.emit(e));
+  }
+
+  ngOnDestroy(): void {
+    this.actionSub?.unsubscribe();
+  }
 
   getSortIcon(key: string): string {
     if (this.sortField() !== key) return '↕';
@@ -46,7 +53,15 @@ export class DataTableComponent {
     return fn ? fn(row) : '';
   }
 
-  trackByFn(_: number, item: any): any {
+  trackByFn(_: number, item: any): unknown {
     return item[this.trackBy()];
+  }
+
+  getCellComponent(cellName: string): Type<unknown> {
+    return CELL_REGISTRY[cellName] ?? CELL_REGISTRY['text'];
+  }
+
+  getCellInputs(row: any, col: TableColumn): any {
+    return { value: resolve(row, col.key), row, column: col };
   }
 }

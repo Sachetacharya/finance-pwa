@@ -10,6 +10,7 @@ import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
 import { NgIcon } from '@ng-icons/core';
 import { ExpensesFiltersComponent } from './expenses-filters/expenses-filters.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import { TableColumn } from '../../shared/components/data-table/cell-registry';
 import {
   Expense,
   ExpenseFilter,
@@ -47,6 +48,35 @@ export class ExpensesComponent {
     if (e.type === 'transfer') return 'et-row--transfer';
     return 'et-row--expense';
   };
+
+  readonly expenseColumns: TableColumn[] = [
+    { key: 'date', label: 'Date', cell: 'date', sortable: true },
+    { key: 'title', label: 'Title', cell: 'text', sortable: true, class: 'dt-bold' },
+    { key: 'categoryLabel', label: 'Category', cell: 'badge', sortable: true, hideOnMobile: true, icon: 'categoryIcon' },
+    { key: 'amount', label: 'Amount', cell: 'amount', sortable: true },
+    { key: 'paymentMethod', label: 'Payment', cell: 'payment', sortable: true, hideOnMobile: true },
+    { key: 'notes', label: 'Notes', cell: 'text', hideOnMobile: true, class: 'dt-date' },
+    { key: 'actions', label: '', cell: 'actions', actions: [
+      { type: 'edit', icon: 'lucidePencil', label: 'Edit', class: 'dt-act--edit' },
+      { type: 'delete', icon: 'lucideTrash2', label: 'Delete', class: 'dt-act--delete' },
+    ]},
+  ];
+
+  /** Data enriched with category icon/label for badge cell */
+  readonly enrichedExpenses = computed(() =>
+    this.paginatedExpenses().map(e => ({
+      ...e,
+      categoryIcon: this.getCategoryIcon(e.category),
+      categoryLabel: this.getCategoryLabel(e.category),
+    }))
+  );
+
+  onExpenseAction(event: { type: string; row: any }): void {
+    switch (event.type) {
+      case 'edit': this.editingExpense.set(event.row); break;
+      case 'delete': this.deletingExpenseId.set(event.row.id); break;
+    }
+  }
 
   readonly filter = signal<ExpenseFilter>({ search: '', type: '', category: '', paymentMethod: '' });
   readonly sortField = signal<SortField>('date');

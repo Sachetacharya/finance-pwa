@@ -32,69 +32,71 @@
 
   <!-- Table -->
   <div class="card table-card expenses-table-wrap">
-    <app-data-table
-      [columns]="[
-        { key: 'date', label: 'Date', sortable: true },
-        { key: 'title', label: 'Title', sortable: true },
-        { key: 'category', label: 'Category', sortable: true, hideOnMobile: true },
-        { key: 'amount', label: 'Amount', sortable: true },
-        { key: 'paymentMethod', label: 'Payment', sortable: true, hideOnMobile: true },
-        { key: 'notes', label: 'Notes', hideOnMobile: true },
-        { key: 'actions', label: 'Actions' }
-      ]"
-      [data]="paginatedExpenses()"
-      trackBy="id"
-      [sortField]="sortField()"
-      [sortDir]="sortDir()"
-      [rowClass]="expenseRowClass"
-      minWidth="580px"
-      emptyMessage="No expenses found"
-      (sortChange)="sort($event)"
-    >
-      <ng-template #rowTpl let-expense>
-        <td class="et-date">{{ expense.date }}</td>
-        <td class="et-title" [title]="expense.title">{{ expense.title }}</td>
-        <td class="et-hide-m">
-          <span class="et-category">
-            <ng-icon [name]="getCategoryIcon(expense.category)" size="14" /> {{ getCategoryLabel(expense.category) }}
-          </span>
-        </td>
-        <td class="et-amount"
-            [class.et-amount--income]="expense.type === 'income'"
-            [class.et-amount--transfer]="expense.type === 'transfer'">
-          @if (isStatementMode()) {
+
+    <!-- Normal mode: config-only (zero template) -->
+    @if (!isStatementMode()) {
+      <app-data-table
+        [columns]="expenseColumns"
+        [data]="enrichedExpenses()"
+        trackBy="id"
+        [sortField]="sortField()"
+        [sortDir]="sortDir()"
+        [rowClass]="expenseRowClass"
+        minWidth="580px"
+        emptyMessage="No expenses found"
+        (sortChange)="sort($event)"
+        (action)="onExpenseAction($event)"
+      />
+    }
+
+    <!-- Statement mode: custom template for before/after balances -->
+    @if (isStatementMode()) {
+      <app-data-table
+        [columns]="expenseColumns"
+        [data]="paginatedExpenses()"
+        trackBy="id"
+        [sortField]="sortField()"
+        [sortDir]="sortDir()"
+        [rowClass]="expenseRowClass"
+        minWidth="580px"
+        emptyMessage="No expenses found"
+        (sortChange)="sort($event)"
+      >
+        <ng-template #rowTpl let-expense>
+          <td class="et-date">{{ expense.date }}</td>
+          <td class="et-title" [title]="expense.title">{{ expense.title }}</td>
+          <td class="et-hide-m">
+            <span class="et-category">
+              <ng-icon [name]="getCategoryIcon(expense.category)" size="14" /> {{ getCategoryLabel(expense.category) }}
+            </span>
+          </td>
+          <td class="et-amount"
+              [class.et-amount--income]="expense.type === 'income'"
+              [class.et-amount--transfer]="expense.type === 'transfer'">
             <span class="et-stmt-before">{{ statementBalances().get(expense.id)?.before | currencyFormat | privacyMask }}</span>
-          }
-          <span class="et-stmt-main">
-            @if (expense.type === 'income') { + }
-            @else if (expense.type === 'transfer') { <ng-icon name="lucideArrowRightLeft" size="12" /> }
-            @else { - }
-            {{ expense.amount | currencyFormat | privacyMask }}
-          </span>
-          @if (isStatementMode()) {
+            <span class="et-stmt-main">
+              @if (expense.type === 'income') { + }
+              @else if (expense.type === 'transfer') { <ng-icon name="lucideArrowRightLeft" size="12" /> }
+              @else { - }
+              {{ expense.amount | currencyFormat | privacyMask }}
+            </span>
             <span class="et-stmt-after" [class.et-stmt-after--neg]="(statementBalances().get(expense.id)?.after ?? 0) < 0">
               {{ statementBalances().get(expense.id)?.after | currencyFormat | privacyMask }}
             </span>
-          }
-        </td>
-        <td class="et-hide-m">
-          <span class="et-payment" [style.color]="accountService.getColor(expense.paymentMethod)">
-            {{ accountService.getLabel(expense.paymentMethod) }}
-          </span>
-          @if (expense.toAccount) {
-            <ng-icon name="lucideArrowRightLeft" size="10" />
-            <span class="et-payment" [style.color]="accountService.getColor(expense.toAccount)">
-              {{ accountService.getLabel(expense.toAccount) }}
+          </td>
+          <td class="et-hide-m">
+            <span class="et-payment" [style.color]="accountService.getColor(expense.paymentMethod)">
+              {{ accountService.getLabel(expense.paymentMethod) }}
             </span>
-          }
-        </td>
-        <td class="et-hide-m et-notes" [title]="expense.notes ?? ''">{{ expense.notes || '—' }}</td>
-        <td class="et-actions">
-          <button class="et-act" (click)="editingExpense.set(expense)" title="Edit"><ng-icon name="lucidePencil" size="16" color="currentColor" /></button>
-          <button class="et-act et-act--delete" (click)="deletingExpenseId.set(expense.id)" title="Delete"><ng-icon name="lucideTrash2" size="16" color="currentColor" /></button>
-        </td>
-      </ng-template>
-    </app-data-table>
+          </td>
+          <td class="et-hide-m et-notes" [title]="expense.notes ?? ''">{{ expense.notes || '—' }}</td>
+          <td class="et-actions">
+            <button class="et-act" (click)="editingExpense.set(expense)" title="Edit"><ng-icon name="lucidePencil" size="16" color="currentColor" /></button>
+            <button class="et-act et-act--delete" (click)="deletingExpenseId.set(expense.id)" title="Delete"><ng-icon name="lucideTrash2" size="16" color="currentColor" /></button>
+          </td>
+        </ng-template>
+      </app-data-table>
+    }
 
     <!-- Mobile card view -->
     <div class="mobile-cards">
