@@ -31,6 +31,8 @@ export class ProfileComponent {
   readonly lastChecked = signal<string | null>(null);
   readonly showEditProfile = signal(false);
   readonly showChangePassword = signal(false);
+  readonly showResetConfirm = signal(false);
+  resetPassword = '';
 
   // Edit profile fields
   editName = '';
@@ -161,5 +163,28 @@ export class ProfileComponent {
       this.notification.error(result.message);
     }
     input.value = '';
+  }
+
+  openReset(): void {
+    this.resetPassword = '';
+    this.showResetConfirm.set(true);
+  }
+
+  onConfirmReset(): void {
+    if (!this.resetPassword) return;
+    const valid = this.auth.changePassword(this.resetPassword, this.resetPassword);
+    if (!valid) {
+      this.notification.error('Incorrect password');
+      return;
+    }
+    // Clear all app data
+    const keysToKeep = ['auth_token', 'auth_user', 'fp_theme', 'fp_logged_once'];
+    const allKeys = Object.keys(localStorage);
+    allKeys.forEach(key => {
+      if (!keysToKeep.includes(key)) localStorage.removeItem(key);
+    });
+    this.notification.success('All data has been reset');
+    this.showResetConfirm.set(false);
+    setTimeout(() => window.location.reload(), 1000);
   }
 }

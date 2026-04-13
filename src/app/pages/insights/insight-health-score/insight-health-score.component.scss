@@ -15,7 +15,10 @@
     flex-direction: column;
   }
 
-  &__number { font-family: 'DM Sans', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--text-primary); line-height: 1; }
+  &__number {
+    font-family: 'DM Sans', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--text-primary); line-height: 1;
+    &--na { color: var(--text-muted); font-size: 1.8rem; }
+  }
   &__of { font-size: 0.65rem; color: var(--text-muted); }
   &__label { font-family: 'DM Sans', sans-serif; font-size: 1.2rem; font-weight: 800; }
   &__desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }

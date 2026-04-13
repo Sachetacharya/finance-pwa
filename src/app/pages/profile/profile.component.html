@@ -119,6 +119,20 @@
       <button class="btn btn--primary btn--sm" (click)="pwa.installApp()">Install App</button>
     }
   </div>
+
+  <!-- Reset All Data -->
+  <div class="setting-card setting-card--highlight">
+    <div class="setting-card__header">
+      <span class="setting-card__icon"><ng-icon name="lucideTrash2" size="20" /></span>
+      <div>
+        <div class="setting-card__title">Reset All Data</div>
+        <div class="setting-card__desc">Delete all expenses, accounts, budgets, loans, templates, and recurring entries. This cannot be undone.</div>
+      </div>
+    </div>
+    <button class="btn btn--danger-outline btn--sm" (click)="openReset()">
+      <ng-icon name="lucideTrash2" size="14" /> Reset
+    </button>
+  </div>
 </div>
 
 <!-- Edit Profile Modal -->
@@ -176,6 +190,33 @@
           <button class="btn btn--primary" (click)="onChangePassword()"
             [disabled]="!currentPassword || !newPassword || newPassword !== confirmPassword">
             Change Password
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Reset Confirmation Modal -->
+@if (showResetConfirm()) {
+  <div class="modal-overlay" lockScroll (click)="showResetConfirm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title reset-title"><ng-icon name="lucideAlertTriangle" size="20" /> Reset All Data</h2>
+        <button class="modal__close" aria-label="Close" (click)="showResetConfirm.set(false)"><ng-icon name="lucideX" size="18" /></button>
+      </div>
+      <div class="modal__body">
+        <div class="reset-warning">
+          This will permanently delete all your expenses, accounts, budgets, loans, templates, and recurring entries. Your login and theme will be kept.
+        </div>
+        <div class="form-group">
+          <label class="form-label">Enter your password to confirm</label>
+          <input class="form-control" type="password" [(ngModel)]="resetPassword" placeholder="Your current password" />
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="showResetConfirm.set(false)">Cancel</button>
+          <button class="btn btn--danger-outline" (click)="onConfirmReset()" [disabled]="!resetPassword">
+            <ng-icon name="lucideTrash2" size="14" /> Reset Everything
           </button>
         </div>
       </div>

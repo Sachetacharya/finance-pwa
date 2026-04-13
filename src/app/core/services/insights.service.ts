@@ -300,17 +300,25 @@ export class InsightsService {
     return { months, biggest_improvement, biggest_decline };
   });
 
-  // ── 8. Financial Health Score (0-100) ──
-  readonly healthScore = computed(() => {
+  // ── 8. Financial Health Score (0-100), null if no data ──
+  readonly hasData = computed(() =>
+    this.exp.expenses().some(e => e.type === 'expense' || e.type === 'income')
+  );
+
+  readonly healthScore = computed((): number | null => {
+    if (!this.hasData()) return null;
+
     let score = 50; // base
     const ov = this.overview();
 
     // Savings rate (max +25)
-    if (ov.savingsRate >= 30) score += 25;
-    else if (ov.savingsRate >= 20) score += 20;
-    else if (ov.savingsRate >= 10) score += 10;
-    else if (ov.savingsRate > 0) score += 5;
-    else score -= 15;
+    if (ov.totalIncome > 0) {
+      if (ov.savingsRate >= 30) score += 25;
+      else if (ov.savingsRate >= 20) score += 20;
+      else if (ov.savingsRate >= 10) score += 10;
+      else if (ov.savingsRate > 0) score += 5;
+      else score -= 15;
+    }
 
     // Budget adherence (max +15)
     const budgets = this.budget.budgetStatuses();
@@ -320,8 +328,10 @@ export class InsightsService {
     }
 
     // Month trend (+10 if decreasing, -10 if spiking)
-    if (ov.monthChange < -5) score += 10;
-    else if (ov.monthChange > 20) score -= 10;
+    if (ov.lastMonth > 0) {
+      if (ov.monthChange < -5) score += 10;
+      else if (ov.monthChange > 20) score -= 10;
+    }
 
     // Debt penalty
     const debt = this.loan.totalBorrowedOutstanding();
@@ -339,6 +349,7 @@ export class InsightsService {
 
   readonly healthLabel = computed(() => {
     const s = this.healthScore();
+    if (s === null) return { label: 'No Data', color: 'var(--text-muted)' };
     if (s >= 80) return { label: 'Excellent', color: 'var(--success)' };
     if (s >= 60) return { label: 'Good', color: 'var(--primary)' };
     if (s >= 40) return { label: 'Fair', color: 'var(--warning)' };
