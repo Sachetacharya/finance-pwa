@@ -3,7 +3,7 @@
     <div class="modal__header">
       <h2 class="modal__title">
         @if (expense()) {
-          {{ expense()!.type === 'income' ? 'Edit Income' : 'Edit Expense' }}
+          {{ expense()!.type === 'income' ? 'Edit Income' : expense()!.type === 'transfer' ? 'Edit Transfer' : 'Edit Expense' }}
         } @else {
           {{ entryType() === 'income' ? 'Add Income' : 'Add Expense' }}
         }
@@ -75,8 +75,10 @@
           <label class="form-label" for="ef-category">
             {{ entryType() === 'income' ? 'Income Source' : 'Category' }} *
           </label>
-          <select id="ef-category" formControlName="category" class="form-control">
-            @if (entryType() === 'expense') {
+          <select id="ef-category" formControlName="category" class="form-control" [attr.disabled]="entryType() === 'transfer' ? true : null">
+            @if (entryType() === 'transfer') {
+              <option value="transfer">Transfer</option>
+            } @else if (entryType() === 'expense') {
               <option value="">Select category...</option>
               @for (cat of categories; track cat[0]) {
                 <option [value]="cat[0]">{{ cat[1] }}</option>

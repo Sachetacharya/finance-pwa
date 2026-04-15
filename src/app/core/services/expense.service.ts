@@ -194,7 +194,7 @@ export class ExpenseService {
         if (!e.title.toLowerCase().includes(s) && !e.notes?.toLowerCase().includes(s)) return false;
       }
       if (filter.category && e.category !== filter.category) return false;
-      if (filter.paymentMethod && e.paymentMethod !== filter.paymentMethod) return false;
+      if (filter.paymentMethod && e.paymentMethod !== filter.paymentMethod && e.toAccount !== filter.paymentMethod) return false;
       if (filter.startDate && e.date < filter.startDate) return false;
       if (filter.endDate && e.date > filter.endDate) return false;
       if (filter.minAmount !== undefined && e.amount < filter.minAmount) return false;

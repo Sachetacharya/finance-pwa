@@ -138,7 +138,7 @@ export class ExpensesComponent {
     return balanceMap;
   });
   readonly totalAmount = computed(() =>
-    this.filteredExpenses().filter(e => e.type !== 'income').reduce((s, e) => s + e.amount, 0)
+    this.filteredExpenses().filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0)
   );
   readonly totalIncome = computed(() =>
     this.filteredExpenses().filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0)

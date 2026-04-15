@@ -1,4 +1,5 @@
 import { Component, inject, effect, isDevMode } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterOutlet } from '@angular/router';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { filter } from 'rxjs/operators';
@@ -38,7 +39,10 @@ export class App {
     // Service worker update notifications (production only)
     if (!isDevMode() && this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates
-        .pipe(filter((e): e is VersionReadyEvent => e.type === 'VERSION_READY'))
+        .pipe(
+          filter((e): e is VersionReadyEvent => e.type === 'VERSION_READY'),
+          takeUntilDestroyed(),
+        )
         .subscribe(() => {
           this.notification.info('A new version is available. Refresh to update.');
         });

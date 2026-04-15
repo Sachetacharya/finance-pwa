@@ -29,7 +29,7 @@ export class ExpenseFormComponent implements OnInit {
   readonly currencyPipe = inject(CurrencyFormatPipe);
 
   readonly isSubmitting = signal(false);
-  readonly entryType = signal<'expense' | 'income'>('expense');
+  readonly entryType = signal<'expense' | 'income' | 'transfer'>('expense');
   readonly paymentGroup = signal<'cash' | 'bank' | 'wallet' | ''>('');
 
   readonly categories = Object.entries(CATEGORY_LABELS) as [ExpenseCategory, string][];
@@ -42,7 +42,7 @@ export class ExpenseFormComponent implements OnInit {
   }
 
   get exceedsBalance(): boolean {
-    if (this.entryType() !== 'expense') return false;
+    if (this.entryType() !== 'expense' && this.entryType() !== 'transfer') return false;
     const bal = this.selectedBalance;
     const amt = this.form.get('amount')?.value;
     if (bal === null || !amt) return false;
@@ -61,7 +61,7 @@ export class ExpenseFormComponent implements OnInit {
   ngOnInit(): void {
     const exp = this.expense();
     if (exp) {
-      this.entryType.set(exp.type === 'income' ? 'income' : 'expense');
+      this.entryType.set(exp.type === 'income' ? 'income' : exp.type === 'transfer' ? 'transfer' : 'expense');
       this.resolvePaymentGroup(exp.paymentMethod);
       this.form.patchValue({
         title: exp.title,
@@ -115,6 +115,7 @@ export class ExpenseFormComponent implements OnInit {
       category: val.category as ExpenseCategory | IncomeSource,
       date: val.date!,
       paymentMethod: val.paymentMethod!,
+      toAccount: this.expense()?.toAccount,
       notes: val.notes || undefined,
     });
   }
