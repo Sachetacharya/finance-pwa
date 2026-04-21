@@ -17,6 +17,16 @@ export interface BudgetStatus {
 export interface BudgetSettings {
   overallLimit: number;   // total spending cap for the month (0 = disabled)
   savingsGoal: number;    // target savings amount (income - expenses) (0 = disabled)
+  paydayDate: string;     // ISO date of next expected salary (empty = disabled)
+}
+
+export interface PaydayStatus {
+  paydayDate: string;
+  daysUntilPayday: number;   // 0 if today or past
+  totalBalance: number;      // sum of account balances
+  dailyAllowance: number;    // totalBalance / max(daysUntilPayday, 1)
+  spentToday: number;        // expenses recorded with date = today
+  remainingToday: number;    // dailyAllowance - spentToday
 }
 
 export interface OverallStatus {

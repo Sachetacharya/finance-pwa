@@ -28,6 +28,7 @@ export class BudgetsComponent {
   newLimit = 0;
   overallLimitInput = 0;
   savingsGoalInput = 0;
+  paydayDateInput = '';
 
   readonly allCategories = Object.entries(CATEGORY_LABELS) as [ExpenseCategory, string][];
 
@@ -40,12 +41,14 @@ export class BudgetsComponent {
     const s = this.budgetService.settings();
     this.overallLimitInput = s.overallLimit;
     this.savingsGoalInput = s.savingsGoal;
+    this.paydayDateInput = s.paydayDate || '';
     this.showGoalsForm.set(true);
   }
 
   onSaveGoals(): void {
     this.budgetService.setOverallLimit(this.overallLimitInput);
     this.budgetService.setSavingsGoal(this.savingsGoalInput);
+    this.budgetService.setPaydayDate(this.paydayDateInput);
     this.notification.success('Monthly goals updated');
     this.showGoalsForm.set(false);
   }

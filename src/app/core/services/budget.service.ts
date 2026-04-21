@@ -1,15 +1,17 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { ExpenseCategory } from '../models/expense.model';
-import { Budget, BudgetStatus, BudgetSettings, OverallStatus, SavingsStatus } from '../models/budget.model';
+import { Budget, BudgetStatus, BudgetSettings, OverallStatus, SavingsStatus, PaydayStatus } from '../models/budget.model';
 import { ExpenseService } from './expense.service';
+import { AccountService } from './account.service';
 import { NotificationService } from './notification.service';
 
 const SETTINGS_KEY = 'fp_budget_settings';
-const DEFAULT_SETTINGS: BudgetSettings = { overallLimit: 0, savingsGoal: 0 };
+const DEFAULT_SETTINGS: BudgetSettings = { overallLimit: 0, savingsGoal: 0, paydayDate: '' };
 
 @Injectable({ providedIn: 'root' })
 export class BudgetService {
   private readonly expenseService = inject(ExpenseService);
+  private readonly accountService = inject(AccountService);
   private readonly notification = inject(NotificationService);
   private readonly _budgets = signal<Budget[]>(this.loadFromStorage());
   private readonly _settings = signal<BudgetSettings>(this.loadSettings());
@@ -34,9 +36,10 @@ export class BudgetService {
       const spent = monthExpenses
         .filter(e => e.category === budget.category)
         .reduce((s, e) => s + e.amount, 0);
+      // No-buy categories (limit === 0): any spending = 100%+ (exceeded)
       const percentage = budget.monthlyLimit > 0
         ? Math.round((spent / budget.monthlyLimit) * 1000) / 10
-        : 0;
+        : (spent > 0 ? 999 : 0);
       return {
         budget,
         spent: Math.round(spent * 100) / 100,
@@ -91,6 +94,41 @@ export class BudgetService {
     const saved = Math.round((income - expenses) * 100) / 100;
     const percentage = goal > 0 ? Math.round((saved / goal) * 1000) / 10 : 0;
     return { goal, income, expenses, saved, percentage };
+  });
+
+  /** Countdown + per-day allowance until next payday */
+  readonly paydayStatus = computed((): PaydayStatus | null => {
+    const paydayDate = this._settings().paydayDate;
+    if (!paydayDate) return null;
+
+    const today = new Date();
+    const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const pay = new Date(paydayDate);
+    const payMid = new Date(pay.getFullYear(), pay.getMonth(), pay.getDate());
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const daysUntilPayday = Math.max(0, Math.round((payMid.getTime() - todayMid.getTime()) / msPerDay));
+
+    const balances = this.accountService.accountBalances();
+    const grossBalance = Object.values(balances).reduce((s, b) => s + b, 0);
+    const reserved = this.accountService.totalReserved();
+    const totalBalance = Math.max(0, grossBalance - reserved);
+
+    const divisor = Math.max(daysUntilPayday, 1);
+    const dailyAllowance = Math.round((totalBalance / divisor) * 100) / 100;
+
+    const todayKey = todayMid.toISOString().split('T')[0];
+    const spentToday = this.expenseService.expenses()
+      .filter(e => e.type === 'expense' && e.date === todayKey)
+      .reduce((s, e) => s + e.amount, 0);
+
+    return {
+      paydayDate,
+      daysUntilPayday,
+      totalBalance: Math.round(totalBalance * 100) / 100,
+      dailyAllowance,
+      spentToday: Math.round(spentToday * 100) / 100,
+      remainingToday: Math.round((dailyAllowance - spentToday) * 100) / 100,
+    };
   });
 
   constructor() {
@@ -151,6 +189,12 @@ export class BudgetService {
 
   setSavingsGoal(goal: number): void {
     const next = { ...this._settings(), savingsGoal: Math.max(0, goal || 0) };
+    this._settings.set(next);
+    this.persistSettings(next);
+  }
+
+  setPaydayDate(paydayDate: string): void {
+    const next = { ...this._settings(), paydayDate: paydayDate || '' };
     this._settings.set(next);
     this.persistSettings(next);
   }

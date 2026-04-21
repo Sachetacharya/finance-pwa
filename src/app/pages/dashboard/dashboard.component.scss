@@ -27,6 +27,91 @@
   margin: 0;
 }
 
+.payday-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.10), rgba(139, 92, 246, 0.06));
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 14px;
+  flex-wrap: wrap;
+
+  &--warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.04));
+    border-color: rgba(245, 158, 11, 0.35);
+  }
+
+  &--danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.04));
+    border-color: rgba(239, 68, 68, 0.35);
+  }
+
+  &__left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__days {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  &__days-num {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  &__days-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #64748b);
+    font-weight: 600;
+  }
+
+  &__date {
+    font-size: 0.75rem;
+    color: var(--text-muted, #94a3b8);
+  }
+
+  &__right {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  &__metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 90px;
+  }
+
+  &__metric-label {
+    font-size: 0.7rem;
+    color: var(--text-muted, #94a3b8);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+  }
+
+  &__metric-value {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+}
+
+.text-ok { color: var(--success); }
+.text-warn { color: var(--warning); }
+.text-over { color: var(--danger); }
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));

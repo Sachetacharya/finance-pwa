@@ -32,6 +32,12 @@
       <div class="account-card__info">
         <div class="account-card__name">{{ acc.name }}</div>
         <div class="account-card__type">{{ acc.type === 'bank' ? 'Bank Account' : 'Digital Wallet' }}</div>
+        @if (acc.reservedAmount && acc.reservedAmount > 0) {
+          <div class="account-card__reserved" title="Reserved funds">
+            <ng-icon name="lucideLock" size="12" />
+            {{ acc.reservedAmount | currencyFormat | privacyMask }}@if (acc.reservedNote) { · {{ acc.reservedNote }} }
+          </div>
+        }
       </div>
       <div class="account-card__balance" [class.account-card__balance--negative]="accountService.accountBalances()[acc.id] < 0">
         {{ accountService.accountBalances()[acc.id] | currencyFormat | privacyMask }}
@@ -73,6 +79,17 @@
             <input type="text" [value]="editColor" (input)="editColor = $any($event.target).value" class="color-picker__hex" placeholder="#6366f1" maxlength="7" />
             <div class="color-picker__preview" [style.background]="editColor"></div>
           </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><ng-icon name="lucideLock" size="12" /> Reserved Amount (NPR)</label>
+          <input class="form-control" type="number" [(ngModel)]="editReservedAmount"
+            placeholder="0.00" min="0" step="100" />
+          <small class="form-help">Funds locked away (e.g. rent, emergency fund). Subtracted from daily allowance.</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reserved For</label>
+          <input class="form-control" type="text" [(ngModel)]="editReservedNote"
+            placeholder="e.g. Rent, Emergency, Fixed deposit" maxlength="40" />
         </div>
         <div class="modal__footer">
           <button class="btn btn--ghost" (click)="editingAccountId.set(null)">Cancel</button>

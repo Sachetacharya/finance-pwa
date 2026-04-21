@@ -86,6 +86,19 @@ export class AccountService {
     this.persist(updated);
   }
 
+  updateReserved(id: string, reservedAmount: number, reservedNote?: string): void {
+    const updated = this._accounts().map(a =>
+      a.id === id ? { ...a, reservedAmount: Math.max(0, reservedAmount || 0), reservedNote: reservedNote || '' } : a
+    );
+    this._accounts.set(updated);
+    this.persist(updated);
+  }
+
+  /** Total reserved across all accounts (funds locked, not for daily spending) */
+  readonly totalReserved = computed(() =>
+    this._accounts().reduce((s, a) => s + (a.reservedAmount || 0), 0)
+  );
+
   transfer(fromId: string, toId: string, amount: number, date: string, notes?: string): void {
     const fromLabel = this.getLabel(fromId);
     const toLabel = this.getLabel(toId);

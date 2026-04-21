@@ -36,6 +36,8 @@ export class AccountsComponent {
   editName = '';
   editBalance = 0;
   editColor = '#6366f1';
+  editReservedAmount = 0;
+  editReservedNote = '';
 
   // Transfer fields
   transferFrom = '';
@@ -94,6 +96,8 @@ export class AccountsComponent {
     this.editBalance = acc.initialBalance;
     this.editColor = acc.color ?? '#6366f1';
     this.editCurrentBalance = this.accountService.accountBalances()[id] ?? 0;
+    this.editReservedAmount = acc.reservedAmount ?? 0;
+    this.editReservedNote = acc.reservedNote ?? '';
     this.editingAccountId.set(id);
   }
 
@@ -106,6 +110,7 @@ export class AccountsComponent {
 
     // Update name + color
     this.accountService.updateAccount(id, this.editName.trim(), this.editBalance, this.editColor);
+    this.accountService.updateReserved(id, this.editReservedAmount, this.editReservedNote.trim());
 
     // Create balance adjustment record if balance changed
     if (diff !== 0) {

@@ -8,6 +8,48 @@
     <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Add</button>
   </div>
 
+  <!-- Payday countdown + daily allowance -->
+  @if (budgetService.paydayStatus(); as p) {
+    <div class="payday-card"
+      [class.payday-card--danger]="p.remainingToday < 0"
+      [class.payday-card--warning]="p.remainingToday >= 0 && p.remainingToday < p.dailyAllowance * 0.2">
+      <div class="payday-card__left">
+        <div class="payday-card__days">
+          <span class="payday-card__days-num">{{ p.daysUntilPayday }}</span>
+          <span class="payday-card__days-label">{{ p.daysUntilPayday === 1 ? 'day' : 'days' }} until payday</span>
+        </div>
+        <div class="payday-card__date">
+          {{ p.paydayDate }}
+          @if (accountService.totalReserved() > 0) {
+            · <ng-icon name="lucideLock" size="10" /> {{ accountService.totalReserved() | currencyFormat | privacyMask }} reserved
+          }
+        </div>
+      </div>
+      <div class="payday-card__right">
+        <div class="payday-card__metric">
+          <span class="payday-card__metric-label">Daily allowance</span>
+          <span class="payday-card__metric-value">{{ p.dailyAllowance | currencyFormat | privacyMask }}</span>
+        </div>
+        <div class="payday-card__metric">
+          <span class="payday-card__metric-label">Today's spend</span>
+          <span class="payday-card__metric-value"
+            [class.text-over]="p.spentToday > p.dailyAllowance">
+            {{ p.spentToday | currencyFormat | privacyMask }}
+          </span>
+        </div>
+        <div class="payday-card__metric">
+          <span class="payday-card__metric-label">Left today</span>
+          <span class="payday-card__metric-value"
+            [class.text-ok]="p.remainingToday >= p.dailyAllowance * 0.5"
+            [class.text-warn]="p.remainingToday >= 0 && p.remainingToday < p.dailyAllowance * 0.5"
+            [class.text-over]="p.remainingToday < 0">
+            {{ p.remainingToday | currencyFormat | privacyMask }}
+          </span>
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- Quick Add Templates -->
   @if (templateService.templates().length) {
     <app-dashboard-quick-add
