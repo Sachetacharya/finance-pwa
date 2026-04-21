@@ -20,17 +20,34 @@ export class BudgetsComponent {
   private readonly notification = inject(NotificationService);
 
   readonly showAddForm = signal(false);
+  readonly showGoalsForm = signal(false);
   readonly categoryLabels = CATEGORY_LABELS;
   readonly categoryIcons = CATEGORY_ICONS;
 
   newCategory: ExpenseCategory | '' = '';
   newLimit = 0;
+  overallLimitInput = 0;
+  savingsGoalInput = 0;
 
   readonly allCategories = Object.entries(CATEGORY_LABELS) as [ExpenseCategory, string][];
 
   get availableCategories() {
     const existing = new Set(this.budgetService.budgets().map(b => b.category));
     return this.allCategories.filter(([key]) => !existing.has(key));
+  }
+
+  openGoalsForm(): void {
+    const s = this.budgetService.settings();
+    this.overallLimitInput = s.overallLimit;
+    this.savingsGoalInput = s.savingsGoal;
+    this.showGoalsForm.set(true);
+  }
+
+  onSaveGoals(): void {
+    this.budgetService.setOverallLimit(this.overallLimitInput);
+    this.budgetService.setSavingsGoal(this.savingsGoalInput);
+    this.notification.success('Monthly goals updated');
+    this.showGoalsForm.set(false);
   }
 
   onAdd(): void {

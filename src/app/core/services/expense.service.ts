@@ -153,7 +153,7 @@ export class ExpenseService {
       const stored = localStorage.getItem('fp_expenses');
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Migrate old records that pre-date the type field
+        // Payment-method migrations (legacy named methods → deleted-account)
         const pmMigrate: Record<string, string> = {
           'card': 'deleted-account',
           'credit-card': 'deleted-account',
@@ -167,12 +167,44 @@ export class ExpenseService {
           'khalti': 'deleted-account',
           'digital-wallet': 'deleted-account',
         };
-        const catMigrate: Record<string, string> = { rental: 'return-pay', business: 'other-income' };
+        // Category migrations — direct remap first
+        const catMigrate: Record<string, string> = {
+          rental: 'return-pay',
+          business: 'other-income',
+          transport: 'travel-transport',
+          travel: 'travel-transport',
+          entertainment: 'other',
+          education: 'other',
+          health: 'personal',
+          freelance: 'other-income',
+          gift: 'other-income',
+        };
+        // Title-aware remaps for overloaded categories (runtime deals with legacy strings)
+        const remapByContent = (e: any): string => {
+          const t = (e.title || '').toLowerCase();
+          const cat = e.category as string;
+          if (e.type === 'expense' && cat === 'other') {
+            if (t.startsWith('loan payment') || t.startsWith('lent')) return 'loans-debt';
+          }
+          if (e.type === 'expense' && cat === 'utilities') {
+            if (t === 'share' || t.includes('demat')) return 'investment';
+            if (t.includes('interest return tax') || t.includes('asba') || t.includes('charge')) return 'fees-charges';
+            if (t === 'brush') return 'personal';
+            return 'bills';
+          }
+          if (e.type === 'expense' && cat === 'personal') {
+            if (t.includes('charge') && t.includes('transfer')) return 'fees-charges';
+          }
+          if (e.type === 'expense' && cat === 'housing') {
+            if (t.includes('charge') && t.includes('transfer')) return 'fees-charges';
+          }
+          return catMigrate[cat] ?? cat;
+        };
         return parsed.map((e: Expense) => ({
           ...e,
           type: e.type === 'income' ? 'income' : e.type === 'transfer' ? 'transfer' : 'expense',
           paymentMethod: pmMigrate[e.paymentMethod] ?? e.paymentMethod,
-          category: catMigrate[e.category] ?? e.category,
+          category: remapByContent(e) as any,
         }));
       }
     } catch { /* ignore */ }

@@ -45,7 +45,22 @@ export class TemplateService {
   private loadFromStorage(): TransactionTemplate[] {
     try {
       const stored = localStorage.getItem('fp_templates');
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const catMigrate: Record<string, string> = {
+          transport: 'travel-transport',
+          travel: 'travel-transport',
+          utilities: 'bills',
+          entertainment: 'other',
+          education: 'other',
+          health: 'personal',
+          freelance: 'other-income',
+          gift: 'other-income',
+        };
+        return JSON.parse(stored).map((t: TransactionTemplate) => ({
+          ...t,
+          category: (catMigrate[t.category as string] ?? t.category) as any,
+        }));
+      }
     } catch { /* ignore */ }
     return [];
   }

@@ -1,10 +1,10 @@
 export type ExpenseCategory =
-  | 'food' | 'transport' | 'entertainment' | 'shopping'
-  | 'health' | 'utilities' | 'housing' | 'education'
-  | 'travel' | 'personal' | 'other';
+  | 'food' | 'travel-transport' | 'shopping' | 'bills'
+  | 'housing' | 'personal' | 'loans-debt' | 'fees-charges'
+  | 'investment' | 'other';
 
 export type IncomeSource =
-  | 'salary' | 'freelance' | 'investment' | 'return-pay' | 'gift' | 'other-income';
+  | 'salary' | 'investment' | 'return-pay' | 'other-income';
 
 export type RecordCategory = ExpenseCategory | IncomeSource | 'transfer';
 
@@ -49,61 +49,54 @@ export interface CategoryTotal {
 
 export const CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   food: 'Food & Dining',
-  transport: 'Transportation',
-  entertainment: 'Entertainment',
+  'travel-transport': 'Travel & Transport',
   shopping: 'Shopping',
-  health: 'Health & Medical',
-  utilities: 'Utilities',
+  bills: 'Bills & Recharge',
   housing: 'Housing & Rent',
-  education: 'Education',
-  travel: 'Travel',
   personal: 'Personal Care',
+  'loans-debt': 'Loans & Debt',
+  'fees-charges': 'Fees & Charges',
+  investment: 'Investment',
   other: 'Other',
 };
 
 export const CATEGORY_ICONS: Record<ExpenseCategory, string> = {
   food: 'lucideUtensilsCrossed',
-  transport: 'lucideCar',
-  entertainment: 'lucideFilm',
+  'travel-transport': 'lucideCar',
   shopping: 'lucideShoppingBag',
-  health: 'lucideHeart',
-  utilities: 'lucideZap',
+  bills: 'lucideZap',
   housing: 'lucideHome',
-  education: 'lucideBookOpen',
-  travel: 'lucidePlane',
   personal: 'lucideUser',
+  'loans-debt': 'lucideHandshake',
+  'fees-charges': 'lucideBanknote',
+  investment: 'lucideTrendingUp',
   other: 'lucidePackage',
 };
 
 export const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
   food: '#FF6384',
-  transport: '#36A2EB',
-  entertainment: '#FFCE56',
+  'travel-transport': '#36A2EB',
   shopping: '#4BC0C0',
-  health: '#9966FF',
-  utilities: '#FF9F40',
+  bills: '#FF9F40',
   housing: '#C9CBCF',
-  education: '#4BC0C0',
-  travel: '#36A2EB',
   personal: '#FFCE56',
-  other: '#FF6384',
+  'loans-debt': '#9966FF',
+  'fees-charges': '#FF6384',
+  investment: '#10B981',
+  other: '#94A3B8',
 };
 
 export const INCOME_SOURCE_LABELS: Record<IncomeSource, string> = {
   salary: 'Salary',
-  freelance: 'Freelance',
   investment: 'Investment',
   'return-pay': 'Return Pay',
-  gift: 'Gift',
   'other-income': 'Other Income',
 };
 
 export const INCOME_SOURCE_ICONS: Record<IncomeSource, string> = {
   salary: 'lucideBriefcase',
-  freelance: 'lucideLaptop',
   investment: 'lucideTrendingUp',
   'return-pay': 'lucideRefreshCw',
-  gift: 'lucideGift',
   'other-income': 'lucideCircleDollarSign',
 };
 

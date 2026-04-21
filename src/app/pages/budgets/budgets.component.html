@@ -2,12 +2,97 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Budgets</h1>
-      <p class="page-subtitle">Set monthly spending limits by category</p>
+      <p class="page-subtitle">Monthly spending cap, savings goal & category limits</p>
     </div>
-    @if (availableCategories.length) {
-      <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Set Budget</button>
-    }
+    <div class="header-actions">
+      <button class="btn btn--ghost" (click)="openGoalsForm()"><ng-icon name="lucideTarget" size="14" /> Goals</button>
+      @if (availableCategories.length) {
+        <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Set Budget</button>
+      }
+    </div>
   </div>
+
+  <!-- Monthly goals summary -->
+  @if (budgetService.overallStatus(); as o) {
+    <div class="budget-card budget-card--summary"
+      [class.budget-card--warning]="o.percentage >= 80 && o.percentage < 100"
+      [class.budget-card--danger]="o.percentage >= 100">
+      <div class="budget-card__top">
+        <div class="budget-card__info">
+          <span class="budget-card__icon"><ng-icon name="lucideWallet" size="20" /></span>
+          <div>
+            <div class="budget-card__name">Overall monthly spending</div>
+            <div class="budget-card__meta">{{ o.spent | currencyFormat | privacyMask }} of {{ o.limit | currencyFormat | privacyMask }}</div>
+          </div>
+        </div>
+        <div class="budget-card__actions">
+          <div class="budget-card__pct"
+            [class.text-ok]="o.percentage < 80"
+            [class.text-warn]="o.percentage >= 80 && o.percentage < 100"
+            [class.text-over]="o.percentage >= 100">
+            {{ o.percentage }}%
+          </div>
+        </div>
+      </div>
+      <div class="budget-card__bar">
+        <div class="budget-card__bar-fill"
+          [class.budget-card__bar-fill--warning]="o.percentage >= 80 && o.percentage < 100"
+          [class.budget-card__bar-fill--danger]="o.percentage >= 100"
+          [style.width.%]="o.percentage > 100 ? 100 : o.percentage">
+        </div>
+      </div>
+      <div class="budget-card__bottom">
+        @if (o.remaining >= 0) {
+          <span class="budget-card__remaining">{{ o.remaining | currencyFormat | privacyMask }} left to spend this month</span>
+        } @else {
+          <span class="budget-card__remaining text-over">{{ (o.remaining * -1) | currencyFormat | privacyMask }} over cap</span>
+        }
+      </div>
+    </div>
+  }
+
+  @if (budgetService.savingsStatus(); as g) {
+    <div class="budget-card budget-card--summary"
+      [class.budget-card--warning]="g.percentage < 50 && g.percentage >= 0"
+      [class.budget-card--danger]="g.saved < 0">
+      <div class="budget-card__top">
+        <div class="budget-card__info">
+          <span class="budget-card__icon"><ng-icon name="lucidePiggyBank" size="20" /></span>
+          <div>
+            <div class="budget-card__name">Savings goal</div>
+            <div class="budget-card__meta">
+              Saved {{ g.saved | currencyFormat | privacyMask }} of {{ g.goal | currencyFormat | privacyMask }}
+              · Income {{ g.income | currencyFormat | privacyMask }} − Expenses {{ g.expenses | currencyFormat | privacyMask }}
+            </div>
+          </div>
+        </div>
+        <div class="budget-card__actions">
+          <div class="budget-card__pct"
+            [class.text-ok]="g.percentage >= 100"
+            [class.text-warn]="g.percentage >= 50 && g.percentage < 100"
+            [class.text-over]="g.percentage < 50">
+            {{ g.percentage }}%
+          </div>
+        </div>
+      </div>
+      <div class="budget-card__bar">
+        <div class="budget-card__bar-fill"
+          [class.budget-card__bar-fill--warning]="g.percentage < 100 && g.percentage >= 50"
+          [class.budget-card__bar-fill--danger]="g.saved < 0"
+          [style.width.%]="g.percentage < 0 ? 0 : (g.percentage > 100 ? 100 : g.percentage)">
+        </div>
+      </div>
+      <div class="budget-card__bottom">
+        @if (g.saved >= g.goal) {
+          <span class="budget-card__remaining text-ok">Goal reached — {{ (g.saved - g.goal) | currencyFormat | privacyMask }} above target</span>
+        } @else if (g.saved >= 0) {
+          <span class="budget-card__remaining">{{ (g.goal - g.saved) | currencyFormat | privacyMask }} more to hit goal</span>
+        } @else {
+          <span class="budget-card__remaining text-over">Spending exceeds income this month</span>
+        }
+      </div>
+    </div>
+  }
 
   @for (s of budgetService.budgetStatuses(); track s.budget.id) {
     <div class="budget-card" [class.budget-card--warning]="s.percentage >= 80 && s.percentage < 100" [class.budget-card--danger]="s.percentage >= 100">
@@ -58,6 +143,35 @@
     </div>
   }
 </div>
+
+@if (showGoalsForm()) {
+  <div class="modal-overlay" lockScroll (click)="showGoalsForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title">Monthly Goals</h2>
+        <button class="modal__close" aria-label="Close" (click)="showGoalsForm.set(false)"><ng-icon name="lucideX" size="18" /></button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label class="form-label">Overall spending cap (NPR)</label>
+          <input class="form-control" type="number" [(ngModel)]="overallLimitInput"
+            placeholder="e.g. 35000" min="0" step="500" />
+          <small class="form-help">Total expenses this month shouldn't exceed this. Leave 0 to disable.</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Savings goal (NPR)</label>
+          <input class="form-control" type="number" [(ngModel)]="savingsGoalInput"
+            placeholder="e.g. 30000" min="0" step="500" />
+          <small class="form-help">Target amount to save this month (income − expenses). Leave 0 to disable.</small>
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost" (click)="showGoalsForm.set(false)">Cancel</button>
+          <button class="btn btn--primary" (click)="onSaveGoals()">Save Goals</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
 @if (showAddForm()) {
   <div class="modal-overlay" lockScroll (click)="showAddForm.set(false)">

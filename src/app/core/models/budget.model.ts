@@ -13,3 +13,23 @@ export interface BudgetStatus {
   percentage: number; // 0-100+
   remaining: number;
 }
+
+export interface BudgetSettings {
+  overallLimit: number;   // total spending cap for the month (0 = disabled)
+  savingsGoal: number;    // target savings amount (income - expenses) (0 = disabled)
+}
+
+export interface OverallStatus {
+  limit: number;
+  spent: number;
+  percentage: number;
+  remaining: number;
+}
+
+export interface SavingsStatus {
+  goal: number;
+  income: number;
+  expenses: number;
+  saved: number;          // income - expenses this month
+  percentage: number;     // saved / goal
+}

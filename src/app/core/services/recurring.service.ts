@@ -87,7 +87,22 @@ export class RecurringService {
   private loadFromStorage(): RecurringTransaction[] {
     try {
       const stored = localStorage.getItem('fp_recurring');
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const catMigrate: Record<string, string> = {
+          transport: 'travel-transport',
+          travel: 'travel-transport',
+          utilities: 'bills',
+          entertainment: 'other',
+          education: 'other',
+          health: 'personal',
+          freelance: 'other-income',
+          gift: 'other-income',
+        };
+        return JSON.parse(stored).map((r: RecurringTransaction) => ({
+          ...r,
+          category: (catMigrate[r.category as string] ?? r.category) as any,
+        }));
+      }
     } catch { /* ignore */ }
     return [];
   }
