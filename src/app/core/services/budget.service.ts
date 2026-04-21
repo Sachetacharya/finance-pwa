@@ -20,29 +20,17 @@ export class BudgetService {
   readonly budgets = this._budgets.asReadonly();
   readonly settings = this._settings.asReadonly();
 
-  /** Returns the inclusive start-date (ISO) of the current budget cycle */
+  /** Returns the inclusive start-date (ISO) of the current budget cycle.
+   *  Default is today — forward-looking — unless the user explicitly picks a different date. */
   readonly cycleStartISO = computed((): string => {
     const s = this._settings();
     if (s.cycleStartDate) return s.cycleStartDate;
-
-    const todayISO = new Date().toISOString().split('T')[0];
-
-    // If payday is set and still in the future, cycle = today → payday (forward-looking)
-    if (s.paydayDate && s.paydayDate >= todayISO) return todayISO;
-
-    // Legacy fallback: first day of current month
-    const now = new Date();
-    const first = new Date(now.getFullYear(), now.getMonth(), 1);
-    return first.toISOString().split('T')[0];
+    return new Date().toISOString().split('T')[0];
   });
 
-  /** Human-readable label for the cycle: e.g. "Apr 21 → May 19" or "April 2026" */
+  /** Human-readable label for the cycle: e.g. "Apr 21 → May 19" or "from Apr 21" */
   readonly cycleLabel = computed((): string => {
     const s = this._settings();
-    if (!s.cycleStartDate && !s.paydayDate) {
-      const now = new Date();
-      return now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    }
     const start = new Date(this.cycleStartISO());
     const end = s.paydayDate ? new Date(s.paydayDate) : null;
     const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
