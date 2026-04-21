@@ -15,9 +15,10 @@ export interface BudgetStatus {
 }
 
 export interface BudgetSettings {
-  overallLimit: number;   // total spending cap for the month (0 = disabled)
-  savingsGoal: number;    // target savings amount (income - expenses) (0 = disabled)
-  paydayDate: string;     // ISO date of next expected salary (empty = disabled)
+  overallLimit: number;      // total spending cap for the cycle (0 = disabled)
+  savingsGoal: number;       // target savings for the cycle (0 = disabled)
+  paydayDate: string;        // ISO date of next expected salary (empty = disabled)
+  cycleStartDate: string;    // ISO date — budgets/goals count from this date (empty = use calendar month)
 }
 
 export interface PaydayStatus {

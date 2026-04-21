@@ -1,0 +1,93 @@
+<div class="weekly-page">
+  <div class="page-header">
+    <h1 class="page-title">Weekly Review</h1>
+    <p class="page-subtitle">Last 7 days vs the 7 days before</p>
+  </div>
+
+  @if (!hasData()) {
+    <div class="empty-state">
+      <div class="empty-state__icon"><ng-icon name="lucideCalendarDays" size="36" /></div>
+      <h3 class="empty-state__title">No activity this week</h3>
+      <p class="empty-state__text">Log some expenses and check back.</p>
+    </div>
+  } @else {
+    <!-- Summary cards -->
+    <div class="summary-grid">
+      <div class="summary-card summary-card--primary">
+        <span class="summary-card__label">Spent this week</span>
+        <span class="summary-card__value">{{ thisWeekExpense() | currencyFormat | privacyMask }}</span>
+        @if (weekChangePct() !== null) {
+          <span class="summary-card__trend"
+            [class.trend-up]="(weekChangePct() ?? 0) > 0"
+            [class.trend-down]="(weekChangePct() ?? 0) < 0">
+            <ng-icon [name]="(weekChangePct() ?? 0) > 0 ? 'lucideTrendingUp' : 'lucideTrendingDown'" size="12" />
+            {{ weekChangePct() }}% vs last week
+          </span>
+        }
+      </div>
+      <div class="summary-card">
+        <span class="summary-card__label">Daily average</span>
+        <span class="summary-card__value">{{ avgPerDay() | currencyFormat | privacyMask }}</span>
+        <span class="summary-card__sub">{{ txCount() }} transaction{{ txCount() === 1 ? '' : 's' }}</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-card__label">Income</span>
+        <span class="summary-card__value">{{ thisWeekIncome() | currencyFormat | privacyMask }}</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-card__label">Last week</span>
+        <span class="summary-card__value">{{ prevWeekExpense() | currencyFormat | privacyMask }}</span>
+      </div>
+    </div>
+
+    <!-- Daily bar chart -->
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Daily spending</h3>
+      </div>
+      <div class="daily-bars">
+        @for (d of dailySummary(); track d.date) {
+          <div class="daily-bars__col" [class.daily-bars__col--today]="d.isToday">
+            <div class="daily-bars__bar-wrap" [title]="d.label + ': ' + d.total">
+              <div class="daily-bars__bar"
+                [style.height.%]="(d.total / maxDayTotal()) * 100"></div>
+            </div>
+            <span class="daily-bars__amount">{{ d.total > 0 ? (d.total | currencyFormat) : '—' }}</span>
+            <span class="daily-bars__label">{{ d.label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Top categories -->
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Top categories this week</h3>
+      </div>
+      <ul class="cat-list">
+        @for (c of topCategories(); track c.category) {
+          <li class="cat-list__item">
+            <span class="cat-list__icon"><ng-icon [name]="c.icon" size="18" /></span>
+            <span class="cat-list__name">{{ c.label }}</span>
+            <span class="cat-list__count">{{ c.count }}×</span>
+            <span class="cat-list__total">{{ c.total | currencyFormat | privacyMask }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- Biggest expense -->
+    @if (biggest(); as b) {
+      <div class="card biggest">
+        <div class="biggest__label">Biggest expense this week</div>
+        <div class="biggest__row">
+          <div>
+            <div class="biggest__title">{{ b.title }}</div>
+            <div class="biggest__meta">{{ b.date }} · {{ accountService.getLabel(b.paymentMethod) }}</div>
+          </div>
+          <div class="biggest__amount">{{ b.amount | currencyFormat | privacyMask }}</div>
+        </div>
+      </div>
+    }
+  }
+</div>

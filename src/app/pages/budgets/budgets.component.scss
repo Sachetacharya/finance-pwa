@@ -294,6 +294,15 @@
   margin-top: 2px;
 }
 
+.input-with-action {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  .form-control { flex: 1; }
+  .btn--sm { padding: 8px 12px; font-size: 0.8rem; }
+}
+
 .form-control {
   padding: 10px 14px;
   border: 1.5px solid var(--border-color, #e2e8f0);

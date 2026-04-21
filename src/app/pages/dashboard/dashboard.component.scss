@@ -80,6 +80,33 @@
     color: var(--text-muted, #94a3b8);
   }
 
+  &__wizard-btn {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--primary, #6366f1);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    max-width: fit-content;
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.88; }
+
+    &--muted {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+
+      &:hover { background: var(--bg-secondary); color: var(--text-primary); }
+    }
+  }
+
   &__right {
     display: flex;
     gap: 20px;

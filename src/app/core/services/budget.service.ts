@@ -6,7 +6,7 @@ import { AccountService } from './account.service';
 import { NotificationService } from './notification.service';
 
 const SETTINGS_KEY = 'fp_budget_settings';
-const DEFAULT_SETTINGS: BudgetSettings = { overallLimit: 0, savingsGoal: 0, paydayDate: '' };
+const DEFAULT_SETTINGS: BudgetSettings = { overallLimit: 0, savingsGoal: 0, paydayDate: '', cycleStartDate: '' };
 
 @Injectable({ providedIn: 'root' })
 export class BudgetService {
@@ -20,16 +20,39 @@ export class BudgetService {
   readonly budgets = this._budgets.asReadonly();
   readonly settings = this._settings.asReadonly();
 
-  /** Current month spending per category vs budget limit */
-  readonly budgetStatuses = computed((): BudgetStatus[] => {
+  /** Returns the inclusive start-date (ISO) of the current budget cycle */
+  readonly cycleStartISO = computed((): string => {
+    const s = this._settings();
+    if (s.cycleStartDate) return s.cycleStartDate;
+    // Fallback: first day of current month
     const now = new Date();
-    const month = now.getMonth();
-    const year = now.getFullYear();
+    const first = new Date(now.getFullYear(), now.getMonth(), 1);
+    return first.toISOString().split('T')[0];
+  });
+
+  /** Human-readable label for the cycle: e.g. "Apr 21 → May 19" or "April 2026" */
+  readonly cycleLabel = computed((): string => {
+    const s = this._settings();
+    if (!s.cycleStartDate && !s.paydayDate) {
+      const now = new Date();
+      return now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+    const start = new Date(this.cycleStartISO());
+    const end = s.paydayDate ? new Date(s.paydayDate) : null;
+    const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return end ? `${fmt(start)} → ${fmt(end)}` : `from ${fmt(start)}`;
+  });
+
+  /** Current cycle spending per category vs budget limit */
+  readonly budgetStatuses = computed((): BudgetStatus[] => {
+    const startISO = this.cycleStartISO();
+    const paydayISO = this._settings().paydayDate;
 
     const monthExpenses = this.expenseService.expenses().filter(e => {
       if (e.type !== 'expense') return false;
-      const d = new Date(e.date);
-      return d.getMonth() === month && d.getFullYear() === year;
+      if (e.date < startISO) return false;
+      if (paydayISO && e.date > paydayISO) return false;
+      return true;
     });
 
     return this._budgets().map(budget => {
@@ -54,15 +77,14 @@ export class BudgetService {
     this.budgetStatuses().filter(s => s.percentage >= 80)
   );
 
-  /** Current month totals (expense + income) used by overall/savings trackers */
+  /** Current cycle totals (expense + income) used by overall/savings trackers */
   private readonly monthTotals = computed(() => {
-    const now = new Date();
-    const m = now.getMonth();
-    const y = now.getFullYear();
+    const startISO = this.cycleStartISO();
+    const paydayISO = this._settings().paydayDate;
     let income = 0, expenses = 0;
     for (const e of this.expenseService.expenses()) {
-      const d = new Date(e.date);
-      if (d.getMonth() !== m || d.getFullYear() !== y) continue;
+      if (e.date < startISO) continue;
+      if (paydayISO && e.date > paydayISO) continue;
       if (e.type === 'expense') expenses += e.amount;
       else if (e.type === 'income') income += e.amount;
     }
@@ -195,6 +217,12 @@ export class BudgetService {
 
   setPaydayDate(paydayDate: string): void {
     const next = { ...this._settings(), paydayDate: paydayDate || '' };
+    this._settings.set(next);
+    this.persistSettings(next);
+  }
+
+  setCycleStartDate(cycleStartDate: string): void {
+    const next = { ...this._settings(), cycleStartDate: cycleStartDate || '' };
     this._settings.set(next);
     this.persistSettings(next);
   }

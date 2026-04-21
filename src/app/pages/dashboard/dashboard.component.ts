@@ -20,11 +20,12 @@ import { Expense, CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS, ALL_CATEGORY
 import { formatCurrency } from '../../shared/utils/currency.utils';
 import { ChartConfiguration } from 'chart.js';
 import { DashboardQuickAddComponent } from './dashboard-quick-add/dashboard-quick-add.component';
+import { SalaryWizardComponent } from '../../shared/components/salary-wizard/salary-wizard.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterModule, StatCardComponent, ChartComponent, ExpenseFormComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon, FormsModule, LockScrollDirective, DashboardQuickAddComponent],
+  imports: [RouterModule, StatCardComponent, ChartComponent, ExpenseFormComponent, CurrencyFormatPipe, PrivacyMaskPipe, NgIcon, FormsModule, LockScrollDirective, DashboardQuickAddComponent, SalaryWizardComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -39,7 +40,18 @@ export class DashboardComponent {
 
   readonly privacy = inject(PrivacyService);
   readonly showAddForm = signal(false);
+  readonly showSalaryWizard = signal(false);
   readonly usingTemplate = signal<TransactionTemplate | null>(null);
+
+  /** Best-guess salary account: looks for "kumari" or "salary" in account names, falls back to the first account */
+  readonly salaryAccountId = computed((): string => {
+    const accs = this.accountService.accounts();
+    const match = accs.find(a =>
+      a.name.toLowerCase().includes('kumari') ||
+      a.name.toLowerCase().includes('salary')
+    );
+    return match?.id ?? accs[0]?.id ?? '';
+  });
   useAmount: number | null = null;
   useAccount = '';
 

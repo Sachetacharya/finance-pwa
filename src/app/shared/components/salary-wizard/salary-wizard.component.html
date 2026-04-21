@@ -1,0 +1,77 @@
+<div class="modal-overlay" lockScroll (click)="closed.emit()" role="presentation">
+  <div class="modal" (click)="$event.stopPropagation()" role="dialog">
+    <div class="modal__header">
+      <h2 class="modal__title"><ng-icon name="lucideRocket" size="18" /> Salary Day Wizard</h2>
+      <button class="modal__close" (click)="closed.emit()" aria-label="Close"><ng-icon name="lucideX" size="18" /></button>
+    </div>
+
+    <div class="modal__body">
+      <div class="wiz-section">
+        <div class="wiz-row">
+          <div class="form-group">
+            <label class="form-label">Salary amount (NPR)</label>
+            <input class="form-control" type="number" [(ngModel)]="salaryAmount" min="0" step="100" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date received</label>
+            <input class="form-control" type="date" [(ngModel)]="executionDate" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Next payday</label>
+          <input class="form-control" type="date" [(ngModel)]="nextPaydayDate" />
+          <small class="form-help">Updates the countdown and starts a new budget cycle from today.</small>
+        </div>
+      </div>
+
+      <div class="wiz-section">
+        <h3 class="wiz-title">Allocations</h3>
+        <p class="wiz-hint">Money gets transferred to each destination. Rows marked 🔒 will also lock the amount as reserved in the destination account.</p>
+
+        <div class="alloc-list">
+          @for (a of allocations(); track a.id) {
+            <div class="alloc-row">
+              <input class="alloc-row__label" type="text" [(ngModel)]="a.label" placeholder="Label" />
+              <select class="alloc-row__dest" [(ngModel)]="a.toAccountId">
+                <option value="">(keep in salary acct)</option>
+                @for (acc of accounts(); track acc.id) {
+                  <option [value]="acc.id">{{ acc.name }}</option>
+                }
+              </select>
+              <input class="alloc-row__amount" type="number" [(ngModel)]="a.amount" min="0" step="100" placeholder="0" />
+              @if (a.reservedNote) {
+                <span class="alloc-row__lock" title="Will also set reserved amount"><ng-icon name="lucideLock" size="12" /> {{ a.reservedNote }}</span>
+              }
+              <button class="alloc-row__remove" type="button" (click)="removeAllocation(a.id)" aria-label="Remove"><ng-icon name="lucideX" size="14" /></button>
+            </div>
+          }
+        </div>
+        <button type="button" class="btn btn--ghost btn--sm" (click)="addAllocation()">+ Add row</button>
+      </div>
+
+      <div class="wiz-summary">
+        <div class="wiz-summary__row">
+          <span>Salary</span>
+          <span>{{ salaryAmount | currencyFormat }}</span>
+        </div>
+        <div class="wiz-summary__row">
+          <span>Allocated</span>
+          <span>{{ totalAllocated() | currencyFormat }}</span>
+        </div>
+        <div class="wiz-summary__row wiz-summary__row--total"
+          [class.text-over]="remaining() < -0.5"
+          [class.text-ok]="remaining() >= 0 && remaining() < 1">
+          <span>Unallocated</span>
+          <span>{{ remaining() | currencyFormat }}</span>
+        </div>
+      </div>
+
+      <div class="modal__footer">
+        <button class="btn btn--ghost" type="button" (click)="closed.emit()">Cancel</button>
+        <button class="btn btn--primary" type="button" (click)="execute()" [disabled]="!salaryAccountId() || salaryAmount <= 0">
+          Execute allocations
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

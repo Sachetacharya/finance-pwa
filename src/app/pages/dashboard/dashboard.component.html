@@ -24,6 +24,15 @@
             · <ng-icon name="lucideLock" size="10" /> {{ accountService.totalReserved() | currencyFormat | privacyMask }} reserved
           }
         </div>
+        @if (p.daysUntilPayday <= 1) {
+          <button class="payday-card__wizard-btn" (click)="showSalaryWizard.set(true)">
+            <ng-icon name="lucideRocket" size="14" /> Run Salary Wizard
+          </button>
+        } @else {
+          <button class="payday-card__wizard-btn payday-card__wizard-btn--muted" (click)="showSalaryWizard.set(true)">
+            Run Salary Wizard
+          </button>
+        }
       </div>
       <div class="payday-card__right">
         <div class="payday-card__metric">
@@ -248,5 +257,12 @@
     [expense]="null"
     (saved)="onAddExpense($event)"
     (cancelled)="showAddForm.set(false)"
+  />
+}
+
+@if (showSalaryWizard()) {
+  <app-salary-wizard
+    [salaryAccountId]="salaryAccountId()"
+    (closed)="showSalaryWizard.set(false)"
   />
 }

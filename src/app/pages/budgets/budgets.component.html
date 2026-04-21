@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Budgets</h1>
-      <p class="page-subtitle">Monthly spending cap, savings goal & category limits</p>
+      <p class="page-subtitle">Cycle: {{ budgetService.cycleLabel() }} · Spending cap, savings goal & category limits</p>
     </div>
     <div class="header-actions">
       <button class="btn btn--ghost" (click)="openGoalsForm()"><ng-icon name="lucideTarget" size="14" /> Goals</button>
@@ -168,6 +168,14 @@
           <label class="form-label">Next payday date</label>
           <input class="form-control" type="date" [(ngModel)]="paydayDateInput" />
           <small class="form-help">Used to calculate days remaining and a daily spending allowance. Leave empty to disable.</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Budget cycle start date</label>
+          <div class="input-with-action">
+            <input class="form-control" type="date" [(ngModel)]="cycleStartInput" />
+            <button type="button" class="btn btn--ghost btn--sm" (click)="useTodayAsCycleStart()">Today</button>
+          </div>
+          <small class="form-help">Budgets &amp; goals count spending from this date. Leave empty to use the calendar month.</small>
         </div>
         <div class="modal__footer">
           <button class="btn btn--ghost" (click)="showGoalsForm.set(false)">Cancel</button>

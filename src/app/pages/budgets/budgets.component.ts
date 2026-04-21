@@ -29,6 +29,7 @@ export class BudgetsComponent {
   overallLimitInput = 0;
   savingsGoalInput = 0;
   paydayDateInput = '';
+  cycleStartInput = '';
 
   readonly allCategories = Object.entries(CATEGORY_LABELS) as [ExpenseCategory, string][];
 
@@ -42,6 +43,7 @@ export class BudgetsComponent {
     this.overallLimitInput = s.overallLimit;
     this.savingsGoalInput = s.savingsGoal;
     this.paydayDateInput = s.paydayDate || '';
+    this.cycleStartInput = s.cycleStartDate || '';
     this.showGoalsForm.set(true);
   }
 
@@ -49,8 +51,13 @@ export class BudgetsComponent {
     this.budgetService.setOverallLimit(this.overallLimitInput);
     this.budgetService.setSavingsGoal(this.savingsGoalInput);
     this.budgetService.setPaydayDate(this.paydayDateInput);
-    this.notification.success('Monthly goals updated');
+    this.budgetService.setCycleStartDate(this.cycleStartInput);
+    this.notification.success('Goals updated');
     this.showGoalsForm.set(false);
+  }
+
+  useTodayAsCycleStart(): void {
+    this.cycleStartInput = new Date().toISOString().split('T')[0];
   }
 
   onAdd(): void {
