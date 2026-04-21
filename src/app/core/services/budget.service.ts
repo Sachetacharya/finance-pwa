@@ -77,22 +77,26 @@ export class BudgetService {
     this.budgetStatuses().filter(s => s.percentage >= 80)
   );
 
-  /** Current cycle totals (expense + income) used by overall/savings trackers */
-  private readonly monthTotals = computed(() => {
+  /** Current cycle totals (expense + income + counts) */
+  readonly cycleTotals = computed(() => {
     const startISO = this.cycleStartISO();
     const paydayISO = this._settings().paydayDate;
-    let income = 0, expenses = 0;
+    let income = 0, expenses = 0, expenseCount = 0;
     for (const e of this.expenseService.expenses()) {
       if (e.date < startISO) continue;
       if (paydayISO && e.date > paydayISO) continue;
-      if (e.type === 'expense') expenses += e.amount;
+      if (e.type === 'expense') { expenses += e.amount; expenseCount += 1; }
       else if (e.type === 'income') income += e.amount;
     }
     return {
       income: Math.round(income * 100) / 100,
       expenses: Math.round(expenses * 100) / 100,
+      expenseCount,
+      net: Math.round((income - expenses) * 100) / 100,
     };
   });
+  // Backwards-compat alias used internally
+  private readonly monthTotals = this.cycleTotals;
 
   /** Overall monthly spending vs the overall cap */
   readonly overallStatus = computed((): OverallStatus | null => {

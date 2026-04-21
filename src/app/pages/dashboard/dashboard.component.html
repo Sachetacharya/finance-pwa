@@ -71,32 +71,32 @@
   <!-- Stats -->
   <div class="stats-grid">
     <app-stat-card
-      title="This Month Spent"
-      [value]="expenseService.currentMonthTotal() | currencyFormat"
-      subtitle="Expenses this month"
+      title="Cycle Spent"
+      [value]="budgetService.cycleTotals().expenses | currencyFormat"
+      [subtitle]="'Since ' + budgetService.cycleLabel()"
       icon="lucideCreditCard"
       [trend]="monthChangePct()"
       trendLabel="vs last month"
       color="primary"
     />
     <app-stat-card
-      title="This Month Income"
-      [value]="expenseService.currentMonthIncome() | currencyFormat"
-      subtitle="Income this month"
+      title="Cycle Income"
+      [value]="budgetService.cycleTotals().income | currencyFormat"
+      subtitle="Income in this cycle"
       icon="lucideCircleDollarSign"
       color="success"
     />
     <app-stat-card
-      title="Net Balance"
-      [value]="expenseService.netBalance() | currencyFormat"
+      title="Cycle Net"
+      [value]="budgetService.cycleTotals().net | currencyFormat"
       subtitle="Income minus expenses"
       icon="lucideArrowLeftRight"
       color="info"
     />
     <app-stat-card
       title="Transactions"
-      [value]="expenseService.currentMonthExpenses().length.toString()"
-      subtitle="Expenses this month"
+      [value]="budgetService.cycleTotals().expenseCount.toString()"
+      subtitle="Expenses in this cycle"
       icon="lucideReceipt"
       color="warning"
     />
