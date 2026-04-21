@@ -24,7 +24,13 @@ export class BudgetService {
   readonly cycleStartISO = computed((): string => {
     const s = this._settings();
     if (s.cycleStartDate) return s.cycleStartDate;
-    // Fallback: first day of current month
+
+    const todayISO = new Date().toISOString().split('T')[0];
+
+    // If payday is set and still in the future, cycle = today → payday (forward-looking)
+    if (s.paydayDate && s.paydayDate >= todayISO) return todayISO;
+
+    // Legacy fallback: first day of current month
     const now = new Date();
     const first = new Date(now.getFullYear(), now.getMonth(), 1);
     return first.toISOString().split('T')[0];
@@ -221,6 +227,10 @@ export class BudgetService {
 
   setPaydayDate(paydayDate: string): void {
     const next = { ...this._settings(), paydayDate: paydayDate || '' };
+    // Auto-seed cycle start to today if the user sets a future payday and no cycle has been defined
+    if (paydayDate && !next.cycleStartDate) {
+      next.cycleStartDate = new Date().toISOString().split('T')[0];
+    }
     this._settings.set(next);
     this.persistSettings(next);
   }
