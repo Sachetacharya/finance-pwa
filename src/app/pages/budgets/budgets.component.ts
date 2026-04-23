@@ -7,11 +7,12 @@ import { ExpenseCategory, CATEGORY_LABELS, CATEGORY_ICONS } from '../../core/mod
 import { LockScrollDirective } from '../../shared/directives/lock-scroll.directive';
 import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
 import { NgIcon } from '@ng-icons/core';
+import { BudgetWizardComponent } from './budget-wizard/budget-wizard.component';
 
 @Component({
   selector: 'app-budgets',
   standalone: true,
-  imports: [FormsModule, CurrencyFormatPipe, PrivacyMaskPipe, LockScrollDirective, NgIcon],
+  imports: [FormsModule, CurrencyFormatPipe, PrivacyMaskPipe, LockScrollDirective, NgIcon, BudgetWizardComponent],
   templateUrl: './budgets.component.html',
   styleUrl: './budgets.component.scss',
 })
@@ -21,6 +22,7 @@ export class BudgetsComponent {
 
   readonly showAddForm = signal(false);
   readonly showGoalsForm = signal(false);
+  readonly showWizard = signal(false);
   readonly categoryLabels = CATEGORY_LABELS;
   readonly categoryIcons = CATEGORY_ICONS;
 

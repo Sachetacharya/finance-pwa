@@ -5,6 +5,7 @@
       <p class="page-subtitle">Cycle: {{ budgetService.cycleLabel() }} · Spending cap, savings goal & category limits</p>
     </div>
     <div class="header-actions">
+      <button class="btn btn--ghost" (click)="showWizard.set(true)"><ng-icon name="lucideRocket" size="14" /> Wizard</button>
       <button class="btn btn--ghost" (click)="openGoalsForm()"><ng-icon name="lucideTarget" size="14" /> Goals</button>
       @if (availableCategories.length) {
         <button class="btn btn--primary" (click)="showAddForm.set(true)">+ Set Budget</button>
@@ -215,4 +216,8 @@
       </div>
     </div>
   </div>
+}
+
+@if (showWizard()) {
+  <app-budget-wizard (closed)="showWizard.set(false)" />
 }

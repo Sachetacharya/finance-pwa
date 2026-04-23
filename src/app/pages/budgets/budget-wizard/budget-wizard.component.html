@@ -1,0 +1,68 @@
+<div class="modal-overlay" lockScroll (click)="closed.emit()" role="presentation">
+  <div class="modal" (click)="$event.stopPropagation()" role="dialog">
+    <div class="modal__header">
+      <h2 class="modal__title"><ng-icon name="lucideTarget" size="18" /> Budget Wizard</h2>
+      <button class="modal__close" (click)="closed.emit()" aria-label="Close"><ng-icon name="lucideX" size="18" /></button>
+    </div>
+
+    <div class="modal__body">
+      <div class="wiz-section">
+        <label class="form-label">Pool to allocate (NPR)</label>
+        <input class="form-control" type="number" [(ngModel)]="poolInput" min="0" step="500" />
+        <small class="form-help">Everything left after fixed obligations (rent, Ghar, gym). Unallocated = automatic buffer / extra savings.</small>
+      </div>
+
+      <div class="wiz-section">
+        <div class="preset-row">
+          <span class="preset-row__label">Quick presets:</span>
+          <button type="button" class="preset-btn"
+            [class.preset-btn--active]="activePreset() === 'tight'"
+            (click)="applyPreset('tight')">Tight (save more)</button>
+          <button type="button" class="preset-btn"
+            [class.preset-btn--active]="activePreset() === 'balanced'"
+            (click)="applyPreset('balanced')">Balanced</button>
+          <button type="button" class="preset-btn"
+            [class.preset-btn--active]="activePreset() === 'generous'"
+            (click)="applyPreset('generous')">Generous</button>
+        </div>
+
+        <div class="cat-list">
+          @for (r of rows(); track r.category) {
+            <div class="cat-row">
+              <span class="cat-row__icon"><ng-icon [name]="r.icon" size="18" /></span>
+              <div class="cat-row__info">
+                <span class="cat-row__label">{{ r.label }}</span>
+                <span class="cat-row__daily">~{{ r.daily | currencyFormat }}/day</span>
+              </div>
+              <input class="cat-row__amount" type="number" [ngModel]="r.amount" (ngModelChange)="updateRow(r.category, $event)" [name]="'cat-' + r.category" min="0" step="100" placeholder="0" />
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="wiz-summary">
+        <div class="wiz-summary__row">
+          <span>Pool</span>
+          <span>{{ poolInput | currencyFormat }}</span>
+        </div>
+        <div class="wiz-summary__row">
+          <span>Allocated ({{ percentAllocated() }}%)</span>
+          <span>{{ totalAllocated() | currencyFormat }}</span>
+        </div>
+        <div class="wiz-summary__row wiz-summary__row--total"
+          [class.text-over]="buffer() < -0.5"
+          [class.text-warn]="buffer() < 0 && buffer() >= -0.5">
+          <span>Buffer / extra savings</span>
+          <span>{{ buffer() | currencyFormat }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal__footer">
+      <button class="btn btn--ghost" type="button" (click)="closed.emit()">Cancel</button>
+      <button class="btn btn--primary" type="button" (click)="execute()" [disabled]="buffer() < -0.5">
+        Apply budgets
+      </button>
+    </div>
+  </div>
+</div>
