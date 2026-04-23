@@ -40,52 +40,27 @@ export interface BudgetWizardConfig {
 const SALARY_KEY = 'fp_salary_wizard_config';
 const BUDGET_KEY = 'fp_budget_wizard_config';
 
-/** Baseline values — used only when the user's localStorage is empty. Edit once via the wizard to override. */
+/** Empty baseline — no personal figures. Users configure their own values in the wizards; the wizard
+ *  persists them on Execute. Anyone launching the app for the first time starts from a blank slate. */
 const DEFAULT_SALARY: SalaryWizardConfig = {
-  salaryAmount: 95200,
+  salaryAmount: 0,
   cycleDays: 30,
-  allocations: [
-    { id: 'ghar',      label: 'Ghar (send to parents)',  kind: 'expense',  category: 'housing',  amount: 20000, compulsory: true },
-    { id: 'rent-pay',  label: 'Rent (landlord)',         kind: 'expense',  category: 'housing',  amount: 10000, compulsory: true },
-    { id: 'gym',       label: 'Gym',                     kind: 'expense',  category: 'personal', amount: 3000,  compulsory: true },
-    { id: 'emergency', label: 'Emergency fund (locked)', kind: 'transfer', accountHint: 'global', amount: 10000, reservedNote: 'Emergency fund' },
-    { id: 'savings',   label: 'Savings goal',            kind: 'transfer', accountHint: 'global', amount: 17000, reservedNote: 'Savings' },
-    { id: 'investment',label: 'Investment',              kind: 'transfer', accountHint: 'global', amount: 5000 },
-    { id: 'budget',    label: 'Remaining for the month', kind: 'transfer', accountHint: '',       amount: 30200 },
-  ],
+  allocations: [],
 };
 
 const DEFAULT_BUDGET: BudgetWizardConfig = {
-  pool: 30200,
+  pool: 0,
   categories: ['food', 'shopping', 'personal', 'bills', 'travel-transport', 'other', 'fees-charges'],
-  amounts: {
-    food: 10000, shopping: 5000, personal: 2500, bills: 1500,
-    'travel-transport': 1500, other: 2000, 'fees-charges': 200,
-  },
-  defaultPreset: 'balanced',
-  presets: [
-    {
-      key: 'tight', label: 'Tight (save more)',
-      amounts: { food: 8000, shopping: 3000, personal: 2000, bills: 1500, 'travel-transport': 1000, other: 1500, 'fees-charges': 200 },
-    },
-    {
-      key: 'balanced', label: 'Balanced',
-      amounts: { food: 10000, shopping: 5000, personal: 2500, bills: 1500, 'travel-transport': 1500, other: 2000, 'fees-charges': 200 },
-    },
-    {
-      key: 'generous', label: 'Generous',
-      amounts: { food: 12000, shopping: 7000, personal: 3000, bills: 2000, 'travel-transport': 2500, other: 3000, 'fees-charges': 500 },
-    },
-  ],
+  amounts: {},
+  defaultPreset: '',
+  presets: [],
 };
 
 @Injectable({ providedIn: 'root' })
 export class WizardConfigService {
-  constructor() {
-    // On app startup, seed the keys if absent so users can inspect/edit them in DevTools/localStorage
-    this.ensureKey(SALARY_KEY, DEFAULT_SALARY);
-    this.ensureKey(BUDGET_KEY, DEFAULT_BUDGET);
-  }
+  // Deliberately no auto-seeding: localStorage keys are written only when the user saves
+  // (via Execute). This keeps a fresh browser/user empty and prevents anyone who loads
+  // the app from seeing someone else's defaults.
 
   loadSalary(): SalaryWizardConfig {
     return this.load(SALARY_KEY, DEFAULT_SALARY);
