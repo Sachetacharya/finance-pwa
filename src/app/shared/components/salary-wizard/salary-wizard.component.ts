@@ -67,8 +67,6 @@ export class SalaryWizardComponent {
 
     // Default allocation template — user can edit any row
     const acc = this.accountService.accounts();
-    const nabil = acc.find(a => a.name.toLowerCase().includes('nabil'));
-    const siddhartha = acc.find(a => a.name.toLowerCase().includes('siddhartha'));
     const global = acc.find(a => a.name.toLowerCase().includes('global'));
 
     this.allocations.set([
@@ -77,9 +75,8 @@ export class SalaryWizardComponent {
       { id: 'rent-pay',  label: 'Rent (landlord)',         kind: 'expense',  toAccountId: '', category: 'housing',  amount: 10000, compulsory: true },
       { id: 'gym',       label: 'Gym',                     kind: 'expense',  toAccountId: '', category: 'personal', amount: 3000,  compulsory: true },
       // ── Account transfers ──
-      { id: 'minbal',    label: 'Bank min balance top-up', kind: 'transfer', toAccountId: siddhartha?.id ?? '', amount: 2000  },
       { id: 'emergency', label: 'Emergency fund (locked)', kind: 'transfer', toAccountId: global?.id ?? '',     amount: 10000, reservedNote: 'Emergency fund' },
-      { id: 'savings',   label: 'Savings goal',            kind: 'transfer', toAccountId: global?.id ?? '',     amount: 15000, reservedNote: 'Savings' },
+      { id: 'savings',   label: 'Savings goal',            kind: 'transfer', toAccountId: global?.id ?? '',     amount: 17000, reservedNote: 'Savings' },
       { id: 'investment',label: 'Investment',              kind: 'transfer', toAccountId: global?.id ?? '',     amount: 5000 },
       // ── Keep the rest in salary account for the cycle ──
       { id: 'budget',    label: 'Remaining for the month', kind: 'transfer', toAccountId: '',                   amount: 30200 },
@@ -98,6 +95,11 @@ export class SalaryWizardComponent {
 
   removeAllocation(id: string): void {
     this.allocations.update(list => list.filter(a => a.id !== id));
+  }
+
+  /** Patch a single field of a row through the signal so computed totals refresh */
+  updateRow(id: string, patch: Partial<AllocationRow>): void {
+    this.allocations.update(list => list.map(a => a.id === id ? { ...a, ...patch } : a));
   }
 
   execute(): void {

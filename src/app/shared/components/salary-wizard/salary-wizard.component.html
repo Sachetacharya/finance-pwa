@@ -31,37 +31,43 @@
         <div class="alloc-list">
           @for (a of allocations(); track a.id) {
             <div class="alloc-row" [class.alloc-row--expense]="a.kind === 'expense'">
-              <select class="alloc-row__kind" [(ngModel)]="a.kind">
-                <option value="expense">Expense</option>
-                <option value="transfer">Transfer</option>
-              </select>
-              <input class="alloc-row__label" type="text" [(ngModel)]="a.label" placeholder="Label" />
-              @if (a.kind === 'transfer') {
-                <select class="alloc-row__dest" [(ngModel)]="a.toAccountId">
-                  <option value="">(keep in salary acct)</option>
-                  @for (acc of accounts(); track acc.id) {
-                    <option [value]="acc.id">{{ acc.name }}</option>
+              <div class="alloc-row__main">
+                <select class="alloc-row__kind" [ngModel]="a.kind" (ngModelChange)="updateRow(a.id, { kind: $event })" [name]="'k-' + a.id">
+                  <option value="expense">Expense</option>
+                  <option value="transfer">Transfer</option>
+                </select>
+                <input class="alloc-row__label" type="text" [ngModel]="a.label" (ngModelChange)="updateRow(a.id, { label: $event })" [name]="'l-' + a.id" placeholder="Label" />
+                @if (a.kind === 'transfer') {
+                  <select class="alloc-row__dest" [ngModel]="a.toAccountId" (ngModelChange)="updateRow(a.id, { toAccountId: $event })" [name]="'d-' + a.id">
+                    <option value="">(keep in salary acct)</option>
+                    @for (acc of accounts(); track acc.id) {
+                      <option [value]="acc.id">{{ acc.name }}</option>
+                    }
+                  </select>
+                } @else {
+                  <select class="alloc-row__dest" [ngModel]="a.category" (ngModelChange)="updateRow(a.id, { category: $event })" [name]="'c-' + a.id">
+                    <option value="housing">Housing</option>
+                    <option value="personal">Personal</option>
+                    <option value="bills">Bills</option>
+                    <option value="food">Food</option>
+                    <option value="loans-debt">Loans & Debt</option>
+                    <option value="fees-charges">Fees & Charges</option>
+                    <option value="other">Other</option>
+                  </select>
+                }
+                <input class="alloc-row__amount" type="number" [ngModel]="a.amount" (ngModelChange)="updateRow(a.id, { amount: +$event || 0 })" [name]="'a-' + a.id" min="0" step="100" placeholder="0" />
+                <button class="alloc-row__remove" type="button" (click)="removeAllocation(a.id)" aria-label="Remove"><ng-icon name="lucideX" size="14" /></button>
+              </div>
+              @if (a.compulsory || a.reservedNote) {
+                <div class="alloc-row__badges">
+                  @if (a.compulsory) {
+                    <span class="alloc-row__badge alloc-row__badge--req" title="Compulsory monthly obligation">Compulsory</span>
                   }
-                </select>
-              } @else {
-                <select class="alloc-row__dest" [(ngModel)]="a.category">
-                  <option value="housing">Housing</option>
-                  <option value="personal">Personal</option>
-                  <option value="bills">Bills</option>
-                  <option value="food">Food</option>
-                  <option value="loans-debt">Loans & Debt</option>
-                  <option value="fees-charges">Fees & Charges</option>
-                  <option value="other">Other</option>
-                </select>
+                  @if (a.reservedNote) {
+                    <span class="alloc-row__badge alloc-row__badge--lock" title="Will also set reserved amount"><ng-icon name="lucideLock" size="12" /> {{ a.reservedNote }}</span>
+                  }
+                </div>
               }
-              <input class="alloc-row__amount" type="number" [(ngModel)]="a.amount" min="0" step="100" placeholder="0" />
-              @if (a.compulsory) {
-                <span class="alloc-row__badge alloc-row__badge--req" title="Compulsory monthly obligation">Compulsory</span>
-              }
-              @if (a.reservedNote) {
-                <span class="alloc-row__badge alloc-row__badge--lock" title="Will also set reserved amount"><ng-icon name="lucideLock" size="12" /> {{ a.reservedNote }}</span>
-              }
-              <button class="alloc-row__remove" type="button" (click)="removeAllocation(a.id)" aria-label="Remove"><ng-icon name="lucideX" size="14" /></button>
             </div>
           }
         </div>

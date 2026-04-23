@@ -48,8 +48,21 @@
     flex-direction: column;
     gap: 18px;
     overflow-y: auto;
+    overflow-x: hidden;
     flex: 1;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--text-muted) 35%, transparent) transparent;
+
+    &::-webkit-scrollbar { width: 6px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--text-muted) 35%, transparent);
+      border-radius: 999px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: color-mix(in srgb, var(--text-muted) 55%, transparent);
+    }
   }
   &__footer {
     display: flex;
@@ -104,19 +117,35 @@
 .alloc-list { display: flex; flex-direction: column; gap: 6px; }
 
 .alloc-row {
-  display: grid;
-  grid-template-columns: 90px 1.4fr 1.1fr 90px auto auto;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
-  align-items: center;
-  padding: 6px 4px;
+  padding: 8px 6px;
   border-bottom: 1px dashed var(--border-color);
+  border-radius: 6px;
 
   &--expense { background: color-mix(in srgb, var(--danger, #ef4444) 3%, transparent); }
 
-  @media (max-width: 640px) {
-    grid-template-columns: 90px 1fr 1fr;
-    gap: 4px;
-    padding: 8px 0;
+  &__main {
+    display: grid;
+    grid-template-columns: 88px 1fr 1fr 88px 28px;
+    gap: 6px;
+    align-items: center;
+    min-width: 0;
+
+    @media (max-width: 560px) {
+      grid-template-columns: 1fr 1fr 28px;
+      grid-template-areas:
+        "kind   kind   remove"
+        "label  label  label"
+        "dest   amount amount";
+
+      .alloc-row__kind   { grid-area: kind;   }
+      .alloc-row__label  { grid-area: label;  }
+      .alloc-row__dest   { grid-area: dest;   }
+      .alloc-row__amount { grid-area: amount; }
+      .alloc-row__remove { grid-area: remove; }
+    }
   }
 
   &__kind, &__label, &__dest, &__amount {
@@ -126,10 +155,22 @@
     font-size: 0.82rem;
     color: var(--text-primary);
     background: var(--bg-primary);
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   &__kind { font-weight: 700; }
   &__amount { text-align: right; font-family: 'DM Sans', sans-serif; font-weight: 700; }
+
+  &__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-left: 94px;
+
+    @media (max-width: 560px) { padding-left: 0; }
+  }
 
   &__badge {
     display: inline-flex; align-items: center; gap: 4px;
@@ -138,6 +179,9 @@
     font-size: 0.68rem;
     font-weight: 700;
     white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     &--lock {
       background: rgba(245, 158, 11, 0.15);
@@ -155,6 +199,8 @@
     color: var(--text-muted);
     padding: 4px;
     border-radius: 6px;
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
     &:hover { color: var(--danger); background: var(--bg-secondary); }
   }
 }
