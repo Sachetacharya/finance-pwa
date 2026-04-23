@@ -31,6 +31,7 @@ export class SidebarComponent {
     { path: '/expenses', label: 'Expenses', icon: 'lucideReceipt' },
     { path: '/weekly', label: 'Weekly', icon: 'lucideCalendarDays' },
     { path: '/monthly', label: 'Monthly', icon: 'lucideCalendar' },
+    { path: '/heatmap', label: 'Heatmap', icon: 'lucideGrid3x3' },
     { path: '/insights', label: 'Insights', icon: 'lucideZap' },
     { path: '/analytics', label: 'Analytics', icon: 'lucideBarChart3' },
     { path: '/templates', label: 'Templates', icon: 'lucideClipboardList' },

@@ -41,6 +41,11 @@ export const routes: Routes = [
           import('./pages/weekly/weekly.component').then(m => m.WeeklyComponent),
       },
       {
+        path: 'heatmap',
+        loadComponent: () =>
+          import('./pages/heatmap/heatmap.component').then(m => m.HeatmapComponent),
+      },
+      {
         path: 'expenses',
         loadComponent: () =>
           import('./pages/expenses/expenses.component').then(m => m.ExpensesComponent),

@@ -1,0 +1,129 @@
+<div class="heatmap-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Spending Heatmap</h1>
+      <p class="page-subtitle">Last {{ weeksToShow() }} weeks · click any day for details{{ discretionaryOnly() ? ' · discretionary only' : '' }}</p>
+    </div>
+    <label class="disc-toggle" [class.disc-toggle--on]="discretionaryOnly()">
+      <span class="disc-toggle__text">Discretionary only</span>
+      <span class="toggle-switch" [class.toggle-switch--on]="discretionaryOnly()">
+        <input type="checkbox" [checked]="discretionaryOnly()" (change)="toggleDiscretionary()" class="toggle-switch__input" />
+        <span class="toggle-switch__slider"></span>
+      </span>
+    </label>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-card__label">Total</span>
+      <span class="summary-card__value">{{ summary().total | currencyFormat | privacyMask }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-card__label">Daily avg</span>
+      <span class="summary-card__value">{{ summary().avgPerDay | currencyFormat | privacyMask }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-card__label">Active days</span>
+      <span class="summary-card__value">{{ summary().activeDays }}</span>
+      <span class="summary-card__sub">{{ summary().count }} txn</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-card__label">Biggest day</span>
+      <span class="summary-card__value">{{ summary().maxDay.amount | currencyFormat | privacyMask }}</span>
+      <span class="summary-card__sub">{{ summary().maxDay.date || '—' }}</span>
+    </div>
+  </div>
+
+  <!-- Heatmap grid -->
+  <div class="heatmap-card">
+    <div class="heatmap-scroll">
+      <!-- Month axis -->
+      <div class="heatmap-months">
+        <span class="heatmap-months__spacer"></span>
+        @for (label of monthAxis(); track $index) {
+          <span class="heatmap-months__cell">{{ label }}</span>
+        }
+      </div>
+
+      <div class="heatmap-body">
+        <!-- Weekday axis -->
+        <div class="heatmap-weekdays">
+          @for (day of weekdayLabels; track $index; let i = $index) {
+            <span class="heatmap-weekdays__cell" [class.heatmap-weekdays__cell--visible]="i === 1 || i === 3 || i === 5">
+              {{ i === 1 || i === 3 || i === 5 ? day : '' }}
+            </span>
+          }
+        </div>
+
+        <!-- The grid -->
+        <div class="heatmap-grid">
+          @for (week of grid(); track $index) {
+            <div class="heatmap-grid__col">
+              @for (cell of week; track cell.date) {
+                <button type="button"
+                  class="heatmap-cell"
+                  [class.heatmap-cell--l0]="cell.level === 0 && !cell.isFuture"
+                  [class.heatmap-cell--l1]="cell.level === 1"
+                  [class.heatmap-cell--l2]="cell.level === 2"
+                  [class.heatmap-cell--l3]="cell.level === 3"
+                  [class.heatmap-cell--l4]="cell.level === 4"
+                  [class.heatmap-cell--future]="cell.isFuture"
+                  [class.heatmap-cell--today]="cell.date === todayISO()"
+                  [class.heatmap-cell--selected]="cell.date === selectedDate()"
+                  [disabled]="cell.isFuture"
+                  [attr.title]="cell.date + ' · ' + cell.amount + ' NPR · ' + cell.count + ' txn'"
+                  [attr.aria-label]="cell.date + ': ' + cell.amount + ' spent'"
+                  (click)="onSelectCell(cell)">
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="heatmap-legend">
+      <span class="heatmap-legend__text">Less</span>
+      <span class="heatmap-cell heatmap-cell--legend heatmap-cell--l0"></span>
+      <span class="heatmap-cell heatmap-cell--legend heatmap-cell--l1"></span>
+      <span class="heatmap-cell heatmap-cell--legend heatmap-cell--l2"></span>
+      <span class="heatmap-cell heatmap-cell--legend heatmap-cell--l3"></span>
+      <span class="heatmap-cell heatmap-cell--legend heatmap-cell--l4"></span>
+      <span class="heatmap-legend__text">More</span>
+    </div>
+  </div>
+
+  <!-- Selected day drawer -->
+  @if (selectedDay(); as day) {
+    <div class="day-drawer">
+      <div class="day-drawer__header">
+        <div>
+          <div class="day-drawer__date">{{ day.date }}</div>
+          <div class="day-drawer__total">{{ day.amount | currencyFormat | privacyMask }} · {{ day.count }} transaction{{ day.count === 1 ? '' : 's' }}</div>
+        </div>
+        <button type="button" class="day-drawer__close" (click)="closeDrawer()" aria-label="Close">
+          <ng-icon name="lucideX" size="18" />
+        </button>
+      </div>
+
+      @if (day.items.length) {
+        <ul class="day-drawer__list">
+          @for (item of day.items; track item.id) {
+            <li class="day-drawer__item">
+              <span class="day-drawer__icon"><ng-icon [name]="getCategoryIcon(item.category)" size="16" /></span>
+              <div class="day-drawer__info">
+                <span class="day-drawer__title">{{ item.title }}</span>
+                <span class="day-drawer__meta">{{ getCategoryLabel(item.category) }} · {{ accountService.getLabel(item.paymentMethod) }}</span>
+              </div>
+              <span class="day-drawer__amount">{{ item.amount | currencyFormat | privacyMask }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="day-drawer__empty">No spending on this day</div>
+      }
+    </div>
+  }
+</div>
