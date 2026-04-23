@@ -211,10 +211,10 @@
   }
 
   &--l0 { background: color-mix(in srgb, var(--text-muted) 10%, transparent); }
-  &--l1 { background: #6ee7b7; }
-  &--l2 { background: #34d399; }
-  &--l3 { background: #10b981; }
-  &--l4 { background: #059669; }
+  &--l1 { background: #fde68a; }  // pale amber — low
+  &--l2 { background: #fb923c; }  // orange — moderate
+  &--l3 { background: #ef4444; }  // red — high
+  &--l4 { background: #991b1b; }  // deep red — danger
 
   &--future {
     background: transparent;
