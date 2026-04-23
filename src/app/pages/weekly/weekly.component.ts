@@ -1,4 +1,5 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { PrivacyMaskPipe } from '../../shared/pipes/privacy-mask.pipe';
@@ -7,6 +8,9 @@ import { AccountService } from '../../core/services/account.service';
 import {
   Expense, ALL_CATEGORY_LABELS, ALL_CATEGORY_ICONS,
 } from '../../core/models/expense.model';
+
+const LUMPY_CATEGORIES = new Set(['loans-debt', 'housing', 'fees-charges', 'investment']);
+const OUTLIER_THRESHOLD = 5000;
 
 interface DaySummary {
   date: string;      // ISO
@@ -19,7 +23,7 @@ interface DaySummary {
 @Component({
   selector: 'app-weekly',
   standalone: true,
-  imports: [NgIcon, CurrencyFormatPipe, PrivacyMaskPipe],
+  imports: [FormsModule, NgIcon, CurrencyFormatPipe, PrivacyMaskPipe],
   templateUrl: './weekly.component.html',
   styleUrl: './weekly.component.scss',
 })
@@ -28,6 +32,24 @@ export class WeeklyComponent {
   readonly accountService = inject(AccountService);
   readonly allCategoryLabels = ALL_CATEGORY_LABELS;
   readonly allCategoryIcons = ALL_CATEGORY_ICONS;
+
+  /** Discretionary-only toggle: filters out lumpy categories + single outliers */
+  readonly discretionaryOnly = signal<boolean>(this.loadPref());
+
+  private loadPref(): boolean {
+    try { return localStorage.getItem('fp_weekly_discretionary') === 'true'; } catch { return false; }
+  }
+
+  toggleDiscretionary(): void {
+    const next = !this.discretionaryOnly();
+    this.discretionaryOnly.set(next);
+    try { localStorage.setItem('fp_weekly_discretionary', String(next)); } catch {}
+  }
+
+  private applyDiscretionary(list: Expense[]): Expense[] {
+    if (!this.discretionaryOnly()) return list;
+    return list.filter(e => !LUMPY_CATEGORIES.has(e.category as string) && e.amount < OUTLIER_THRESHOLD);
+  }
 
   private rangeStart(daysAgo: number): Date {
     const d = new Date();
@@ -47,10 +69,10 @@ export class WeeklyComponent {
     return this.exp.expenses().filter(e => e.date >= startISO && e.date <= endISO);
   }
 
-  /** Last 7 days including today */
-  private readonly thisWeek = computed(() => this.filterRange(this.rangeStart(6), this.rangeStart(0)));
-  /** 7 days before that */
-  private readonly prevWeek = computed(() => this.filterRange(this.rangeStart(13), this.rangeStart(7)));
+  /** Last 7 days including today (respects discretionary toggle) */
+  private readonly thisWeek = computed(() => this.applyDiscretionary(this.filterRange(this.rangeStart(6), this.rangeStart(0))));
+  /** 7 days before that (respects discretionary toggle) */
+  private readonly prevWeek = computed(() => this.applyDiscretionary(this.filterRange(this.rangeStart(13), this.rangeStart(7))));
 
   readonly thisWeekExpense = computed(() =>
     this.thisWeek().filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0)

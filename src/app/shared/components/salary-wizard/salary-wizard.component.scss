@@ -13,19 +13,24 @@
   width: 100%;
   max-width: 640px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
 
   @media (max-width: 480px) {
     max-width: 100%;
     border-radius: 20px 20px 0 0;
     padding-bottom: var(--safe-bottom, 0px);
     max-height: 90dvh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
   }
 
   &__header {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 20px 24px 0;
+    padding: 20px 24px 14px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+    flex-shrink: 0;
   }
   &__title {
     display: inline-flex; align-items: center; gap: 8px;
@@ -33,10 +38,28 @@
   }
   &__close {
     background: none; border: none; cursor: pointer;
-    color: var(--text-muted); padding: 4px;
+    color: var(--text-muted); padding: 6px;
+    border-radius: 8px;
+    &:hover { background: var(--bg-secondary); color: var(--text-primary); }
   }
-  &__body { padding: 20px 24px; display: flex; flex-direction: column; gap: 18px; }
-  &__footer { display: flex; justify-content: flex-end; gap: 10px; padding-top: 8px; }
+  &__body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    overflow-y: auto;
+    flex: 1;
+    -webkit-overflow-scrolling: touch;
+  }
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 24px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-card);
+    flex-shrink: 0;
+  }
 }
 
 .wiz-section {
@@ -82,19 +105,21 @@
 
 .alloc-row {
   display: grid;
-  grid-template-columns: 1.5fr 1.2fr 90px auto auto;
+  grid-template-columns: 90px 1.4fr 1.1fr 90px auto auto;
   gap: 6px;
   align-items: center;
   padding: 6px 4px;
   border-bottom: 1px dashed var(--border-color);
 
+  &--expense { background: color-mix(in srgb, var(--danger, #ef4444) 3%, transparent); }
+
   @media (max-width: 640px) {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 90px 1fr 1fr;
     gap: 4px;
     padding: 8px 0;
   }
 
-  &__label, &__dest, &__amount {
+  &__kind, &__label, &__dest, &__amount {
     padding: 7px 10px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -103,17 +128,26 @@
     background: var(--bg-primary);
   }
 
+  &__kind { font-weight: 700; }
   &__amount { text-align: right; font-family: 'DM Sans', sans-serif; font-weight: 700; }
 
-  &__lock {
+  &__badge {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 2px 8px;
-    background: rgba(245, 158, 11, 0.15);
-    color: var(--warning, #d97706);
     border-radius: 999px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
     white-space: nowrap;
+
+    &--lock {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning, #d97706);
+    }
+
+    &--req {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--danger, #dc2626);
+    }
   }
 
   &__remove {

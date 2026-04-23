@@ -1,7 +1,16 @@
 <div class="weekly-page">
   <div class="page-header">
-    <h1 class="page-title">Weekly Review</h1>
-    <p class="page-subtitle">Last 7 days vs the 7 days before</p>
+    <div>
+      <h1 class="page-title">Weekly Review</h1>
+      <p class="page-subtitle">Last 7 days vs the 7 days before{{ discretionaryOnly() ? ' · discretionary only' : '' }}</p>
+    </div>
+    <label class="disc-toggle" [class.disc-toggle--on]="discretionaryOnly()">
+      <span class="disc-toggle__text">Discretionary only</span>
+      <span class="toggle-switch" [class.toggle-switch--on]="discretionaryOnly()">
+        <input type="checkbox" [checked]="discretionaryOnly()" (change)="toggleDiscretionary()" class="toggle-switch__input" />
+        <span class="toggle-switch__slider"></span>
+      </span>
+    </label>
   </div>
 
   @if (!hasData()) {

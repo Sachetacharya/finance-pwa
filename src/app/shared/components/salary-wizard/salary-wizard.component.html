@@ -30,17 +30,36 @@
 
         <div class="alloc-list">
           @for (a of allocations(); track a.id) {
-            <div class="alloc-row">
-              <input class="alloc-row__label" type="text" [(ngModel)]="a.label" placeholder="Label" />
-              <select class="alloc-row__dest" [(ngModel)]="a.toAccountId">
-                <option value="">(keep in salary acct)</option>
-                @for (acc of accounts(); track acc.id) {
-                  <option [value]="acc.id">{{ acc.name }}</option>
-                }
+            <div class="alloc-row" [class.alloc-row--expense]="a.kind === 'expense'">
+              <select class="alloc-row__kind" [(ngModel)]="a.kind">
+                <option value="expense">Expense</option>
+                <option value="transfer">Transfer</option>
               </select>
+              <input class="alloc-row__label" type="text" [(ngModel)]="a.label" placeholder="Label" />
+              @if (a.kind === 'transfer') {
+                <select class="alloc-row__dest" [(ngModel)]="a.toAccountId">
+                  <option value="">(keep in salary acct)</option>
+                  @for (acc of accounts(); track acc.id) {
+                    <option [value]="acc.id">{{ acc.name }}</option>
+                  }
+                </select>
+              } @else {
+                <select class="alloc-row__dest" [(ngModel)]="a.category">
+                  <option value="housing">Housing</option>
+                  <option value="personal">Personal</option>
+                  <option value="bills">Bills</option>
+                  <option value="food">Food</option>
+                  <option value="loans-debt">Loans & Debt</option>
+                  <option value="fees-charges">Fees & Charges</option>
+                  <option value="other">Other</option>
+                </select>
+              }
               <input class="alloc-row__amount" type="number" [(ngModel)]="a.amount" min="0" step="100" placeholder="0" />
+              @if (a.compulsory) {
+                <span class="alloc-row__badge alloc-row__badge--req" title="Compulsory monthly obligation">Compulsory</span>
+              }
               @if (a.reservedNote) {
-                <span class="alloc-row__lock" title="Will also set reserved amount"><ng-icon name="lucideLock" size="12" /> {{ a.reservedNote }}</span>
+                <span class="alloc-row__badge alloc-row__badge--lock" title="Will also set reserved amount"><ng-icon name="lucideLock" size="12" /> {{ a.reservedNote }}</span>
               }
               <button class="alloc-row__remove" type="button" (click)="removeAllocation(a.id)" aria-label="Remove"><ng-icon name="lucideX" size="14" /></button>
             </div>
@@ -65,13 +84,13 @@
           <span>{{ remaining() | currencyFormat }}</span>
         </div>
       </div>
+    </div>
 
-      <div class="modal__footer">
-        <button class="btn btn--ghost" type="button" (click)="closed.emit()">Cancel</button>
-        <button class="btn btn--primary" type="button" (click)="execute()" [disabled]="!salaryAccountId() || salaryAmount <= 0">
-          Execute allocations
-        </button>
-      </div>
+    <div class="modal__footer">
+      <button class="btn btn--ghost" type="button" (click)="closed.emit()">Cancel</button>
+      <button class="btn btn--primary" type="button" (click)="execute()" [disabled]="!salaryAccountId() || salaryAmount <= 0">
+        Execute allocations
+      </button>
     </div>
   </div>
 </div>

@@ -8,12 +8,17 @@ import { ExpenseService } from '../../../core/services/expense.service';
 import { BudgetService } from '../../../core/services/budget.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
+type AllocationKind = 'expense' | 'transfer';
+
 interface AllocationRow {
   id: string;
   label: string;
-  toAccountId: string;       // '' = don't transfer, stays in salary account
+  kind: AllocationKind;      // 'expense' = logs as expense; 'transfer' = moves between accounts
+  toAccountId: string;       // transfer dest ('' = keep in salary account); ignored for expense
+  category?: string;         // only used when kind === 'expense'
   amount: number;
-  reservedNote?: string;     // if set, bumps the destination account's reservedAmount
+  reservedNote?: string;     // if set on a transfer, bumps the destination's reservedAmount
+  compulsory?: boolean;      // locked monthly obligation — shown with a badge
 }
 
 @Component({
@@ -33,8 +38,12 @@ export class SalaryWizardComponent {
   private readonly notification = inject(NotificationService);
 
   salaryAmount = 95200;
-  executionDate = new Date().toISOString().split('T')[0];
+  executionDate = this.localDateStr(new Date());
   nextPaydayDate = '';
+
+  private localDateStr(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
 
   readonly allocations = signal<AllocationRow[]>([]);
 
@@ -54,7 +63,7 @@ export class SalaryWizardComponent {
     // Suggested next payday = ~30 days from execution
     const next = new Date(this.executionDate);
     next.setDate(next.getDate() + 30);
-    this.nextPaydayDate = next.toISOString().split('T')[0];
+    this.nextPaydayDate = this.localDateStr(next);
 
     // Default allocation template — user can edit any row
     const acc = this.accountService.accounts();
@@ -63,12 +72,17 @@ export class SalaryWizardComponent {
     const global = acc.find(a => a.name.toLowerCase().includes('global'));
 
     this.allocations.set([
-      { id: 'rent',      label: 'Top up rent reserve',     toAccountId: nabil?.id ?? '',      amount: 10000, reservedNote: 'Rent (self)' },
-      { id: 'minbal',    label: 'Bank min balance top-up', toAccountId: siddhartha?.id ?? '', amount: 2000  },
-      { id: 'emergency', label: 'Emergency fund (locked)', toAccountId: global?.id ?? '',     amount: 10000, reservedNote: 'Emergency fund' },
-      { id: 'savings',   label: 'Savings goal',            toAccountId: global?.id ?? '',     amount: 15000, reservedNote: 'Savings' },
-      { id: 'investment',label: 'Investment',              toAccountId: global?.id ?? '',     amount: 5000 },
-      { id: 'budget',    label: 'Leave in salary account for month', toAccountId: '',        amount: 53200 },
+      // ── Compulsory monthly obligations (expenses) ──
+      { id: 'ghar',      label: 'Ghar (send to parents)',  kind: 'expense',  toAccountId: '', category: 'housing',  amount: 20000, compulsory: true },
+      { id: 'rent-pay',  label: 'Rent (landlord)',         kind: 'expense',  toAccountId: '', category: 'housing',  amount: 10000, compulsory: true },
+      { id: 'gym',       label: 'Gym',                     kind: 'expense',  toAccountId: '', category: 'personal', amount: 3000,  compulsory: true },
+      // ── Account transfers ──
+      { id: 'minbal',    label: 'Bank min balance top-up', kind: 'transfer', toAccountId: siddhartha?.id ?? '', amount: 2000  },
+      { id: 'emergency', label: 'Emergency fund (locked)', kind: 'transfer', toAccountId: global?.id ?? '',     amount: 10000, reservedNote: 'Emergency fund' },
+      { id: 'savings',   label: 'Savings goal',            kind: 'transfer', toAccountId: global?.id ?? '',     amount: 15000, reservedNote: 'Savings' },
+      { id: 'investment',label: 'Investment',              kind: 'transfer', toAccountId: global?.id ?? '',     amount: 5000 },
+      // ── Keep the rest in salary account for the cycle ──
+      { id: 'budget',    label: 'Remaining for the month', kind: 'transfer', toAccountId: '',                   amount: 30200 },
     ]);
   }
 
@@ -76,6 +90,7 @@ export class SalaryWizardComponent {
     this.allocations.update(list => [...list, {
       id: `custom-${Date.now()}`,
       label: 'Custom allocation',
+      kind: 'transfer',
       toAccountId: '',
       amount: 0,
     }]);
@@ -106,11 +121,26 @@ export class SalaryWizardComponent {
       paymentMethod: salaryId,
     });
 
-    // 2. Execute transfers + reserved bumps
-    let transfers = 0;
+    // 2. Execute expenses, transfers, and reserved bumps
+    let expenses = 0, transfers = 0;
     for (const a of this.allocations()) {
       const amt = Number(a.amount) || 0;
       if (amt <= 0) continue;
+
+      if (a.kind === 'expense') {
+        this.expenseService.addExpense({
+          type: 'expense',
+          title: a.label,
+          amount: amt,
+          category: (a.category as any) ?? 'other',
+          date: this.executionDate,
+          paymentMethod: salaryId,
+        });
+        expenses++;
+        continue;
+      }
+
+      // kind === 'transfer'
       if (!a.toAccountId) continue; // keeps money in salary account
 
       this.accountService.transfer(salaryId, a.toAccountId, amt, this.executionDate, a.label);
@@ -129,7 +159,7 @@ export class SalaryWizardComponent {
     }
     this.budgetService.setCycleStartDate(this.executionDate);
 
-    this.notification.success(`Salary processed — ${transfers} transfer${transfers === 1 ? '' : 's'} done`);
+    this.notification.success(`Salary processed — ${expenses} expense${expenses === 1 ? '' : 's'} + ${transfers} transfer${transfers === 1 ? '' : 's'}`);
     this.closed.emit();
   }
 }
