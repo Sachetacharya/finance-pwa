@@ -136,7 +136,8 @@ export class BudgetService {
     const divisor = Math.max(daysUntilPayday, 1);
     const dailyAllowance = Math.round((totalBalance / divisor) * 100) / 100;
 
-    const todayKey = todayMid.toISOString().split('T')[0];
+    // Local-date key (avoid toISOString which shifts to UTC and breaks in +5:45 timezones)
+    const todayKey = `${todayMid.getFullYear()}-${String(todayMid.getMonth() + 1).padStart(2, '0')}-${String(todayMid.getDate()).padStart(2, '0')}`;
     const spentToday = this.expenseService.expenses()
       .filter(e => e.type === 'expense' && e.date === todayKey)
       .reduce((s, e) => s + e.amount, 0);

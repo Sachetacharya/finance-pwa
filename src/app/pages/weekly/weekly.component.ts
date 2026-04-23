@@ -36,9 +36,14 @@ export class WeeklyComponent {
     return d;
   }
 
+  /** Format a local Date as YYYY-MM-DD without the UTC shift that toISOString() causes */
+  private toLocalDateStr(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
   private filterRange(startInclusive: Date, endInclusive: Date): Expense[] {
-    const startISO = startInclusive.toISOString().split('T')[0];
-    const endISO = endInclusive.toISOString().split('T')[0];
+    const startISO = this.toLocalDateStr(startInclusive);
+    const endISO = this.toLocalDateStr(endInclusive);
     return this.exp.expenses().filter(e => e.date >= startISO && e.date <= endISO);
   }
 
@@ -78,11 +83,11 @@ export class WeeklyComponent {
   /** Per-day summary for the last 7 days (oldest → today) */
   readonly dailySummary = computed((): DaySummary[] => {
     const days: DaySummary[] = [];
-    const todayISO = new Date().toISOString().split('T')[0];
+    const todayISO = this.toLocalDateStr(this.rangeStart(0));
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     for (let i = 6; i >= 0; i--) {
       const d = this.rangeStart(i);
-      const iso = d.toISOString().split('T')[0];
+      const iso = this.toLocalDateStr(d);
       const dayExp = this.thisWeek().filter(e => e.type === 'expense' && e.date === iso);
       days.push({
         date: iso,
