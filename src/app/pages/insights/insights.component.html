@@ -14,8 +14,12 @@
   />
 
   <!-- 1. Overview Summary -->
-  <div class="section">
-    <h2 class="section__title"><ng-icon name="lucideLayoutDashboard" size="18" /> Overview</h2>
+  <div class="section" [class.section--collapsed]="!isOpen('overview')">
+    <button type="button" class="section__title section__title--btn" (click)="toggle('overview')" [attr.aria-expanded]="isOpen('overview')">
+      <span class="section__title-left"><ng-icon name="lucideLayoutDashboard" size="18" /> Overview</span>
+      <ng-icon [name]="isOpen('overview') ? 'lucideChevronUp' : 'lucideChevronDown'" size="16" />
+    </button>
+    @if (isOpen('overview')) {
     <div class="overview-grid">
       <div class="ov-card ov-card--income">
         <div class="ov-card__label">Total Income</div>
@@ -43,14 +47,19 @@
     @if (insights.overview().overspending) {
       <div class="alert alert--danger"><ng-icon name="lucideAlertTriangle" size="16" /> You're spending more than you earn this month</div>
     }
+    }
   </div>
 
   <!-- 3. Spending Insights -->
   <app-insight-card title="Spending Insights" icon="lucideTrendingUp" [items]="insights.spendingInsights()" />
 
   <!-- 2. Category Breakdown -->
-  <div class="section">
-    <h2 class="section__title"><ng-icon name="lucidePieChart" size="18" /> Category Breakdown</h2>
+  <div class="section" [class.section--collapsed]="!isOpen('category')">
+    <button type="button" class="section__title section__title--btn" (click)="toggle('category')" [attr.aria-expanded]="isOpen('category')">
+      <span class="section__title-left"><ng-icon name="lucidePieChart" size="18" /> Category Breakdown</span>
+      <ng-icon [name]="isOpen('category') ? 'lucideChevronUp' : 'lucideChevronDown'" size="16" />
+    </button>
+    @if (isOpen('category')) {
     <div class="cat-grid">
       <div class="cat-section">
         <h3 class="cat-section__title">Top Spending</h3>
@@ -77,11 +86,16 @@
         }
       </div>
     </div>
+    }
   </div>
 
   <!-- 4. Expense Patterns -->
-  <div class="section">
-    <h2 class="section__title"><ng-icon name="lucideBarChart3" size="18" /> Expense Patterns</h2>
+  <div class="section" [class.section--collapsed]="!isOpen('patterns')">
+    <button type="button" class="section__title section__title--btn" (click)="toggle('patterns')" [attr.aria-expanded]="isOpen('patterns')">
+      <span class="section__title-left"><ng-icon name="lucideBarChart3" size="18" /> Expense Patterns</span>
+      <ng-icon [name]="isOpen('patterns') ? 'lucideChevronUp' : 'lucideChevronDown'" size="16" />
+    </button>
+    @if (isOpen('patterns')) {
     <div class="pattern-grid">
       <div class="pattern-card">
         <div class="pattern-card__label">Daily Average</div>
@@ -112,13 +126,17 @@
         }
       </div>
     }
+    }
   </div>
 
-  <!-- 11. Loan & Lent Analysis -->
-  @if (insights.loanAnalysis().borrowedCount > 0 || insights.loanAnalysis().lentCount > 0) {
-    <div class="section">
-      <h2 class="section__title"><ng-icon name="lucideHandshake" size="18" /> Loan & Lent</h2>
-
+  <!-- 11. Loan & Lent Analysis — only show when there's active (unresolved) activity -->
+  @if (insights.loanAnalysis().totalBorrowedOutstanding > 0 || insights.loanAnalysis().totalLentOutstanding > 0) {
+    <div class="section" [class.section--collapsed]="!isOpen('loans')">
+      <button type="button" class="section__title section__title--btn" (click)="toggle('loans')" [attr.aria-expanded]="isOpen('loans')">
+        <span class="section__title-left"><ng-icon name="lucideHandshake" size="18" /> Loan & Lent</span>
+        <ng-icon [name]="isOpen('loans') ? 'lucideChevronUp' : 'lucideChevronDown'" size="16" />
+      </button>
+      @if (isOpen('loans')) {
       <div class="loan-overview-grid">
         <div class="loan-ov-card loan-ov-card--borrowed">
           <div class="loan-ov-card__label">Borrowed</div>
@@ -209,6 +227,7 @@
           </div>
         }
       </div>
+      }
     </div>
   }
 
@@ -219,8 +238,12 @@
   <app-insight-card title="Budget Recommendations" icon="lucideTarget" [items]="insights.budgetRecs()" />
 
   <!-- 7. Month-to-Month Comparison -->
-  <div class="section">
-    <h2 class="section__title"><ng-icon name="lucideCalendar" size="18" /> Month Comparison</h2>
+  <div class="section" [class.section--collapsed]="!isOpen('months')">
+    <button type="button" class="section__title section__title--btn" (click)="toggle('months')" [attr.aria-expanded]="isOpen('months')">
+      <span class="section__title-left"><ng-icon name="lucideCalendar" size="18" /> Month Comparison</span>
+      <ng-icon [name]="isOpen('months') ? 'lucideChevronUp' : 'lucideChevronDown'" size="16" />
+    </button>
+    @if (isOpen('months')) {
     <div class="month-grid">
       @for (m of insights.monthComparison().months; track m.label) {
         <div class="month-card">
@@ -244,11 +267,16 @@
         </div>
       }
     </div>
+    }
   </div>
 
   <!-- 12. Prediction & Forecast -->
-  <div class="section">
-    <h2 class="section__title"><ng-icon name="lucideTrendingUp" size="18" /> Forecast</h2>
+  <div class="section" [class.section--collapsed]="!isOpen('forecast')">
+    <button type="button" class="section__title section__title--btn" (click)="toggle('forecast')" [attr.aria-expanded]="isOpen('forecast')">
+      <span class="section__title-left"><ng-icon name="lucideTrendingUp" size="18" /> Forecast</span>
+      <ng-icon [name]="isOpen('forecast') ? 'lucideChevronUp' : 'lucideChevronDown'" size="16" />
+    </button>
+    @if (isOpen('forecast')) {
     <div class="pattern-grid">
       <div class="pattern-card">
         <div class="pattern-card__label">Predicted Month End</div>
@@ -276,11 +304,16 @@
         <span>On track to exceed: {{ insights.forecast().budgetAlerts.join(', ') }}</span>
       </div>
     }
+    }
   </div>
 
   <!-- 13. Lifestyle & Expense Types -->
-  <div class="section">
-    <h2 class="section__title"><ng-icon name="lucideUser" size="18" /> Lifestyle & Habits</h2>
+  <div class="section" [class.section--collapsed]="!isOpen('lifestyle')">
+    <button type="button" class="section__title section__title--btn" (click)="toggle('lifestyle')" [attr.aria-expanded]="isOpen('lifestyle')">
+      <span class="section__title-left"><ng-icon name="lucideUser" size="18" /> Lifestyle & Habits</span>
+      <ng-icon [name]="isOpen('lifestyle') ? 'lucideChevronUp' : 'lucideChevronDown'" size="16" />
+    </button>
+    @if (isOpen('lifestyle')) {
 
     @if (insights.lifestyle().mostExpensiveDay.day > 0) {
       <div class="alert alert--info" style="margin-bottom: 12px;">
@@ -328,6 +361,7 @@
           </div>
         }
       </div>
+    }
     }
   </div>
 

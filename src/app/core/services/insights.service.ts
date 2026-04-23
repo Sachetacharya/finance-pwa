@@ -400,11 +400,13 @@ export class InsightsService {
         entry.loans.push(s.loan.title);
         map.set(key, entry);
       });
-      return Array.from(map.values()).filter(g => g.count > 0).sort((a, b) => b.outstanding - a.outstanding);
+      // Only show people who still have an outstanding balance (hide fully settled)
+      return Array.from(map.values()).filter(g => g.outstanding > 0.01).sort((a, b) => b.outstanding - a.outstanding);
     };
 
-    const borrowedByPerson = groupByPerson(borrowed);
-    const lentByPerson = groupByPerson(lent);
+    // Only group active (not fully-paid) loans — completed loans shouldn't clutter insights
+    const borrowedByPerson = groupByPerson(borrowed.filter(s => s.outstanding > 0.01));
+    const lentByPerson = groupByPerson(lent.filter(s => s.outstanding > 0.01));
 
     return {
       totalBorrowed, totalBorrowedPaid, totalBorrowedOutstanding, borrowedProgress,
