@@ -7,18 +7,22 @@ import { AccountService } from '../../../core/services/account.service';
 import { ExpenseService } from '../../../core/services/expense.service';
 import { BudgetService } from '../../../core/services/budget.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import {
+  WizardConfigService, SalaryAllocationConfig, AccountHint,
+} from '../../../core/services/wizard-config.service';
 
 type AllocationKind = 'expense' | 'transfer';
 
 interface AllocationRow {
   id: string;
   label: string;
-  kind: AllocationKind;      // 'expense' = logs as expense; 'transfer' = moves between accounts
-  toAccountId: string;       // transfer dest ('' = keep in salary account); ignored for expense
-  category?: string;         // only used when kind === 'expense'
+  kind: AllocationKind;
+  toAccountId: string;       // runtime-resolved id ('' = keep in salary acct)
+  accountHint?: AccountHint; // persisted hint, used to resolve id across devices
+  category?: string;
   amount: number;
-  reservedNote?: string;     // if set on a transfer, bumps the destination's reservedAmount
-  compulsory?: boolean;      // locked monthly obligation — shown with a badge
+  reservedNote?: string;
+  compulsory?: boolean;
 }
 
 @Component({
@@ -36,10 +40,12 @@ export class SalaryWizardComponent {
   private readonly expenseService = inject(ExpenseService);
   private readonly budgetService = inject(BudgetService);
   private readonly notification = inject(NotificationService);
+  private readonly config = inject(WizardConfigService);
 
-  salaryAmount = 95200;
+  salaryAmount = 0;
   executionDate = this.localDateStr(new Date());
   nextPaydayDate = '';
+  private cycleDays = 30;
 
   private localDateStr(d: Date): string {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -60,27 +66,44 @@ export class SalaryWizardComponent {
   );
 
   ngOnInit(): void {
-    // Suggested next payday = ~30 days from execution
+    const cfg = this.config.loadSalary();
+    this.salaryAmount = cfg.salaryAmount;
+    this.cycleDays = cfg.cycleDays;
+
     const next = new Date(this.executionDate);
-    next.setDate(next.getDate() + 30);
+    next.setDate(next.getDate() + this.cycleDays);
     this.nextPaydayDate = this.localDateStr(next);
 
-    // Default allocation template — user can edit any row
-    const acc = this.accountService.accounts();
-    const global = acc.find(a => a.name.toLowerCase().includes('global'));
+    this.allocations.set(cfg.allocations.map(a => ({
+      id: a.id,
+      label: a.label,
+      kind: a.kind,
+      toAccountId: a.kind === 'transfer' ? this.resolveAccountId(a.accountHint) : '',
+      accountHint: a.accountHint,
+      category: a.category,
+      amount: a.amount,
+      reservedNote: a.reservedNote,
+      compulsory: a.compulsory,
+    })));
+  }
 
-    this.allocations.set([
-      // ── Compulsory monthly obligations (expenses) ──
-      { id: 'ghar',      label: 'Ghar (send to parents)',  kind: 'expense',  toAccountId: '', category: 'housing',  amount: 20000, compulsory: true },
-      { id: 'rent-pay',  label: 'Rent (landlord)',         kind: 'expense',  toAccountId: '', category: 'housing',  amount: 10000, compulsory: true },
-      { id: 'gym',       label: 'Gym',                     kind: 'expense',  toAccountId: '', category: 'personal', amount: 3000,  compulsory: true },
-      // ── Account transfers ──
-      { id: 'emergency', label: 'Emergency fund (locked)', kind: 'transfer', toAccountId: global?.id ?? '',     amount: 10000, reservedNote: 'Emergency fund' },
-      { id: 'savings',   label: 'Savings goal',            kind: 'transfer', toAccountId: global?.id ?? '',     amount: 17000, reservedNote: 'Savings' },
-      { id: 'investment',label: 'Investment',              kind: 'transfer', toAccountId: global?.id ?? '',     amount: 5000 },
-      // ── Keep the rest in salary account for the cycle ──
-      { id: 'budget',    label: 'Remaining for the month', kind: 'transfer', toAccountId: '',                   amount: 30200 },
-    ]);
+  /** Resolve an account hint (e.g. "global") to an actual account id by name-substring match */
+  private resolveAccountId(hint: AccountHint | undefined): string {
+    if (!hint) return '';
+    const match = this.accountService.accounts().find(a =>
+      a.name.toLowerCase().includes(hint.toLowerCase())
+    );
+    return match?.id ?? '';
+  }
+
+  /** Reverse — turn an account id into a hint we can persist */
+  private hintForAccountId(id: string): AccountHint | undefined {
+    if (!id) return '';
+    const acc = this.accountService.accounts().find(a => a.id === id);
+    if (!acc) return '';
+    const n = acc.name.toLowerCase();
+    const known: AccountHint[] = ['kumari', 'siddhartha', 'nabil', 'global', 'esewa'];
+    return known.find(h => n.includes(h)) ?? '';
   }
 
   addAllocation(): void {
@@ -97,7 +120,6 @@ export class SalaryWizardComponent {
     this.allocations.update(list => list.filter(a => a.id !== id));
   }
 
-  /** Patch a single field of a row through the signal so computed totals refresh */
   updateRow(id: string, patch: Partial<AllocationRow>): void {
     this.allocations.update(list => list.map(a => a.id === id ? { ...a, ...patch } : a));
   }
@@ -142,8 +164,7 @@ export class SalaryWizardComponent {
         continue;
       }
 
-      // kind === 'transfer'
-      if (!a.toAccountId) continue; // keeps money in salary account
+      if (!a.toAccountId) continue;
 
       this.accountService.transfer(salaryId, a.toAccountId, amt, this.executionDate, a.label);
       transfers++;
@@ -156,10 +177,26 @@ export class SalaryWizardComponent {
     }
 
     // 3. Roll the budget cycle forward
-    if (this.nextPaydayDate) {
-      this.budgetService.setPaydayDate(this.nextPaydayDate);
-    }
+    if (this.nextPaydayDate) this.budgetService.setPaydayDate(this.nextPaydayDate);
     this.budgetService.setCycleStartDate(this.executionDate);
+
+    // 4. Persist the wizard config so next time it remembers the user's edits
+    const persisted: SalaryAllocationConfig[] = this.allocations().map(a => ({
+      id: a.id,
+      label: a.label,
+      kind: a.kind,
+      // Always derive hint from the current destination — the user may have changed it in the UI
+      accountHint: a.kind === 'transfer' ? (this.hintForAccountId(a.toAccountId) ?? '') : undefined,
+      category: a.category as any,
+      amount: a.amount,
+      reservedNote: a.reservedNote,
+      compulsory: a.compulsory,
+    }));
+    this.config.saveSalary({
+      salaryAmount: this.salaryAmount,
+      cycleDays: this.cycleDays,
+      allocations: persisted,
+    });
 
     this.notification.success(`Salary processed — ${expenses} expense${expenses === 1 ? '' : 's'} + ${transfers} transfer${transfers === 1 ? '' : 's'}`);
     this.closed.emit();

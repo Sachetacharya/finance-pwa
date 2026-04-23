@@ -5,6 +5,7 @@ import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
 import { LockScrollDirective } from '../../../shared/directives/lock-scroll.directive';
 import { BudgetService } from '../../../core/services/budget.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { WizardConfigService, BudgetPreset } from '../../../core/services/wizard-config.service';
 import { ExpenseCategory, CATEGORY_LABELS, CATEGORY_ICONS } from '../../../core/models/expense.model';
 
 interface CategoryRow {
@@ -23,16 +24,18 @@ interface CategoryRow {
   styleUrl: './budget-wizard.component.scss',
 })
 export class BudgetWizardComponent {
-  /** Total pool to allocate across categories (defaults to 30,200) */
-  pool = input<number>(30200);
+  /** Pool override — if provided, takes precedence over the stored config */
+  pool = input<number | null>(null);
   closed = output<void>();
 
   private readonly budgetService = inject(BudgetService);
   private readonly notification = inject(NotificationService);
+  private readonly config = inject(WizardConfigService);
 
   readonly rows = signal<CategoryRow[]>([]);
-  readonly activePreset = signal<'tight' | 'balanced' | 'generous' | null>('balanced');
-  poolInput = 30200;
+  readonly activePreset = signal<string | null>(null);
+  readonly presets = signal<BudgetPreset[]>([]);
+  poolInput = 0;
 
   readonly totalAllocated = computed(() =>
     this.rows().reduce((s, r) => s + (Number(r.amount) || 0), 0)
@@ -48,36 +51,42 @@ export class BudgetWizardComponent {
   });
 
   ngOnInit(): void {
-    this.poolInput = this.pool();
+    const cfg = this.config.loadBudget();
+    this.presets.set(cfg.presets);
 
-    // Sensible defaults based on the user's actual spending patterns
-    const defaults: Array<{ category: ExpenseCategory; amount: number }> = [
-      { category: 'food',             amount: 10000 },
-      { category: 'shopping',         amount: 5000  },
-      { category: 'personal',         amount: 2500  },
-      { category: 'bills',            amount: 1500  },
-      { category: 'travel-transport', amount: 1500  },
-      { category: 'other',            amount: 2000  },
-      { category: 'fees-charges',     amount: 200   },
-    ];
+    const poolOverride = this.pool();
+    this.poolInput = poolOverride != null ? poolOverride : cfg.pool;
 
-    // Pre-fill from existing budgets where set
+    // Prefer existing category budgets; fall back to last-used amounts from config
     const existing = new Map(this.budgetService.budgets().map(b => [b.category, b.monthlyLimit]));
-    const hasExisting = existing.size > 0;
+    const hasExistingBudgets = existing.size > 0;
 
-    this.rows.set(defaults.map(d => {
-      const amount = existing.get(d.category) ?? d.amount;
+    this.rows.set(cfg.categories.map(cat => {
+      const amount = existing.get(cat) ?? cfg.amounts[cat] ?? 0;
       return {
-        category: d.category,
-        label: CATEGORY_LABELS[d.category],
-        icon: CATEGORY_ICONS[d.category],
+        category: cat,
+        label: CATEGORY_LABELS[cat],
+        icon: CATEGORY_ICONS[cat],
         amount,
         daily: Math.round(amount / 30),
       };
     }));
 
-    // If user already had custom budgets, don't claim a preset is active
-    if (hasExisting) this.activePreset.set(null);
+    // Mark a preset active only if amounts exactly match one (and user hasn't saved custom budgets)
+    if (!hasExistingBudgets) {
+      this.activePreset.set(cfg.defaultPreset);
+    } else {
+      this.activePreset.set(this.detectMatchingPreset());
+    }
+  }
+
+  private detectMatchingPreset(): string | null {
+    const current = Object.fromEntries(this.rows().map(r => [r.category, r.amount]));
+    for (const p of this.presets()) {
+      const matches = Object.entries(p.amounts).every(([k, v]) => (current as any)[k] === v);
+      if (matches) return p.key;
+    }
+    return null;
   }
 
   updateRow(category: ExpenseCategory, amount: number): void {
@@ -85,37 +94,17 @@ export class BudgetWizardComponent {
     this.rows.update(list => list.map(r =>
       r.category === category ? { ...r, amount: n, daily: Math.round(n / 30) } : r
     ));
-    // Manual edit breaks out of preset mode
     this.activePreset.set(null);
   }
 
-  /** Quick preset: balanced (default), tight (more savings), generous */
-  applyPreset(preset: 'balanced' | 'tight' | 'generous'): void {
-    const presets: Record<string, Record<ExpenseCategory, number>> = {
-      balanced: {
-        food: 10000, shopping: 5000, personal: 2500, bills: 1500,
-        'travel-transport': 1500, other: 2000, 'fees-charges': 200,
-        // unused in this wizard but required to satisfy type
-        housing: 0, 'loans-debt': 0, investment: 0,
-      } as any,
-      tight: {
-        food: 8000, shopping: 3000, personal: 2000, bills: 1500,
-        'travel-transport': 1000, other: 1500, 'fees-charges': 200,
-        housing: 0, 'loans-debt': 0, investment: 0,
-      } as any,
-      generous: {
-        food: 12000, shopping: 7000, personal: 3000, bills: 2000,
-        'travel-transport': 2500, other: 3000, 'fees-charges': 500,
-        housing: 0, 'loans-debt': 0, investment: 0,
-      } as any,
-    };
-
-    const chosen = presets[preset];
+  applyPreset(key: string): void {
+    const p = this.presets().find(x => x.key === key);
+    if (!p) return;
     this.rows.update(list => list.map(r => {
-      const amount = chosen[r.category] ?? r.amount;
+      const amount = p.amounts[r.category] ?? r.amount;
       return { ...r, amount, daily: Math.round(amount / 30) };
     }));
-    this.activePreset.set(preset);
+    this.activePreset.set(key);
   }
 
   execute(): void {
@@ -125,6 +114,18 @@ export class BudgetWizardComponent {
       this.budgetService.setBudget(r.category, amt);
       if (amt > 0) applied++;
     }
+
+    // Persist last-used amounts so next open reflects the user's actual preferences
+    const cfg = this.config.loadBudget();
+    const amounts: Record<string, number> = {};
+    for (const r of this.rows()) amounts[r.category] = r.amount;
+    this.config.saveBudget({
+      ...cfg,
+      pool: this.poolInput,
+      amounts: amounts as any,
+      defaultPreset: this.activePreset() ?? cfg.defaultPreset,
+    });
+
     this.notification.success(`${applied} category budget${applied === 1 ? '' : 's'} applied`);
     this.closed.emit();
   }

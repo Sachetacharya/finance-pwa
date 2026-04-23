@@ -15,15 +15,11 @@
       <div class="wiz-section">
         <div class="preset-row">
           <span class="preset-row__label">Quick presets:</span>
-          <button type="button" class="preset-btn"
-            [class.preset-btn--active]="activePreset() === 'tight'"
-            (click)="applyPreset('tight')">Tight (save more)</button>
-          <button type="button" class="preset-btn"
-            [class.preset-btn--active]="activePreset() === 'balanced'"
-            (click)="applyPreset('balanced')">Balanced</button>
-          <button type="button" class="preset-btn"
-            [class.preset-btn--active]="activePreset() === 'generous'"
-            (click)="applyPreset('generous')">Generous</button>
+          @for (p of presets(); track p.key) {
+            <button type="button" class="preset-btn"
+              [class.preset-btn--active]="activePreset() === p.key"
+              (click)="applyPreset(p.key)">{{ p.label }}</button>
+          }
         </div>
 
         <div class="cat-list">
