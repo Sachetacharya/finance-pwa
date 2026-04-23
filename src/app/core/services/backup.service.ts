@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-const BACKUP_KEYS = ['fp_expenses', 'fp_accounts', 'fp_budgets', 'fp_recurring', 'fp_loans', 'fp_templates', 'auth_user', 'auth_token', 'fp_theme'];
+const BACKUP_KEYS = ['fp_expenses', 'fp_accounts', 'fp_budgets', 'fp_budget_settings', 'fp_recurring', 'fp_loans', 'fp_templates', 'fp_transfer_charge', 'auth_user', 'auth_token', 'fp_theme'];
 
 @Injectable({ providedIn: 'root' })
 export class BackupService {

@@ -187,6 +187,18 @@
           <input class="form-control" type="text" [(ngModel)]="transferNotes"
             placeholder="e.g. Cash withdrawal, Fund transfer..." />
         </div>
+        <div class="charge-row">
+          <label class="charge-row__label">
+            <span class="charge-row__text">Bank charge</span>
+            <span class="toggle-switch" [class.toggle-switch--on]="includeCharge">
+              <input type="checkbox" [(ngModel)]="includeCharge" class="toggle-switch__input" />
+              <span class="toggle-switch__slider"></span>
+            </span>
+          </label>
+          <input class="charge-row__amount" type="number" [(ngModel)]="chargeAmount"
+            [disabled]="!includeCharge" min="0" step="1" placeholder="0" />
+          <span class="charge-row__hint">NPR deducted from source</span>
+        </div>
         <div class="modal__footer">
           <button class="btn btn--ghost" (click)="showTransferForm.set(false)">Cancel</button>
           <button class="btn btn--primary" (click)="onTransfer()" [disabled]="!canTransfer">Transfer</button>

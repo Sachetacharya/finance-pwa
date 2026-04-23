@@ -45,6 +45,25 @@ export class AccountsComponent {
   transferAmount: number | null = null;
   transferDate = new Date().toISOString().split('T')[0];
   transferNotes = '';
+  includeCharge = this.loadChargePref().enabled;
+  chargeAmount = this.loadChargePref().amount;
+
+  private loadChargePref(): { enabled: boolean; amount: number } {
+    try {
+      const raw = localStorage.getItem('fp_transfer_charge');
+      if (raw) return { enabled: true, amount: 10, ...JSON.parse(raw) };
+    } catch { /* ignore */ }
+    return { enabled: false, amount: 10 };
+  }
+
+  private saveChargePref(): void {
+    try {
+      localStorage.setItem('fp_transfer_charge', JSON.stringify({
+        enabled: this.includeCharge,
+        amount: this.chargeAmount,
+      }));
+    } catch { /* ignore */ }
+  }
 
   /** All selectable account options (cash + user accounts) */
   get allAccounts(): { id: string; name: string; icon: string }[] {
@@ -68,7 +87,9 @@ export class AccountsComponent {
   }
 
   get exceedsBalance(): boolean {
-    return !!this.transferAmount && this.transferAmount > this.sourceBalance;
+    if (!this.transferAmount) return false;
+    const needed = this.transferAmount + (this.includeCharge ? (this.chargeAmount || 0) : 0);
+    return needed > this.sourceBalance;
   }
 
   get canTransfer(): boolean {
@@ -155,6 +176,23 @@ export class AccountsComponent {
       this.transferDate,
       this.transferNotes || undefined,
     );
+
+    // Optional: log the bank charge as a separate fees-charges expense from the source account
+    if (this.includeCharge && this.chargeAmount > 0) {
+      const fromLabel = this.accountService.getLabel(this.transferFrom);
+      const toLabel = this.accountService.getLabel(this.transferTo);
+      this.expenseService.addExpense({
+        type: 'expense',
+        title: 'Transfer charge',
+        amount: this.chargeAmount,
+        category: 'fees-charges',
+        date: this.transferDate,
+        paymentMethod: this.transferFrom,
+        notes: `${fromLabel} → ${toLabel}`,
+      });
+    }
+    this.saveChargePref();
+
     const from = this.accountService.getLabel(this.transferFrom);
     const to = this.accountService.getLabel(this.transferTo);
     this.notification.success(`Transferred to ${to} from ${from}`);
